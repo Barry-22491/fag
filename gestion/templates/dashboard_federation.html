@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h1 class="h3 mb-1">Tableau de bord</h1>
+    <p class="text-muted mb-0">Vue d’ensemble de la fédération</p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Associations</div>
+        <div class="fs-3 fw-bold">{{ associations_count }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Bénéficiaires</div>
+        <div class="fs-3 fw-bold">{{ beneficiaires_count }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Paiements validés</div>
+        <div class="fs-3 fw-bold">{{ cotisations_payees }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Rapatriements ouverts</div>
+        <div class="fs-3 fw-bold">{{ rapatriements_ouverts }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Cotisations encaissées en {{ current_year }}</h2>
+        <div style="height: 320px;">
+          <canvas id="cotisationsChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Résumé du mois</h2>
+        <dl class="row mb-0">
+          <dt class="col-7 text-muted">Montant attendu</dt>
+          <dd class="col-5 text-end">{{ montant_attendu }}</dd>
+
+          <dt class="col-7 text-muted">Montant payé</dt>
+          <dd class="col-5 text-end">{{ montant_paye }}</dd>
+
+          <dt class="col-7 text-muted">Restant</dt>
+          <dd class="col-5 text-end">{{ reste_a_payer }}</dd>
+
+          <dt class="col-7 text-muted">Taux paiement</dt>
+          <dd class="col-5 text-end">{{ taux_paiement }}%</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Associations en retard</h2>
+        <div style="height: 320px;">
+          <canvas id="retardsChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Activités à venir</h2>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Titre</th>
+                <th>Date</th>
+                <th>Lieu</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for activite in activites_a_venir %}
+              <tr>
+                <td>{{ activite.titre }}</td>
+                <td>{{ activite.date|date:'d/m/Y H:i' }}</td>
+                <td>{{ activite.lieu|default:'-' }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="3" class="text-center text-muted py-4">Aucune activité à venir.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mt-1">
+  <div class="col-12 col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3 text-danger">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Cotisations en retard
+        </h2>
+        <ul class="list-group list-group-flush">
+          {% for item in alertes_cotisations %}
+          <li class="list-group-item px-0">
+            <div class="fw-semibold">{{ item.affiliation.association.entite.nom }}</div>
+            <div class="small text-muted">
+              {{ item.mois }}/{{ item.annee }} — {{ item.get_statut_display }}
+            </div>
+          </li>
+          {% empty %}
+          <li class="list-group-item px-0 text-muted">Aucune alerte cotisation.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3 text-warning">
+          <i class="bi bi-heart-pulse-fill me-2"></i>Rapatriements urgents
+        </h2>
+        <ul class="list-group list-group-flush">
+          {% for item in alertes_rapatriements %}
+          <li class="list-group-item px-0">
+            <div class="fw-semibold">{{ item.personne }}</div>
+            <div class="small text-muted">
+              {{ item.affiliation.association.entite.nom }} — {{ item.get_statut_display }}
+            </div>
+          </li>
+          {% empty %}
+          <li class="list-group-item px-0 text-muted">Aucun dossier urgent.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3 text-primary">
+          <i class="bi bi-calendar-event-fill me-2"></i>Activités proches
+        </h2>
+        <ul class="list-group list-group-flush">
+          {% for item in alertes_activites %}
+          <li class="list-group-item px-0">
+            <div class="fw-semibold">{{ item.titre }}</div>
+            <div class="small text-muted">
+              {{ item.date|date:"d/m/Y H:i" }}{% if item.lieu %} — {{ item.lieu }}{% endif %}
+            </div>
+          </li>
+          {% empty %}
+          <li class="list-group-item px-0 text-muted">Aucune activité imminente.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+const chartLabels = {{ chart_labels|default:"[]"|safe }};
+const chartValues = {{ chart_values|default:"[]"|safe }};
+const retardLabels = {{ retard_labels|default:"[]"|safe }};
+const retardValues = {{ retard_values|default:"[]"|safe }};
+
+const cotisationsCanvas = document.getElementById('cotisationsChart');
+if (cotisationsCanvas) {
+  new Chart(cotisationsCanvas, {
+    type: 'bar',
+    data: {
+      labels: chartLabels,
+      datasets: [{
+        label: 'Montant payé',
+        data: chartValues,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+const retardsCanvas = document.getElementById('retardsChart');
+if (retardsCanvas) {
+  new Chart(retardsCanvas, {
+    type: 'doughnut',
+    data: {
+      labels: retardLabels,
+      datasets: [{
+        data: retardValues,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+}
+</script>
+
+{% endblock %}

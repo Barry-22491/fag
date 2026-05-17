@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Associations{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <h1 class="h4 mb-1">Associations</h1>
+        <p class="text-muted mb-0">Liste des associations affiliées</p>
+      </div>
+      {% if can_finance_override and associations_edit%}
+        <a href="{% url 'association_create' %}" class="btn btn-primary">
+          <i class="bi bi-plus-lg"></i> Ajouter
+        </a>
+      {% endif %}
+    </div>
+
+    <form method="get" class="row g-2 mb-3">
+      <div class="col-12 col-md-6 col-lg-4">
+        <input type="text" name="q" value="{{ q|default:'' }}" class="form-control" placeholder="Rechercher une association...">
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-outline-secondary">Rechercher</button>
+      </div>
+    </form>
+
+    <div class="table-responsive">
+      <table class="table align-middle table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Identifiant</th>
+            <th>Association</th>
+            <th>Président</th>
+            <th>Ville</th>
+            <th>Email</th>
+            <th>Telephone</th>
+            <th>Fédération</th>
+
+            {% if can_edit_associations %}
+              <th class="text-end">Actions</th>
+            {% endif %}
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for association in page_obj %}
+          <tr>
+
+            <td>
+              <span class="badge bg-dark fs-6">
+                {{ association.code_paiement }}
+              </span>
+            </td>
+
+            <td>
+              <div class="d-flex align-items-center gap-2">
+
+                {% if association.entite.logo %}
+                  <img src="{{ association.entite.logo.url }}"
+                      width="40"
+                      height="40"
+                      class="rounded-circle border"
+                      style="object-fit:cover;">
+                {% endif %}
+
+                <div>
+                  <div class="fw-semibold">
+                    {{ association.entite.nom }}
+                  </div>
+
+                  <div class="small text-muted">
+                    Crée le {{ association.date_creation|date:"d/m/Y" }}
+                  </div>
+                </div>
+
+              </div>
+            </td>
+
+            <td>
+              {% with president=association.get_president %}
+                {% if president %}
+                  <div class="d-flex align-items-center gap-2">
+
+                    {% if president.photo %}
+                      <img src="{{ president.photo.url }}"
+                          width="32"
+                          height="32"
+                          class="rounded-circle border"
+                          style="object-fit:cover;">
+                    {% endif %}
+
+                    <div>
+                      {{ president.prenom }} {{ president.nom }}
+                    </div>
+
+                  </div>
+                {% else %}
+                  <span class="text-muted">
+                    Non défini
+                  </span>
+                {% endif %}
+              {% endwith %}
+            </td>
+
+            <td>{{ association.ville }}</td>
+
+            <td>{{ association.email|default:"-" }}</td>
+            <td>
+                {% with president=association.get_president %}
+                  {% if president and president.telephone %}
+                    <a href="tel:{{ president.telephone }}">
+                      {{ president.telephone }}
+                    </a>
+                  {% else %}
+                    <span class="text-muted">-</span>
+                  {% endif %}
+                {% endwith %}
+          </td>
+
+            <td>{{ association.federation.nom }}</td>
+
+            {% if can_edit_associations %}
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+
+                <a href="{% url 'association_detail' association.pk %}"
+                  class="btn btn-outline-primary">
+                  Voir
+                </a>
+
+                <a href="{% url 'association_update' association.pk %}"
+                  class="btn btn-outline-warning">
+                  Modifier
+                </a>
+
+                {% if can_finance_override %}
+                <a href="{% url 'association_delete' association.pk %}"
+                  class="btn btn-outline-danger">
+                  Supprimer
+                </a>
+                {% endif %}
+
+              </div>
+            </td>
+            {% endif %}
+
+          </tr>
+
+          {% empty %}
+          <tr>
+            <td colspan="{% if can_edit_associations %}7{% else %}8{% endif %}"
+                class="text-center text-muted py-4">
+              Aucune association trouvée.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+  </div>
+
+    {% include 'partials/pagination.html' %}
+  </div>
+</div>
+{% endblock %}

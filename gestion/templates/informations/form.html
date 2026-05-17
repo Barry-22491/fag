@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Publier une information{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+
+    <h1 class="h4 mb-4">{{ title }}</h1>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      {{ form.entite.as_hidden }}
+
+      <!-- Onglets langues -->
+      <ul class="nav nav-tabs mb-4" id="langTabs" role="tablist">
+
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active"
+                  data-bs-toggle="tab"
+                  data-bs-target="#fr-tab"
+                  type="button">
+            Français
+          </button>
+        </li>
+
+        <li class="nav-item" role="presentation">
+          <button class="nav-link"
+                  data-bs-toggle="tab"
+                  data-bs-target="#de-tab"
+                  type="button">
+            Deutsch
+          </button>
+        </li>
+
+        <li class="nav-item" role="presentation">
+          <button class="nav-link"
+                  data-bs-toggle="tab"
+                  data-bs-target="#en-tab"
+                  type="button">
+            English
+          </button>
+        </li>
+
+      </ul>
+
+      <div class="tab-content">
+
+        <!-- FR -->
+        <div class="tab-pane fade show active" id="fr-tab">
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              Titre 
+            </label>
+            {{ form.titre_fr }}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">
+              Contenu
+            </label>
+            {{ form.contenu_fr }}
+          </div>
+
+        </div>
+
+        <!-- DE -->
+        <div class="tab-pane fade" id="de-tab">
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              Titel 
+            </label>
+            {{ form.titre_de }}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">
+              Inhalt
+            </label>
+            {{ form.contenu_de }}
+          </div>
+
+        </div>
+
+        <!-- EN -->
+        <div class="tab-pane fade" id="en-tab">
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              Title
+            </label>
+            {{ form.titre_en }}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">
+              Content
+            </label>
+            {{ form.contenu_en }}
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Paramètres -->
+      <div class="row">
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">
+            Type
+          </label>
+          {{ form.type_information }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">
+            Priorité
+          </label>
+          {{ form.priorite }}
+        </div>
+
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">
+          Statut
+        </label>
+        {{ form.statut }}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">
+          Date fin affichage
+        </label>
+        {{ form.date_fin_affichage }}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">
+          Pièce jointe
+        </label>
+        {{ form.piece_jointe }}
+      </div>
+
+      <div class="form-check mb-4">
+        {{ form.est_public }}
+        <label class="form-check-label">
+          Visible sur le site public 
+        </label>
+      </div>
+      {% if form.envoyer_email %}
+        <div class="form-check mb-4">
+          {{ form.envoyer_email }}
+          <label class="form-check-label">
+            Envoyer une notification email
+          </label>
+        </div>
+      {% endif %}
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          Publier
+        </button>
+
+        <a href="{% url 'informations_liste' %}"
+           class="btn btn-light">
+          Annuler
+        </a>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "public/base_public.html" %}
+{% block title %}Activités{% endblock %}
+{% load i18n %}
+
+{% block content %}
+<h1 class="h3 mb-4">{%trans "Activités publiques"%}</h1>
+
+<div class="row g-3">
+  {% for activite in activites %}
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5">{{ activite.titre_traduit }}</h2>
+        <p class="text-muted mb-1">{{ activite.date|date:"d/m/Y H:i" }}</p>
+        <p class="mb-1">{{ activite.lieu|default:"" }}</p>
+        <p class="small text-muted">{{ activite.description_traduite|linebreaks }}</p>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-muted">{%trans "Aucune activité publique."%}</p>
+  {% endfor %}
+</div>
+{% endblock %}
+
+

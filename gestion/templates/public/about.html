@@ -1,0 +1,127 @@
+{% extends "public/base_public.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "À propos" %}{% endblock %}
+
+{% block content %}
+
+<section class="mb-5">
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4 p-lg-5">
+      <h1 class="h3 mb-3">{% trans "À propos de la fédération" %}</h1>
+
+      <p class="text-muted mb-0">
+        {% trans "La fédération regroupe plusieurs associations membres et coordonne les activités, communications et services au bénéfice de la communauté." %}
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="mb-5">
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">{% trans "Notre mission" %}</h2>
+          <p class="text-muted mb-0">
+            {%trans "--------------------------------------"%}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">{% trans "Nos objectifs" %}</h2>
+          <ul class="text-muted mb-0">
+            <li>{% trans "1" %}</li>
+            <li>{% trans "2" %}</li>
+            <li>{% trans "3" %}</li>
+            <li>{% trans "4" %}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mb-5">
+  <div class="text-center mb-4">
+    <h2 class="h4 fw-bold">{% trans "Bureau exécutif" %}</h2>
+
+    {% if bureau %}
+      <p class="text-muted mb-0">
+        {% trans "Mandat" %} :
+        {{ bureau.date_debut|date:"d/m/Y" }}
+        {% if bureau.date_fin %}
+          - {{ bureau.date_fin|date:"d/m/Y" }}
+        {% else %}
+          - {% trans "En cours" %}
+        {% endif %}
+      </p>
+    {% endif %}
+  </div>
+
+  <div class="row g-4">
+    {% for membre in membres_bureau %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm text-center h-100">
+          <div class="card-body p-4">
+
+            {% if membre.adhesion.personne.photo %}
+              <img src="{{ membre.adhesion.personne.photo.url }}"
+                   class="rounded-circle mb-3"
+                   width="110"
+                   height="110"
+                   style="object-fit: cover;">
+            {% else %}
+              <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3"
+                   style="width:110px;height:110px;">
+                <i class="bi bi-person fs-1 text-muted"></i>
+              </div>
+            {% endif %}
+
+            <h5 class="fw-bold mb-1">
+              {{ membre.adhesion.personne.prenom }}
+              {{ membre.adhesion.personne.nom }}
+            </h5>
+
+            <div class="text-primary fw-semibold mb-2">
+              {{ membre.poste.nom }}
+            </div>
+
+            <div class="text-muted small">
+              {{ membre.adhesion.association.entite.nom }}
+            </div>
+
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="alert alert-light text-center">
+          {% trans "Aucun bureau exécutif actif." %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <h2 class="h5 mb-3">{% trans "Associations membres" %}</h2>
+
+      <p class="text-muted mb-3">
+        {% trans "La fédération rassemble des associations engagées au service de la communauté." %}
+      </p>
+
+      <a href="{% url 'public_associations' %}" class="btn btn-outline-primary">
+        {% trans "Voir les associations" %}
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

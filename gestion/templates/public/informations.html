@@ -1,0 +1,26 @@
+{% extends "public/base_public.html" %}
+{% block title %}Informations{% endblock %}
+{% load i18n %}
+
+{% block content %}
+<h1 class="h3 mb-4">{%trans "Communiqués publics"%}</h1>
+
+<div class="row g-3">
+  {% for info in infos %}
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5">{{ info.titre_traduit }}</h2>
+        <p class="small text-muted">{{ info.created_at|date:"d/m/Y" }}</p>
+        <p>{{ info.contenu_traduit|linebreaks }}</p>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-muted">{%trans "Aucune information publique."%}</p>
+  {% endfor %}
+</div>
+{% endblock %}
+
+
+{{ info.contenu_traduit|linebreaks }}

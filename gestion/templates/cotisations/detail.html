@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Détail cotisation{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h1 class="h3 mb-1">Cotisation mensuelle</h1>
+      <p class="text-muted mb-0">{{ cotisation.affiliation.association.entite.nom }}</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        {% if can_finance_override %}
+          <a href="{% url 'cotisation_update' cotisation.pk %}" class="btn btn-warning">
+            Modifier
+          </a>
+        {% elif can_edit_cotisations and cotisation.statut != "paye" %}
+          <a href="{% url 'cotisation_update' cotisation.pk %}" class="btn btn-warning">
+            Modifier
+          </a>
+        {% endif %}
+
+        {% if can_send_notifications %}
+        <a href="{% url 'envoyer_rappel_cotisation' cotisation.pk %}"
+          class="btn btn-outline-danger"
+          onclick="return confirm('Envoyer un rappel par email ?')">
+          <i class="bi bi-envelope"></i> Relancer
+        </a>
+        {% endif %}
+
+        {% if can_export_cotisations %}
+        <a href="{% url 'cotisation_pdf' cotisation.pk %}" class="btn btn-outline-secondary">
+          PDF
+        </a>
+        {% endif %}
+
+        <a href="{% url 'cotisations_liste' %}" class="btn btn-light">
+          Retour
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-4 text-muted">Association</dt>
+      <dd class="col-sm-8">{{ cotisation.affiliation.association.entite.nom }}</dd>
+
+      <dt class="col-sm-4 text-muted">Fédération</dt>
+      <dd class="col-sm-8">{{ cotisation.affiliation.federation.nom }}</dd>
+
+      <dt class="col-sm-4 text-muted">Période</dt>
+      <dd class="col-sm-8">{{ cotisation.mois }}/{{ cotisation.annee }}</dd>
+
+      <dt class="col-sm-4 text-muted">Montant attendu</dt>
+      <dd class="col-sm-8">{{ cotisation.montant_attendu }}</dd>
+
+      <dt class="col-sm-4 text-muted">Montant payé</dt>
+      <dd class="col-sm-8">{{ cotisation.montant_paye }}</dd>
+
+      <dt class="col-sm-4 text-muted">Date paiement</dt>
+      <dd class="col-sm-8">{{ cotisation.date_paiement|date:"d/m/Y"|default:"-" }}</dd>
+
+      <dt class="col-sm-4 text-muted">Mode paiement</dt>
+      <dd class="col-sm-8">{{ cotisation.get_mode_paiement_display|default:"-" }}</dd>
+
+      <dt class="col-sm-4 text-muted">Statut</dt>
+      <dd class="col-sm-8">{{ cotisation.get_statut_display }}</dd>
+    </dl>
+  </div>
+</div>
+{% endblock %}

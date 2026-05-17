@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <h1 class="h4 mb-3">{{ title }}</h1>
+
+    <div class="alert alert-info">
+      <strong>Association :</strong> {{ contribution.association.entite.nom }}<br>
+      <strong>Dossier :</strong> #{{ contribution.dossier.pk }}
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Montant attendu</label>
+          {{ form.montant_attendu }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Montant payé</label>
+          {{ form.montant_paye }}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Statut</label>
+          {{ form.statut }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Date paiement</label>
+          {{ form.date_paiement }}
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <a href="{% url 'contributions_deces_liste' %}" class="btn btn-light">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

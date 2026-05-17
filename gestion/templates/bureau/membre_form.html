@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <h1 class="h4 mb-3">{{ title }}</h1>
+
+    <form method="post">
+      {% csrf_token %}
+
+      {{ form.poste.as_field_group }}
+      {{ form.adhesion.as_field_group }}
+
+      <button type="submit" class="btn btn-primary">Ajouter</button>
+      <a href="{% url 'bureau_liste' %}" class="btn btn-light">Annuler</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

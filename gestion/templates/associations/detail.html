@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Détail association{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h1 class="h3 mb-1">{{ association.entite.nom }}</h1>
+    <p class="text-muted mb-0">Fiche détaillée de l'association</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'association_update' association.pk %}" class="btn btn-warning">
+      <i class="bi bi-pencil-square"></i> Modifier
+    </a>
+    <div class="d-flex gap-2 flex-wrap mt-2">
+          <a href="{% url 'cotisations_liste' %}?association={{ association.entite.nom }}" class="btn btn-outline-primary btn-sm">
+            Voir les cotisations
+          </a>
+          <a href="{% url 'beneficiaires_liste' %}" class="btn btn-outline-secondary btn-sm">
+            Voir les bénéficiaires
+          </a>
+    </div>
+    <a href="{% url 'associations_liste' %}" class="btn btn-light">Retour</a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-lg-6">
+  <div class="card border-0 shadow-sm h-100">
+    <div class="card-body">
+
+      <div class="d-flex align-items-center gap-3 mb-4">
+
+        {% if association.entite.logo %}
+          <img src="{{ association.entite.logo.url }}"
+               width="90"
+               height="90"
+               class="rounded-circle border shadow-sm"
+               style="object-fit:cover;">
+        {% endif %}
+
+        <div>
+          <h2 class="h4 mb-1">
+            {{ association.entite.nom }}
+          </h2>
+
+          <div class="d-flex gap-2 flex-wrap">
+
+            <span class="badge bg-dark">
+              {{ association.code_paiement }}
+            </span>
+
+            <span class="badge bg-primary">
+              {{ association.federation.nom }}
+            </span>
+
+          </div>
+        </div>
+
+      </div>
+
+      <h2 class="h5 mb-3">
+        Informations générales
+      </h2>
+
+      <dl class="row mb-0">
+
+        <dt class="col-sm-4 text-muted">
+          Président
+        </dt>
+
+        <dd class="col-sm-8">
+
+          {% with president=association.get_president %}
+            {% if president %}
+
+              <div class="d-flex align-items-center gap-3">
+
+                {% if president.photo %}
+                  <img src="{{ president.photo.url }}"
+                       width="55"
+                       height="55"
+                       class="rounded-circle border"
+                       style="object-fit:cover;">
+                {% endif %}
+
+                <div>
+                  <div class="fw-semibold">
+                    {{ president.prenom }} {{ president.nom }}
+                  </div>
+
+                  {% if president.email %}
+                    <div class="small text-muted">
+                      {{ president.email }}
+                    </div>
+                  {% endif %}
+                </div>
+
+              </div>
+
+            {% else %}
+              <span class="text-muted">
+                Aucun président défini
+              </span>
+            {% endif %}
+          {% endwith %}
+
+        </dd>
+
+        <dt class="col-sm-4 text-muted">
+          Ville
+        </dt>
+
+        <dd class="col-sm-8">
+          {{ association.ville }}
+        </dd>
+
+        <dt class="col-sm-4 text-muted">
+          Adresse
+        </dt>
+
+        <dd class="col-sm-8">
+          {{ association.adresse }}
+        </dd>
+
+        <dt class="col-sm-4 text-muted">
+          Email
+        </dt>
+
+        <dd class="col-sm-8">
+          {{ association.email|default:"-" }}
+        </dd>
+
+        <dt class="col-sm-4 text-muted">
+          Date création
+        </dt>
+
+        <dd class="col-sm-8">
+          {{ association.date_creation|date:"d/m/Y" }}
+        </dd>
+
+      </dl>
+
+    </div>
+  </div>
+</div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Bénéficiaires récents</h2>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Nom</th>
+                <th>Activation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in beneficiaires %}
+              <tr>
+                <td>{{ b.personne }}</td>
+                <td>{{ b.date_activation|date:"d/m/Y" }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="2" class="text-center text-muted py-4">
+                  Aucun bénéficiaire actif.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Dernières cotisations mensuelles</h2>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Période</th>
+                <th>Attendu</th>
+                <th>Payé</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in cotisations %}
+              <tr>
+                <td>{{ c.mois }}/{{ c.annee }}</td>
+                <td>{{ c.montant_attendu }}</td>
+                <td>{{ c.montant_paye }}</td>
+                <td>
+                  {% if c.statut == 'paye' %}
+                    <span class="badge bg-success">Payé</span>
+                  {% elif c.statut == 'partiel' %}
+                    <span class="badge bg-warning text-dark">Partiel</span>
+                  {% elif c.statut == 'impaye' %}
+                    <span class="badge bg-danger">Impayé</span>
+                  {% else %}
+                    <span class="badge bg-secondary">En attente</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">
+                  Aucune cotisation enregistrée.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

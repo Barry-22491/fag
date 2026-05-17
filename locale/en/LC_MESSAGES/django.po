@@ -1,0 +1,209 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-01 22:15+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\gestion\forms.py:202
+msgid "Nom"
+msgstr "Name"
+
+#: .\gestion\forms.py:205
+msgid "Email"
+msgstr "Emails"
+
+#: .\gestion\forms.py:209
+msgid "Sujet"
+msgstr "Subject"
+
+#: .\gestion\forms.py:212
+msgid "Message"
+msgstr "Message"
+
+#: .\gestion\templates\public\about.html:8
+msgid "À propos de la fédération"
+msgstr "About us"
+
+#: .\gestion\templates\public\activites.html:6
+msgid "Activités publiques"
+msgstr "Public activities"
+
+#: .\gestion\templates\public\activites.html:21
+#: .\gestion\templates\public\home.html:37
+msgid "Aucune activité publique."
+msgstr "No public activities at the moment"
+
+#: .\gestion\templates\public\associations.html:6
+msgid "Associations membres"
+msgstr "Member associations"
+
+#: .\gestion\templates\public\associations.html:20
+msgid "Aucune association affichée."
+msgstr "No associations listed"
+
+#: .\gestion\templates\public\base_public.html:9
+#: .\gestion\templates\public\base_public.html:20
+msgid "Fédération"
+msgstr "Federation"
+
+#: .\gestion\templates\public\base_public.html:30
+msgid "Accueil"
+msgstr "Home"
+
+#: .\gestion\templates\public\base_public.html:31
+msgid "À propos"
+msgstr "About"
+
+#: .\gestion\templates\public\base_public.html:32
+msgid "Associations"
+msgstr "Associations"
+
+#: .\gestion\templates\public\base_public.html:33
+msgid "Activités"
+msgstr "Activities"
+
+#: .\gestion\templates\public\base_public.html:34
+msgid "Informations"
+msgstr "Information"
+
+#: .\gestion\templates\public\base_public.html:35
+#: .\gestion\templates\public\contact.html:10
+msgid "Contact"
+msgstr "Contact"
+
+#: .\gestion\templates\public\base_public.html:63
+msgid "Retour à l’espace de gestion"
+msgstr "Back to dashboard"
+
+#: .\gestion\templates\public\base_public.html:70
+msgid "Espace membre"
+msgstr "Member area"
+
+#: .\gestion\templates\public\base_public.html:97
+msgid "Plateforme officielle"
+msgstr "Official platform"
+
+#: .\gestion\templates\public\contact.html:11
+msgid "Envoyez un message à la fédération."
+msgstr "Send us a message"
+
+#: .\gestion\templates\public\contact.html:18
+msgid "Envoyer"
+msgstr "Send"
+
+#: .\gestion\templates\public\home.html:8
+msgid "Bienvenue sur le portail de la FAG NRW e.V."
+msgstr "Welcome to the FAG NRW e.V. portal"
+
+#: .\gestion\templates\public\home.html:10
+msgid ""
+"Découvrez nos associations affiliées, nos activités et nos communications "
+"officielles."
+msgstr ""
+"Discover our member associations, our activities, and our official "
+"communications."
+
+#: .\gestion\templates\public\home.html:13
+msgid "Voir les activités"
+msgstr "View activities"
+
+#: .\gestion\templates\public\home.html:14
+msgid "Nous contacter"
+msgstr "Contact us"
+
+#: .\gestion\templates\public\home.html:20
+msgid "Un réseau d’associations au service de la communauté."
+msgstr "A network of associations dedicated to the community."
+
+#: .\gestion\templates\public\home.html:30
+msgid "Dernières activités"
+msgstr "Recent activities"
+
+#: .\gestion\templates\public\home.html:46
+msgid "Communiqués récents"
+msgstr "Recent communications"
+
+#: .\gestion\templates\public\home.html:53
+#: .\gestion\templates\public\informations.html:20
+msgid "Aucune information publique."
+msgstr "No public information"
+
+#: .\gestion\templates\public\informations.html:6
+msgid "Communiqués publics"
+msgstr "Public announcements"
+
+#~ msgid "Gestion Fédération"
+#~ msgstr "Federation Management"
+
+#~ msgid "Dashboard"
+#~ msgstr "Dashboard"
+
+#~ msgid "Cotisations"
+#~ msgstr "Contributions"
+
+#~ msgid "Bénéficiaires"
+#~ msgstr "Beneficiaries"
+
+#~ msgid "Rapatriements"
+#~ msgstr "Repatriations"
+
+#~ msgid "Site public"
+#~ msgstr "Public Website"
+
+#~ msgid "Déconnexion"
+#~ msgstr "Logout"
+
+#~ msgid "Connexion"
+#~ msgstr "Login"
+
+#~ msgid "Tableau de bord"
+#~ msgstr "Dashboard"
+
+#~ msgid "Personnes"
+#~ msgstr "People"
+
+#~ msgid "Transactions"
+#~ msgstr "Transactions"
+
+#~ msgid "Documents"
+#~ msgstr "Documents"
+
+#~ msgid "Alertes"
+#~ msgstr "Alerts"
+
+#~ msgid "Rapports"
+#~ msgstr "Reports"
+
+msgid "La fédération regroupe plusieurs associations membres et coordonne les activités, communications et services au bénéfice de la communauté."
+msgstr "The federation brings together several member associations and coordinates activities, communications, and services for the benefit of the community."
+
+msgid "Notre mission"
+msgstr "Our mission"
+
+msgid "Nos objectifs"
+msgstr "Our objectives"
+
+msgid "Bureau exécutif"
+msgstr "Executive Board"
+
+msgid "Mandat"
+msgstr "Mandate"
+
+msgid "La fédération rassemble des associations engagées au service de la communauté."
+msgstr "The federation brings together associations committed to serving the community."
+
+msgid "Voir les associations"
+msgstr "View associations"

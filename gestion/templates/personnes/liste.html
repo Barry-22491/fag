@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Personnes{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <h1 class="h4 mb-1">Personnes</h1>
+        <p class="text-muted mb-0">Gestion des personnes membres</p>
+      </div>
+
+      <div class="d-flex gap-2">
+          {% if can_export_personnes %}
+            <a href="{% url 'export_personnes_excel' %}?{{ request.GET.urlencode }}"
+              class="btn btn-success">
+              <i class="bi bi-file-earmark-excel"></i>
+              Excel
+            </a>
+          {% endif %}
+
+          {% if can_edit_membres or can_propose_membres %}
+            <a href="{% url 'personne_create' %}" class="btn btn-primary">
+              Ajouter
+            </a>
+          {% endif %}
+      </div>
+
+    </div>
+
+   <form method="get" class="row g-2 mb-3">
+        <div class="col-12 col-md-5">
+          <input type="text" name="q" value="{{ q|default:'' }}" class="form-control" placeholder="Nom association...">
+        </div>
+
+        <div class="col-12 col-md-4">
+          <input type="text" name="ville" value="{{ request.GET.ville|default:'' }}" class="form-control" placeholder="Ville...">
+        </div>
+
+        <div class="col-12 col-md-auto">
+          <button class="btn btn-outline-secondary w-100">Rechercher</button>
+        </div>
+        
+  </form>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Numero</th>
+            <th>Nom complet</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Ville</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for personne in page_obj %}
+          <tr>
+            <td>{{ personne.numero|default:"-" }}</td>
+            <td class="fw-semibold">{{ personne.prenom }} {{ personne.nom }}</td>
+            <td>{{ personne.email|default:"-" }}</td>
+            <td>{{ personne.telephone|default:"-" }}</td>
+            <td>{{ personne.ville|default:"-" }}</td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <a href="{% url 'personne_detail' personne.pk %}" class="btn btn-outline-primary">Voir</a>
+                {% if can_edit_membres %}
+                  <a href="{% url 'personne_update' personne.pk %}" class="btn btn-outline-warning">
+                    Modifier
+                  </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">Aucune personne trouvée.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% include 'partials/pagination.html' %}
+  </div>
+</div>
+{% endblock %}

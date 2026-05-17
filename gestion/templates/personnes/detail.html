@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Détail personne{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h1 class="h3 mb-1">{{ personne.prenom }} {{ personne.nom }}</h1>
+    <p class="text-muted mb-0">Fiche personne</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'personne_update' personne.pk %}" class="btn btn-warning">Modifier</a>
+    <a href="{% url 'personnes_liste' %}" class="btn btn-light">Retour</a>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <dl class="row mb-0">
+      
+      <dt class="col-sm-3 text-muted">Nom</dt>
+      <dd class="col-sm-9">{{ personne.nom }}</dd>
+
+      <dt class="col-sm-3 text-muted">Prénom</dt>
+      <dd class="col-sm-9">{{ personne.prenom }}</dd>
+
+      <dt class="col-sm-3 text-muted">Email</dt>
+      <dd class="col-sm-9">{{ personne.email|default:"-" }}</dd>
+
+      <dt class="col-sm-3 text-muted">Téléphone</dt>
+      <dd class="col-sm-9">{{ personne.telephone|default:"-" }}</dd>
+
+      <dt class="col-sm-3 text-muted">Ville</dt>
+      <dd class="col-sm-9">{{ personne.ville|default:"-" }}</dd>
+
+      <dt class="col-sm-3 text-muted">Créé le</dt>
+      <dd class="col-sm-9">{{ personne.created_at|date:"d/m/Y H:i" }}</dd>
+    </dl>
+  </div>
+</div>
+{% endblock %}

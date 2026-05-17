@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}Cotisations décès{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <h1 class="h4 mb-1">Cotisations décès</h1>
+        <p class="text-muted mb-0">Contribution exceptionnelle de 200€ par association</p>
+      </div>
+
+      <div class="d-flex gap-2">
+        {% if can_export_cotisations_deces %}
+          <a href="{% url 'export_contributions_deces_excel' %}?{{ request.GET.urlencode }}"
+             class="btn btn-success btn-sm">
+            <i class="bi bi-file-earmark-excel"></i> Excel
+          </a>
+
+          <a href="{% url 'export_contributions_deces_pdf' %}?{{ request.GET.urlencode }}"
+             class="btn btn-danger btn-sm">
+            <i class="bi bi-file-earmark-pdf"></i> PDF
+          </a>
+          {% endif %}
+      </div>
+    </div>
+
+    <form method="get" class="row g-2 mb-4">
+      <div class="col-12 col-md-4">
+        <input type="text" name="association" value="{{ request.GET.association }}"
+               class="form-control" placeholder="Association">
+      </div>
+
+      <div class="col-12 col-md-4">
+        <select name="statut" class="form-select">
+          <option value="">Tous les statuts</option>
+          <option value="paye" {% if request.GET.statut == 'paye' %}selected{% endif %}>Payé</option>
+          <option value="partiel" {% if request.GET.statut == 'partiel' %}selected{% endif %}>Partiel</option>
+          <option value="impaye" {% if request.GET.statut == 'impaye' %}selected{% endif %}>Impayé</option>
+          <option value="en_attente" {% if request.GET.statut == 'en_attente' %}selected{% endif %}>En attente</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <button class="btn btn-outline-secondary w-100">Filtrer</button>
+      </div>
+    </form>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-6">
+        <div class="card bg-light border-0">
+          <div class="card-body">
+            <div class="text-muted small">Total attendu</div>
+            <div class="fs-4 fw-bold">{{ total_attendu }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card bg-light border-0">
+          <div class="card-body">
+            <div class="text-muted small">Total payé</div>
+            <div class="fs-4 fw-bold text-success">{{ total_paye }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Association</th>
+            <th>Dossier / Défunt</th>
+            <th>Association du défunt</th>
+            <th>Attendu</th>
+            <th>Payé</th>
+            <th>Statut</th>
+            <th>Date paiement</th>
+            {% if can_finance_override or can_export_cotisations_deces%}
+              <th class="text-end">Actions</th>
+            {% endif %}
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for contribution in page_obj %}
+          <tr>
+            <td>{{ contribution.association.entite.nom }}</td>
+
+            <td>
+              {% if contribution.dossier.personne %}
+                <a href="{% url 'rapatriement_detail' contribution.dossier.pk %}"
+                   class="fw-semibold text-decoration-none">
+                  {{ contribution.dossier.personne }}
+                </a>
+              {% else %}
+                <a href="{% url 'rapatriement_detail' contribution.dossier.pk %}"
+                   class="text-decoration-none">
+                  Dossier #{{ contribution.dossier.pk }}
+                </a>
+              {% endif %}
+            </td>
+
+            <td>
+              {{ contribution.dossier.affiliation.association.entite.nom|default:"-" }}
+            </td>
+
+            <td>{{ contribution.montant_attendu }}</td>
+            <td>{{ contribution.montant_paye }}</td>
+
+            <td>
+              {% if contribution.statut == 'paye' %}
+                <span class="badge bg-success">Payé</span>
+              {% elif contribution.statut == 'partiel' %}
+                <span class="badge bg-warning text-dark">Partiel</span>
+              {% elif contribution.statut == 'impaye' %}
+                <span class="badge bg-danger">Impayé</span>
+              {% else %}
+                <span class="badge bg-secondary">En attente</span>
+              {% endif %}
+            </td>
+
+            <td>{{ contribution.date_paiement|date:"d/m/Y"|default:"-" }}</td>
+
+            {% if can_finance_override or can_export_cotisations_deces %}
+              <td class="text-end">
+                <div class="btn-group btn-group-sm">
+                  {% if can_export_cotisations_deces and contribution.statut != "paye" %}
+                    <a href="{% url 'envoyer_rappel_deces_view' contribution.pk %}"
+                      class="btn btn-outline-secondary">
+                      Rappel
+                    </a>
+                  {% endif %}
+
+                  {% if can_finance_override %}
+                    <a href="{% url 'contribution_deces_update' contribution.pk %}"
+                      class="btn btn-outline-warning">
+                      Corriger
+                    </a>
+                  {% endif %}
+                </div>
+              </td>
+          {% endif %}
+          </tr>
+
+          {% empty %}
+          <tr>
+            <td colspan="{% if can_finance_override %}8{% else %}7{% endif %}"
+                class="text-center text-muted py-4">
+              Aucune cotisation décès trouvée.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% include 'partials/pagination.html' %}
+  </div>
+</div>
+{% endblock %}

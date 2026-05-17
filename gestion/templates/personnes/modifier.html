@@ -1,0 +1,13 @@
+<h1>Modifier membre</h1>
+
+<form method="post">
+  {% csrf_token %}
+
+  <h3>Personne</h3>
+  {{ p_form.as_p }}
+
+  <h3>Adhésion</h3>
+  {{ a_form.as_p }}
+
+  <button type="submit">Modifier</button>
+</form>

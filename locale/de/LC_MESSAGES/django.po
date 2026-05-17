@@ -1,0 +1,209 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-01 22:15+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\gestion\forms.py:202
+msgid "Nom"
+msgstr "Name"
+
+#: .\gestion\forms.py:205
+msgid "Email"
+msgstr "E-Mails"
+
+#: .\gestion\forms.py:209
+msgid "Sujet"
+msgstr "Betreff"
+
+#: .\gestion\forms.py:212
+msgid "Message"
+msgstr "Nachricht"
+
+#: .\gestion\templates\public\about.html:8
+msgid "À propos de la fédération"
+msgstr "Über uns"
+
+#: .\gestion\templates\public\activites.html:6
+msgid "Activités publiques"
+msgstr "Öffentliche Veranstaltungen"
+
+#: .\gestion\templates\public\activites.html:21
+#: .\gestion\templates\public\home.html:37
+msgid "Aucune activité publique."
+msgstr "Derzeit keine öffentlichen Aktivitäten"
+
+#: .\gestion\templates\public\associations.html:6
+msgid "Associations membres"
+msgstr "Mitgliedsverbände"
+
+#: .\gestion\templates\public\associations.html:20
+msgid "Aucune association affichée."
+msgstr "Keine Verbände aufgeführt"
+
+#: .\gestion\templates\public\base_public.html:9
+#: .\gestion\templates\public\base_public.html:20
+msgid "Fédération"
+msgstr "Dachverband"
+
+#: .\gestion\templates\public\base_public.html:30
+msgid "Accueil"
+msgstr "Startseite"
+
+#: .\gestion\templates\public\base_public.html:31
+msgid "À propos"
+msgstr "Über uns"
+
+#: .\gestion\templates\public\base_public.html:32
+msgid "Associations"
+msgstr "Vereine"
+
+#: .\gestion\templates\public\base_public.html:33
+msgid "Activités"
+msgstr "Aktivitäten"
+
+#: .\gestion\templates\public\base_public.html:34
+msgid "Informations"
+msgstr "Informationen"
+
+#: .\gestion\templates\public\base_public.html:35
+#: .\gestion\templates\public\contact.html:10
+msgid "Contact"
+msgstr "Kontakt"
+
+#: .\gestion\templates\public\base_public.html:63
+msgid "Retour à l’espace de gestion"
+msgstr "Zur Verwaltung zurück"
+
+#: .\gestion\templates\public\base_public.html:70
+msgid "Espace membre"
+msgstr "Mitgliederbereich"
+
+#: .\gestion\templates\public\base_public.html:97
+msgid "Plateforme officielle"
+msgstr "Offizielle Plattform"
+
+#: .\gestion\templates\public\contact.html:11
+msgid "Envoyez un message à la fédération."
+msgstr "Senden Sie uns eine Nachricht"
+
+#: .\gestion\templates\public\contact.html:18
+msgid "Envoyer"
+msgstr "Senden"
+
+#: .\gestion\templates\public\home.html:8
+msgid "Bienvenue sur le portail de la FAG NRW e.V."
+msgstr "Willkommen auf dem Portal der FAG NRW e.V."
+
+#: .\gestion\templates\public\home.html:10
+msgid ""
+"Découvrez nos associations affiliées, nos activités et nos communications "
+"officielles."
+msgstr ""
+"Entdecken Sie unsere Mitgliedsverbände, unsere Aktivitäten und unsere "
+"offiziellen Mitteilungen."
+
+#: .\gestion\templates\public\home.html:13
+msgid "Voir les activités"
+msgstr "Aktivitäten ansehen"
+
+#: .\gestion\templates\public\home.html:14
+msgid "Nous contacter"
+msgstr "Kontaktieren Sie uns"
+
+#: .\gestion\templates\public\home.html:20
+msgid "Un réseau d’associations au service de la communauté."
+msgstr "Ein Netzwerk von Vereinen im Dienst der Gemeinschaft."
+
+#: .\gestion\templates\public\home.html:30
+msgid "Dernières activités"
+msgstr "Aktuelle Aktivitäten"
+
+#: .\gestion\templates\public\home.html:46
+msgid "Communiqués récents"
+msgstr "Aktuelle Mitteilungen"
+
+#: .\gestion\templates\public\home.html:53
+#: .\gestion\templates\public\informations.html:20
+msgid "Aucune information publique."
+msgstr "Keine öffentlichen Informationen"
+
+#: .\gestion\templates\public\informations.html:6
+msgid "Communiqués publics"
+msgstr "Öffentliche Mitteilungen"
+
+#~ msgid "Gestion Fédération"
+#~ msgstr "Verbandsverwaltung"
+
+#~ msgid "Dashboard"
+#~ msgstr "Dashboard"
+
+#~ msgid "Cotisations"
+#~ msgstr "Beiträge"
+
+#~ msgid "Bénéficiaires"
+#~ msgstr "Begünstigte"
+
+#~ msgid "Rapatriements"
+#~ msgstr "Rückführungen"
+
+#~ msgid "Site public"
+#~ msgstr "Öffentliche Website"
+
+#~ msgid "Déconnexion"
+#~ msgstr "Abmelden"
+
+#~ msgid "Connexion"
+#~ msgstr "Anmelden"
+
+#~ msgid "Tableau de bord"
+#~ msgstr "Übersicht"
+
+#~ msgid "Personnes"
+#~ msgstr "Personen"
+
+#~ msgid "Transactions"
+#~ msgstr "Transaktionen"
+
+#~ msgid "Documents"
+#~ msgstr "Dokumente"
+
+#~ msgid "Alertes"
+#~ msgstr "Warnungen"
+
+#~ msgid "Rapports"
+#~ msgstr "Berichte"
+
+msgid "La fédération regroupe plusieurs associations membres et coordonne les activités, communications et services au bénéfice de la communauté."
+msgstr "Der Verband vereint mehrere Mitgliedsorganisationen und koordiniert Aktivitäten, Kommunikation und Dienstleistungen zum Nutzen der Gemeinschaft."
+
+msgid "Notre mission"
+msgstr "Unsere Mission"
+
+msgid "Nos objectifs"
+msgstr "Unsere Ziele"
+
+msgid "Bureau exécutif"
+msgstr "Vorstand"
+
+msgid "Mandat"
+msgstr "Mandat"
+
+msgid "La fédération rassemble des associations engagées au service de la communauté."
+msgstr "Der Verband vereint Vereine, die sich im Dienst der Gemeinschaft engagieren."
+
+msgid "Voir les associations"
+msgstr "Vereine ansehen"

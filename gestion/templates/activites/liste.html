@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Activités culturelles{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <h1 class="h4 mb-1">Activités culturelles</h1>
+        <p class="text-muted mb-0">Gestion des activités organisées par la fédération</p>
+      </div>
+      {% if can_create_activites %}
+      <a href="{% url 'activite_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Ajouter
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Titre</th>
+            <th>Date</th>
+            <th>Lieu</th>
+            <th>Capacité</th>
+            <th>Accès</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for activite in page_obj %}
+          <tr>
+            <td class="fw-semibold">{{ activite.titre }}</td>
+            <td>{{ activite.date|date:"d/m/Y H:i" }}</td>
+            <td>{{ activite.lieu|default:"-" }}</td>
+            <td>{{ activite.capacite|default:"-" }}</td>
+            <td>
+              {% if activite.reserve_aux_beneficiaires %}
+                <span class="badge bg-info text-dark">Bénéficiaires</span>
+              {% else %}
+                <span class="badge bg-secondary">Ouvert</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <a href="{% url 'activite_detail' activite.pk %}" class="btn btn-sm btn-outline-primary">Voir</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              Aucune activité trouvée.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% include 'partials/pagination.html' %}
+  </div>
+</div>
+{% endblock %}

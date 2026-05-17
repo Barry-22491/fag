@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <h1 class="h4 mb-4">Notifications</h1>
+
+    <div class="list-group">
+      {% for notif in notifications %}
+      <div class="list-group-item">
+        <div class="fw-semibold">{{ notif.message }}</div>
+        <div class="small text-muted">{{ notif.created_at|date:"d/m/Y H:i" }}</div>
+      </div>
+      {% empty %}
+      <div class="text-muted">Aucune notification.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

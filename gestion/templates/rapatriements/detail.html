@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}Détail rapatriement{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h1 class="h3 mb-1">Dossier de rapatriement</h1>
+    <p class="text-muted mb-0">{{ dossier.personne }}</p>
+  </div>
+
+  {% if request.GET.retour == "deces" %}
+    <a href="{% url 'contributions_deces_liste' %}" class="btn btn-light">Retour</a>
+  {% elif can_edit_rapatriement %}
+    <a href="{% url 'rapatriements_liste' %}" class="btn btn-light">Retour</a>
+  {% else %}
+    <a href="{% url 'contributions_deces_liste' %}" class="btn btn-light">Retour</a>
+  {% endif %}
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Informations principales</h2>
+
+        <dl class="row mb-0">
+          <dt class="col-sm-4 text-muted">Personne</dt>
+          <dd class="col-sm-8">{{ dossier.personne }}</dd>
+
+          <dt class="col-sm-4 text-muted">Association</dt>
+          <dd class="col-sm-8">{{ dossier.affiliation.association.entite.nom }}</dd>
+
+          <dt class="col-sm-4 text-muted">Fédération</dt>
+          <dd class="col-sm-8">{{ dossier.affiliation.federation.nom }}</dd>
+
+          <dt class="col-sm-4 text-muted">Date décès</dt>
+          <dd class="col-sm-8">{{ dossier.date_deces|date:"d/m/Y" }}</dd>
+
+          <dt class="col-sm-4 text-muted">Lieu décès</dt>
+          <dd class="col-sm-8">{{ dossier.lieu_deces }}</dd>
+
+          <dt class="col-sm-4 text-muted">Pays décès</dt>
+          <dd class="col-sm-8">{{ dossier.pays_deces|default:"-" }}</dd>
+
+          <dt class="col-sm-4 text-muted">Destination</dt>
+          <dd class="col-sm-8">{{ dossier.destination_rapatriement }}</dd>
+
+          <dt class="col-sm-4 text-muted">Coût total</dt>
+          <dd class="col-sm-8">{{ dossier.cout_total }} €</dd>
+
+          <dt class="col-sm-4 text-muted">Part par association</dt>
+          <dd class="col-sm-8">{{ dossier.montant_par_association }} €</dd>
+
+          <dt class="col-sm-4 text-muted">Montant collecté</dt>
+          <dd class="col-sm-8 text-success fw-semibold">{{ dossier.montant_collecte }} €</dd>
+
+          <dt class="col-sm-4 text-muted">Reste à collecter</dt>
+          <dd class="col-sm-8">
+            {% if dossier.reste_a_collecter > 0 %}
+              <span class="text-danger fw-bold">{{ dossier.reste_a_collecter }} €</span>
+            {% else %}
+              <span class="text-success fw-bold">0 €</span>
+            {% endif %}
+          </dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Contact et suivi</h2>
+
+        <dl class="row mb-0">
+          <dt class="col-sm-4 text-muted">Contact</dt>
+          <dd class="col-sm-8">{{ dossier.personne_contact|default:"-" }}</dd>
+
+          <dt class="col-sm-4 text-muted">Téléphone</dt>
+          <dd class="col-sm-8">{{ dossier.telephone_contact|default:"-" }}</dd>
+
+          <dt class="col-sm-4 text-muted">Statut</dt>
+          <dd class="col-sm-8">{{ dossier.get_statut_display }}</dd>
+
+          <dt class="col-sm-4 text-muted">Observations</dt>
+          <dd class="col-sm-8">{{ dossier.observations|default:"-" }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4">
+  <div class="card-body">
+    <h2 class="h5 mb-3">Contributions des associations</h2>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Association</th>
+            <th>Attendu</th>
+            <th>Payé</th>
+            <th>Reste</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for contribution in contributions %}
+          <tr class="{% if contribution.statut == 'paye' %}table-success{% elif contribution.statut == 'partiel' %}table-warning{% else %}table-danger{% endif %}">
+            <td>{{ contribution.association.entite.nom }}</td>
+            <td>{{ contribution.montant_attendu }} €</td>
+            <td>{{ contribution.montant_paye }} €</td>
+            <td>
+              {% if contribution.montant_paye >= contribution.montant_attendu %}
+                <span class="text-success fw-semibold">0 €</span>
+              {% else %}
+                <span class="text-danger fw-semibold">
+                  {{ contribution.montant_attendu }} - {{ contribution.montant_paye }} €
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              {% if contribution.statut == 'paye' %}
+                <span class="badge bg-success">Payé</span>
+              {% elif contribution.statut == 'partiel' %}
+                <span class="badge bg-warning text-dark">Partiel</span>
+              {% elif contribution.statut == 'impaye' %}
+                <span class="badge bg-danger">Impayé</span>
+              {% else %}
+                <span class="badge bg-secondary">En attente</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">
+              Aucune contribution enregistrée.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

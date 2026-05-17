@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Alertes{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h1 class="h3 mb-1">Centre d’alertes</h1>
+    <p class="text-muted mb-0">Suivi des événements importants</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 text-danger mb-3">Cotisations à traiter</h2>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Association</th>
+                <th>Période</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in cotisations %}
+              <tr>
+                <td>{{ c.affiliation.association.entite.nom }}</td>
+                <td>{{ c.mois }}/{{ c.annee }}</td>
+                <td>{{ c.get_statut_display }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3" class="text-center text-muted py-4">Aucune alerte.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 text-warning mb-3">Rapatriements urgents</h2>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Personne</th>
+                <th>Association</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in rapatriements %}
+              <tr>
+                <td>{{ r.personne }}</td>
+                <td>{{ r.affiliation.association.entite.nom }}</td>
+                <td>{{ r.get_statut_display }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3" class="text-center text-muted py-4">Aucun dossier urgent.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 text-primary mb-3">Activités dans 7 jours</h2>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Titre</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in activites %}
+              <tr>
+                <td>{{ a.titre }}</td>
+                <td>{{ a.date|date:"d/m/Y H:i" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="2" class="text-center text-muted py-4">Aucune activité proche.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

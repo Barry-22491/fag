@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}{{ information.titre }}{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div class="mb-3">
+      <h1 class="h3 mb-2">{{ information.titre }}</h1>
+      <div class="text-muted small">
+        {{ information.get_type_information_display }} •
+        {{ information.get_priorite_display }} •
+        {{ information.date_publication|date:"d/m/Y H:i" }}
+      </div>
+    </div>
+
+    <div class="mb-4">
+      {{ information.contenu|linebreaks }}
+    </div>
+
+    {% if information.piece_jointe %}
+    <a href="{{ information.piece_jointe.url }}" class="btn btn-outline-secondary" target="_blank">
+      Pièce jointe
+    </a>
+    {% endif %}
+
+    <a href="{% url 'informations_liste' %}" class="btn btn-light">Retour</a>
+  </div>
+</div>
+{% endblock %}

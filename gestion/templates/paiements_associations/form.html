@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <h1 class="h4 mb-4">{{ title }}</h1>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          Enregistrer et répartir
+        </button>
+
+        <a href="{% url 'cotisations_liste' %}" class="btn btn-light">
+          Annuler
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

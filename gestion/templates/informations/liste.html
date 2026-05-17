@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Informations{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h1 class="h4 mb-1">Informations</h1>
+        <p class="text-muted mb-0">Communiqués et informations officielles</p>
+      </div>
+
+      {% if can_publish_informations %}
+      <a href="{% url 'information_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Publier une information
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="list-group">
+      {% for info in page_obj %}
+      <a href="{% url 'information_detail' info.pk %}" class="list-group-item list-group-item-action">
+        <div class="fw-semibold">{{ info.titre }}</div>
+        <div class="small text-muted">{{ info.created_at|date:"d/m/Y H:i" }}</div>
+      </a>
+      {% empty %}
+      <div class="text-muted">Aucune information.</div>
+      {% endfor %}
+    </div>
+
+    {% include 'partials/pagination.html' %}
+  </div>
+</div>
+{% endblock %}

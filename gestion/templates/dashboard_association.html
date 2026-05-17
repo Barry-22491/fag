@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Association{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h1 class="h3 mb-1">{{ association.entite.nom }}</h1>
+    <p class="text-muted mb-0">Vue d’ensemble de votre association</p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Membres</div>
+        <div class="fs-3 fw-bold">{{ membres_count }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Nouveaux membres</div>
+        <div class="fs-3 fw-bold">{{ nouveaux_membres }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Bénéficiaires actifs</div>
+        <div class="fs-3 fw-bold">{{ beneficiaires_count }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Statut cotisation</div>
+        <div class="fs-5 fw-bold">{{ cotisation_status }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <!-- Graphique -->
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Évolution des cotisations</h2>
+        <canvas id="cotisationsChart" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cotisation du mois -->
+  <div class="col-lg-5">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Cotisation du mois</h2>
+        <p class="mb-2"><strong>Montant attendu :</strong> {{ montant_attendu }}</p>
+        <p class="mb-2"><strong>Montant payé :</strong> {{ montant_paye }}</p>
+        <p class="mb-0"><strong>Statut :</strong> {{ cotisation_status }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Informations -->
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Informations récentes</h2>
+        <ul class="list-group list-group-flush">
+          {% for info in informations_recentes %}
+          <li class="list-group-item px-0">
+            <a href="{% url 'information_detail' info.pk %}" class="text-decoration-none">
+              {{ info.titre }}
+            </a>
+          </li>
+          {% empty %}
+          <li class="list-group-item px-0 text-muted">Aucune information.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activités -->
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Activités à venir</h2>
+        <ul class="list-group list-group-flush">
+          {% for activite in activites_a_venir %}
+          <li class="list-group-item px-0">
+            <a href="{% url 'activite_detail' activite.pk %}" class="text-decoration-none">
+              {{ activite.titre }} — {{ activite.date|date:"d/m/Y H:i" }}
+            </a>
+          </li>
+          {% empty %}
+          <li class="list-group-item px-0 text-muted">Aucune activité à venir.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents -->
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Documents récents</h2>
+        <ul class="list-group list-group-flush">
+          {% for doc in documents_recents %}
+          <li class="list-group-item px-0">
+            {{ doc.titre }}
+          </li>
+          {% empty %}
+          <li class="list-group-item px-0 text-muted">Aucun document.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const ctx = document.getElementById('cotisationsChart');
+
+const associationChartLabels = {{ chart_labels|default:"[]"|safe }};
+const associationChartValues = {{ chart_values|default:"[]"|safe }};
+
+if (ctx) {
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: associationChartLabels,
+      datasets: [{
+        label: 'Montant payé',
+        data: associationChartValues,
+        tension: 0.3,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+</script>
+{% endblock %}

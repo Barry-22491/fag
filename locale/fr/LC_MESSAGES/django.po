@@ -1,0 +1,90 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-26 12:51+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+#: .\gestion\templates\base.html:33
+msgid "Gestion Fédération"
+msgstr ""
+
+#: .\gestion\templates\base.html:48
+msgid "Dashboard"
+msgstr ""
+
+#: .\gestion\templates\base.html:53 .\gestion\templates\base.html:151
+msgid "Associations"
+msgstr ""
+
+#: .\gestion\templates\base.html:59 .\gestion\templates\base.html:163
+msgid "Cotisations"
+msgstr ""
+
+#: .\gestion\templates\base.html:65 .\gestion\templates\base.html:169
+msgid "Bénéficiaires"
+msgstr ""
+
+#: .\gestion\templates\base.html:71 .\gestion\templates\base.html:187
+msgid "Informations"
+msgstr ""
+
+#: .\gestion\templates\base.html:77 .\gestion\templates\base.html:175
+msgid "Rapatriements"
+msgstr ""
+
+#: .\gestion\templates\base.html:83 .\gestion\templates\base.html:181
+msgid "Activités"
+msgstr ""
+
+#: .\gestion\templates\base.html:102
+msgid "Site public"
+msgstr ""
+
+#: .\gestion\templates\base.html:118
+msgid "Déconnexion"
+msgstr ""
+
+#: .\gestion\templates\base.html:127
+msgid "Connexion"
+msgstr ""
+
+#: .\gestion\templates\base.html:146
+msgid "Tableau de bord"
+msgstr ""
+
+#: .\gestion\templates\base.html:157
+msgid "Personnes"
+msgstr ""
+
+#: .\gestion\templates\base.html:193
+msgid "Transactions"
+msgstr ""
+
+#: .\gestion\templates\base.html:199
+msgid "Documents"
+msgstr ""
+
+#: .\gestion\templates\base.html:205
+msgid "Alertes"
+msgstr ""
+
+#: .\gestion\templates\base.html:211
+msgid "Rapports"
+msgstr ""
+
+#: .\gestion\templates\base.html:217
+msgid "Emails"
+msgstr ""

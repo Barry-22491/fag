@@ -1,0 +1,56 @@
+body {
+  background: #f6f8fb;
+}
+
+.card {
+  border-radius: 16px;
+}
+
+.card-body {
+  padding: 1.35rem;
+}
+
+.btn {
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.badge {
+  border-radius: 999px;
+  padding: 0.45em 0.7em;
+}
+
+.page-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.stat-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.08) !important;
+}
+
+.avatar-circle {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.empty-state {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: #6c757d;
+}

@@ -1,0 +1,10 @@
+<h1>Supprimer membre</h1>
+
+<p>Confirmer la suppression de {{ adhesion.personne }} ?</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Oui supprimer</button>
+</form>
+
+<a href="{% url 'membres' %}">Annuler</a>

@@ -1,0 +1,23 @@
+{% extends "public/base_public.html" %}
+{% block title %}Associations{% endblock %}
+{% load i18n %}
+
+{% block content %}
+<h1 class="h3 mb-4">{%trans "Associations membres"%}</h1>
+
+<div class="row g-3">
+  {% for association in associations %}
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5">{{ association.entite.nom }}</h2>
+        <p class="text-muted mb-1">{{ association.ville }}</p>
+        <p class="small mb-0">{{ association.email|default:"" }}</p>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-muted">{%trans "Aucune association affichée."%}</p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Affiliations{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <h1 class="h4 mb-1">Affiliations</h1>
+        <p class="text-muted mb-0">Associations affiliées à la fédération</p>
+      </div>
+      <a href="{% url 'affiliation_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Ajouter
+      </a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Association</th>
+            <th>Fédération</th>
+            <th>Date affiliation</th>
+            <th>Montant mensuel</th>
+            <th>Statut</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for affiliation in page_obj %}
+          <tr>
+            <td class="fw-semibold">{{ affiliation.association.entite.nom }}</td>
+            <td>{{ affiliation.federation.nom }}</td>
+            <td>{{ affiliation.date_affiliation|date:"d/m/Y" }}</td>
+            <td>{{ affiliation.montant_mensuel }}</td>
+            <td>
+              {% if affiliation.statut == 'active' %}
+                <span class="badge bg-success">Active</span>
+              {% elif affiliation.statut == 'suspendue' %}
+                <span class="badge bg-warning text-dark">Suspendue</span>
+              {% else %}
+                <span class="badge bg-danger">Radiée</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <a href="{% url 'affiliation_update' affiliation.pk %}" class="btn btn-sm btn-outline-warning">
+                Modifier
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              Aucune affiliation trouvée.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% include 'partials/pagination.html' %}
+  </div>
+</div>
+{% endblock %}

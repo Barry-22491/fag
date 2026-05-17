@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% block title %}Rapports{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h1 class="h3 mb-1">Rapports</h1>
+    <p class="text-muted mb-0">Analyse financière et synthèse de l’activité fédérale</p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Total dû</div>
+        <div class="fs-4 fw-bold">{{ total_du }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Total payé</div>
+        <div class="fs-4 fw-bold text-success">{{ total_paye }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Reste à payer</div>
+        <div class="fs-4 fw-bold text-danger">{{ total_reste }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Avances</div>
+        <div class="fs-4 fw-bold text-primary">{{ total_avance }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Résumé financier par association</h2>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Code</th>
+                <th>Association</th>
+                <th>Mensuel dû</th>
+                <th>Mensuel payé</th>
+                <th>Décès dû</th>
+                <th>Décès payé</th>
+                <th>Total dû</th>
+                <th>Total payé</th>
+                <th>Reste</th>
+                <th>Avance</th>
+                <th>Situation</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for item in resume_financier %}
+              <tr class="{% if item.reste > 0 %}table-danger{% elif item.avance > 0 %}table-info{% else %}table-success{% endif %}">
+                <td><span class="badge bg-dark">{{ item.code }}</span></td>
+                <td class="fw-semibold">{{ item.association }}</td>
+                <td>{{ item.mensuel_attendu }}</td>
+                <td>{{ item.mensuel_paye }}</td>
+                <td>{{ item.deces_attendu }}</td>
+                <td>{{ item.deces_paye }}</td>
+                <td class="fw-semibold">{{ item.total_attendu }}</td>
+                <td class="fw-semibold">{{ item.total_paye }}</td>
+                <td class="fw-bold text-danger">{{ item.reste }}</td>
+                <td class="fw-bold text-primary">{{ item.avance }}</td>
+                <td>
+                  {% if item.reste > 0 %}
+                    <span class="badge bg-danger">En retard</span>
+                  {% elif item.avance > 0 %}
+                    <span class="badge bg-info text-dark">En avance</span>
+                  {% else %}
+                    <span class="badge bg-success">À jour</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="11" class="text-center text-muted py-4">Aucune donnée financière.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Associations en retard</h2>
+
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Code</th>
+                <th>Association</th>
+                <th>Reste à payer</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in associations_en_retard %}
+              <tr>
+                <td><span class="badge bg-dark">{{ item.code }}</span></td>
+                <td>{{ item.association }}</td>
+                <td class="fw-bold text-danger">{{ item.reste }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="3" class="text-center text-muted py-4">Aucune association en retard.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Cotisations décès</h2>
+
+        <dl class="row mb-0">
+          <dt class="col-6 text-muted">Décès dû</dt>
+          <dd class="col-6 text-end fw-semibold">{{ deces_total_attendu }}</dd>
+
+          <dt class="col-6 text-muted">Décès payé</dt>
+          <dd class="col-6 text-end fw-semibold text-success">{{ deces_total_paye }}</dd>
+
+          <dt class="col-6 text-muted">Reste décès</dt>
+          <dd class="col-6 text-end fw-semibold text-danger">{{ deces_reste }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Bénéficiaires par association</h2>
+
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Association</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in beneficiaires_par_association %}
+              <tr>
+                <td>{{ row.affiliation__association__entite__nom }}</td>
+                <td>{{ row.total }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="2" class="text-center text-muted py-4">Aucune donnée.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Rapatriements par statut</h2>
+
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Statut</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rapatriements_par_statut %}
+              <tr>
+                <td>{{ row.statut }}</td>
+                <td>{{ row.total }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="2" class="text-center text-muted py-4">Aucune donnée.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

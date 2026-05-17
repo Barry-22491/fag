@@ -1,0 +1,302 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{LANGUAGE_CODE}}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Gestion Fédération{% endblock %}</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="{% static 'gestion/css/app.css' %}" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm">
+  <div class="container-fluid">
+
+    <!-- LOGO + NOM -->
+    <a class="navbar-brand fw-semibold d-flex align-items-center gap-2" href="{% url 'dashboard' %}">
+      {% if federation_courante and federation_courante.logo %}
+        <img src="{{ federation_courante.logo.url }}"
+             alt="Logo"
+             style="height: 40px; width: 40px; object-fit: contain;"
+             class="rounded bg-white p-1">
+      {% endif %}
+      <span>
+        {% if federation_courante %}
+          {{ federation_courante.nom }}
+        {% else %}
+          Gestion Fédération
+        {% endif %}
+      </span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+
+      {% if user.is_authenticated %}
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+
+        {%if can_view_dashboard %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+        </li>
+        {% endif %}
+
+        {% if can_view_associations %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'associations_liste' %}">Associations</a>
+        </li>
+        {% endif %}
+
+        {% if can_view_cotisations %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'cotisations_liste' %}">Cotisations</a>
+        </li>
+        {% endif %}
+
+        {% if can_view_beneficiaires %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'beneficiaires_liste' %}">Bénéficiaires</a>
+        </li>
+        {% endif %}
+
+        {% if can_view_informations %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'informations_liste' %}">Informations</a>
+          </li>
+        {% endif %}
+
+        {% if can_view_rapatriements %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'rapatriements_liste' %}">Rapatriements</a>
+        </li>
+        {% endif %}
+
+        {% if can_view_activites %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'activites_liste' %}">Activités</a>
+        </li>
+        {% endif %}
+
+        {% if user.is_superuser or can_manage_users %}
+          <li class="nav-item">
+            <a href="{% url 'inviter_utilisateur' %}" class="nav-link">
+              Inviter Users
+            </a>
+          </li>
+        {% endif %}
+
+        <a href="{% url 'public_home' %}" target="_blank" class="btn btn-outline-light btn-sm ms-2">
+            🌍 Site public
+        </a>
+
+        <!-- UTILISATEUR CONNECTÉ -->
+        <li class="nav-item">
+          <span class="nav-link text-white-50 d-flex align-items-center gap-1">
+            <i class="bi bi-person-circle"></i>
+            <span>{{ user.username }}</span>
+          </span>
+        </li>
+
+        <!-- LOGOUT -->
+        <li class="nav-item ms-lg-2">
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-light btn-sm">
+              Déconnexion
+            </button>
+          </form>
+        </li>
+
+      </ul>
+      {% else %}
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="btn btn-light btn-sm" href="{% url 'login' %}">Connexion</a>
+        </li>
+      </ul>
+      {% endif %}
+
+    </div>
+  </div>
+</nav>
+
+<!-- LAYOUT -->
+<div class="container-fluid py-4">
+  <div class="row g-4">
+
+    {% if user.is_authenticated %}
+    <aside class="col-xl-2 d-none d-xl-block">
+      <div class="card shadow-sm border-0">
+        <div class="list-group list-group-flush small">
+
+          <a class="list-group-item list-group-item-action fw-semibold" href="{% url 'dashboard' %}">
+            <i class="bi bi-speedometer2 me-2"></i> Tableau de bord
+          </a>
+
+          {% if can_view_associations or can_view_personnes or can_view_beneficiaires %}
+          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">
+            Organisation
+          </div>
+
+          {% if can_view_associations %}
+          <a class="list-group-item list-group-item-action" href="{% url 'associations_liste' %}">
+            <i class="bi bi-building me-2"></i> Associations
+          </a>
+          {% endif %}
+
+          {% if can_view_personnes %}
+          <a class="list-group-item list-group-item-action" href="{% url 'personnes_liste' %}">
+            <i class="bi bi-people me-2"></i> Personnes
+          </a>
+          {% endif %}
+
+          {% if can_edit_membres %}
+            <a class="list-group-item list-group-item-action" href="{% url 'membres_a_valider' %}">
+              <i class="bi bi-person-check-fill me-2"></i> Membres à valider
+            </a>
+          {% endif %}
+
+          {% if can_view_beneficiaires %}
+          <a class="list-group-item list-group-item-action" href="{% url 'beneficiaires_liste' %}">
+            <i class="bi bi-person-check me-2"></i> Bénéficiaires
+          </a>
+          {% endif %}
+
+          <a class="list-group-item list-group-item-action" href="{% url 'bureau_liste' %}" class="nav-link">
+            <i class="bi bi-people me-2"></i> Bureau
+          </a>
+          {% endif %}
+
+          {% if can_view_cotisations or can_view_transactions %}
+          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">
+            Finances
+          </div>
+
+          {% if can_view_cotisations %}
+          <a class="list-group-item list-group-item-action" href="{% url 'cotisations_liste' %}">
+            <i class="bi bi-cash-coin me-2"></i> Cotisations
+          </a>
+          {% endif %}
+
+          {% if can_view_cotisations %}
+            <a class="list-group-item list-group-item-action" href="{% url 'contributions_deces_liste' %}">
+              <i class="bi bi-heart-pulse me-2"></i> Cotisations décès
+            </a>
+        {% endif %}
+
+          {% if can_view_transactions %}
+          <a class="list-group-item list-group-item-action" href="{% url 'transactions_liste' %}">
+            <i class="bi bi-wallet2 me-2"></i> Transactions
+          </a>
+          {% endif %}
+          {% endif %}
+
+
+          {% if can_view_informations or can_view_activites or can_view_documents %}
+          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">
+            Communication
+          </div>
+
+          {% if can_view_informations %}
+          <a class="list-group-item list-group-item-action" href="{% url 'informations_liste' %}">
+            <i class="bi bi-megaphone me-2"></i> Informations
+          </a>
+          {% endif %}
+
+          {% if can_view_activites %}
+          <a class="list-group-item list-group-item-action" href="{% url 'activites_liste' %}">
+            <i class="bi bi-calendar-event me-2"></i> Activités
+          </a>
+          {% endif %}
+
+          {% if can_view_documents %}
+          <a class="list-group-item list-group-item-action" href="{% url 'documents_liste' %}">
+            <i class="bi bi-folder2-open me-2"></i> Documents
+          </a>
+          {% endif %}
+          {% endif %}
+
+
+          {% if can_view_alertes or can_view_rapatriements %}
+          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">
+            Suivi
+          </div>
+
+          {% if can_view_alertes %}
+          <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+            href="{% url 'alertes_liste' %}">
+            <span>
+              <i class="bi bi-bell me-2"></i> Alertes
+            </span>
+
+            {% if total_alertes and total_alertes > 0 %}
+            <span class="badge bg-danger rounded-pill">{{ total_alertes }}</span>
+            {% endif %}
+          </a>
+          {% endif %}
+
+          {% if can_view_rapatriements %}
+          <a class="list-group-item list-group-item-action" href="{% url 'rapatriements_liste' %}">
+            <i class="bi bi-heart-pulse me-2"></i>Rapatriements
+          </a>
+          {% endif %}
+          {% endif %}
+
+
+          {% if can_view_reports or can_view_emails %}
+          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">
+            Pilotage
+          </div>
+
+          {% if can_view_reports %}
+          <a class="list-group-item list-group-item-action" href="{% url 'rapports' %}">
+            <i class="bi bi-bar-chart-line me-2"></i> Rapports
+          </a>
+          {% endif %}
+
+          {% if can_view_emails %}
+          <a class="list-group-item list-group-item-action" href="{% url 'emails_liste' %}">
+            <i class="bi bi-envelope me-2"></i> Emails
+          </a>
+          {% endif %}
+          {% endif %}
+
+        </div>
+      </div>
+  </aside>
+
+    <main class="col-xl-10 col-12">
+    {% else %}
+    <main class="col-12">
+    {% endif %}
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {% block content %}{% endblock %}
+
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{% block scripts %}{% endblock %}
+
+</body>
+</html>

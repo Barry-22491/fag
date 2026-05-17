@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Documents{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <h1 class="h4 mb-1">Documents</h1>
+        <p class="text-muted mb-0">Documents de la fédération et des entités</p>
+      </div>
+      <a href="{% url 'document_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Ajouter
+      </a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Titre</th>
+            <th>Type</th>
+            <th>Entité</th>
+            <th>Fichier</th>
+          </tr>
+        </thead>
+        <tbody>
+         {% for doc in page_obj %}
+            <tr>
+              <td>{{ doc.titre }}</td>
+              <td>{{ doc.entite.nom }}</td>
+              <td>{{ doc.get_statut_display }}</td>
+
+              <td class="text-end">
+                {% if doc.fichier %}
+                  <a href="{{ doc.fichier.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                    Voir
+                  </a>
+                {% endif %}
+
+                {% if can_traiter_documents %}
+                  <a href="{% url 'document_update_statut' doc.pk 'en_cours' %}" class="btn btn-sm btn-warning">En cours</a>
+                  <a href="{% url 'document_update_statut' doc.pk 'traite' %}" class="btn btn-sm btn-success">Traité</a>
+                  <a href="{% url 'document_update_statut' doc.pk 'rejete' %}" class="btn btn-sm btn-danger">Rejeter</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% include 'partials/pagination.html' %}
+  </div>
+  
+</div>
+{% endblock %}

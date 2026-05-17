@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Détail activité{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h1 class="h3 mb-1">{{ activite.titre }}</h1>
+    <p class="text-muted mb-0">Détail de l'activité culturelle</p>
+  </div>
+  <a href="{% url 'activites_liste' %}" class="btn btn-light">Retour</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3 text-muted">Titre</dt>
+      <dd class="col-sm-9">{{ activite.titre }}</dd>
+
+      <dt class="col-sm-3 text-muted">Date</dt>
+      <dd class="col-sm-9">{{ activite.date|date:"d/m/Y H:i" }}</dd>
+
+      <dt class="col-sm-3 text-muted">Lieu</dt>
+      <dd class="col-sm-9">{{ activite.lieu|default:"-" }}</dd>
+
+      <dt class="col-sm-3 text-muted">Capacité</dt>
+      <dd class="col-sm-9">{{ activite.capacite|default:"-" }}</dd>
+
+      <dt class="col-sm-3 text-muted">Réservée</dt>
+      <dd class="col-sm-9">
+        {% if activite.reserve_aux_beneficiaires %}Oui{% else %}Non{% endif %}
+      </dd>
+
+      <dt class="col-sm-3 text-muted">Description</dt>
+      <dd class="col-sm-9">{{ activite.description|default:"-" }}</dd>
+    </dl>
+  </div>
+</div>
+{% endblock %}

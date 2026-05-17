@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Rapatriements{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <h1 class="h4 mb-1">Dossiers de rapatriement</h1>
+        <p class="text-muted mb-0">Suivi des dossiers ouverts, en cours et terminés</p>
+      </div>
+      <a href="{% url 'rapatriement_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Nouveau dossier
+      </a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Personne</th>
+            <th>Association</th>
+            <th>Date décès</th>
+            <th>Lieu</th>
+            <th>Statut</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for dossier in page_obj %}
+          <tr>
+            <td class="fw-semibold">{{ dossier.personne }}</td>
+            <td>{{ dossier.affiliation.association.entite.nom }}</td>
+            <td>{{ dossier.date_deces|date:"d/m/Y" }}</td>
+            <td>{{ dossier.lieu_deces }}</td>
+            <td>
+              {% if dossier.statut == 'ouvert' %}
+                <span class="badge bg-primary">Ouvert</span>
+              {% elif dossier.statut == 'en_cours' %}
+                <span class="badge bg-warning text-dark">En cours</span>
+              {% elif dossier.statut == 'termine' %}
+                <span class="badge bg-success">Terminé</span>
+              {% else %}
+                <span class="badge bg-danger">Refusé</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <a href="{% url 'rapatriement_detail' dossier.pk %}" class="btn btn-sm btn-outline-primary">Voir</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              Aucun dossier de rapatriement trouvé.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% include 'partials/pagination.html' %}
+  </div>
+</div>
+{% endblock %}

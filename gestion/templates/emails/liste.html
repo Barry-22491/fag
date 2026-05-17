@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Historique des emails{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div class="mb-3">
+      <h1 class="h4 mb-1">Historique des emails</h1>
+      <p class="text-muted mb-0">Emails envoyés par l’application</p>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Date</th>
+            <th>Destinataire</th>
+            <th>Type</th>
+            <th>Sujet</th>
+            <th>Succès</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for email in page_obj %}
+          <tr>
+            <td>{{ email.created_at|date:"d/m/Y H:i" }}</td>
+            <td>{{ email.destinataire }}</td>
+            <td>{{ email.get_type_email_display }}</td>
+            <td>{{ email.sujet }}</td>
+            <td>
+              {% if email.succes %}
+                <span class="badge bg-success">Oui</span>
+              {% else %}
+                <span class="badge bg-danger">Non</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">Aucun email envoyé.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% include 'partials/pagination.html' %}
+  </div>
+</div>
+{% endblock %}
