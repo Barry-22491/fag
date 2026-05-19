@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="{{LANGUAGE_CODE}}">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,11 +13,9 @@
 
 <body class="bg-light">
 
-<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm">
   <div class="container-fluid">
 
-    <!-- LOGO + NOM -->
     <a class="navbar-brand fw-semibold d-flex align-items-center gap-2" href="{% url 'dashboard' %}">
       {% if federation_courante and federation_courante.logo %}
         <img src="{{ federation_courante.logo.url }}"
@@ -39,80 +37,138 @@
     </button>
 
     <div class="collapse navbar-collapse" id="mainNav">
-
       {% if user.is_authenticated %}
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
 
-        {%if can_view_dashboard %}
+        {% if can_view_dashboard %}
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+          <a class="nav-link" href="{% url 'dashboard' %}">
+            <i class="bi bi-speedometer2 me-1"></i> Dashboard
+          </a>
         </li>
         {% endif %}
 
-        {% if can_view_associations %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'associations_liste' %}">Associations</a>
+        {% if can_view_associations or can_view_personnes or can_view_beneficiaires %}
+        <li class="nav-item dropdown">
+          <button class="nav-link dropdown-toggle btn btn-link text-white text-decoration-none"
+                  type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-building me-1"></i> Organisation
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% if can_view_associations %}
+            <li><a class="dropdown-item" href="{% url 'associations_liste' %}">Associations</a></li>
+            {% endif %}
+            {% if can_view_personnes %}
+            <li><a class="dropdown-item" href="{% url 'personnes_liste' %}">Personnes</a></li>
+            {% endif %}
+            {% if can_edit_membres %}
+            <li><a class="dropdown-item" href="{% url 'membres_a_valider' %}">Membres à valider</a></li>
+            {% endif %}
+            {% if can_view_beneficiaires %}
+            <li><a class="dropdown-item" href="{% url 'beneficiaires_liste' %}">Bénéficiaires</a></li>
+            {% endif %}
+            <li><a class="dropdown-item" href="{% url 'bureau_liste' %}">Bureau</a></li>
+          </ul>
         </li>
         {% endif %}
 
-        {% if can_view_cotisations %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'cotisations_liste' %}">Cotisations</a>
+        {% if can_view_cotisations or can_view_transactions %}
+        <li class="nav-item dropdown">
+          <button class="nav-link dropdown-toggle btn btn-link text-white text-decoration-none"
+                  type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-cash-coin me-1"></i> Finances
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% if can_view_cotisations %}
+            <li><a class="dropdown-item" href="{% url 'cotisations_liste' %}">Cotisations</a></li>
+            <li><a class="dropdown-item" href="{% url 'contributions_deces_liste' %}">Cotisations décès</a></li>
+            {% endif %}
+            {% if can_view_transactions %}
+            <li><a class="dropdown-item" href="{% url 'transactions_liste' %}">Transactions</a></li>
+            {% endif %}
+          </ul>
         </li>
         {% endif %}
 
-        {% if can_view_beneficiaires %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'beneficiaires_liste' %}">Bénéficiaires</a>
+        {% if can_view_informations or can_view_activites or can_view_documents %}
+        <li class="nav-item dropdown">
+          <button class="nav-link dropdown-toggle btn btn-link text-white text-decoration-none"
+                  type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-megaphone me-1"></i> Communication
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% if can_view_informations %}
+            <li><a class="dropdown-item" href="{% url 'informations_liste' %}">Informations</a></li>
+            {% endif %}
+            {% if can_view_activites %}
+            <li><a class="dropdown-item" href="{% url 'activites_liste' %}">Activités</a></li>
+            {% endif %}
+            {% if can_view_documents %}
+            <li><a class="dropdown-item" href="{% url 'documents_liste' %}">Documents</a></li>
+            {% endif %}
+          </ul>
         </li>
         {% endif %}
 
-        {% if can_view_informations %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'informations_liste' %}">Informations</a>
-          </li>
-        {% endif %}
-
-        {% if can_view_rapatriements %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'rapatriements_liste' %}">Rapatriements</a>
-        </li>
-        {% endif %}
-
-        {% if can_view_activites %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'activites_liste' %}">Activités</a>
+        {% if can_view_alertes or can_view_rapatriements or can_view_reports or can_view_emails %}
+        <li class="nav-item dropdown">
+          <button class="nav-link dropdown-toggle btn btn-link text-white text-decoration-none"
+                  type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-bar-chart-line me-1"></i> Suivi & Pilotage
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% if can_view_alertes %}
+            <li>
+              <a class="dropdown-item d-flex justify-content-between align-items-center" href="{% url 'alertes_liste' %}">
+                <span>Alertes</span>
+                {% if total_alertes and total_alertes > 0 %}
+                <span class="badge bg-danger rounded-pill">{{ total_alertes }}</span>
+                {% endif %}
+              </a>
+            </li>
+            {% endif %}
+            {% if can_view_rapatriements %}
+            <li><a class="dropdown-item" href="{% url 'rapatriements_liste' %}">Rapatriements</a></li>
+            {% endif %}
+            {% if can_view_reports %}
+            <li><a class="dropdown-item" href="{% url 'rapports' %}">Rapports</a></li>
+            {% endif %}
+            {% if can_view_emails %}
+            <li><a class="dropdown-item" href="{% url 'emails_liste' %}">Emails</a></li>
+            {% endif %}
+          </ul>
         </li>
         {% endif %}
 
         {% if user.is_superuser or can_manage_users %}
-          <li class="nav-item">
-            <a href="{% url 'inviter_utilisateur' %}" class="nav-link">
-              Inviter Users
-            </a>
-          </li>
+        <li class="nav-item">
+          <a href="{% url 'inviter_utilisateur' %}" class="nav-link">
+            <i class="bi bi-person-plus me-1"></i> Inviter
+          </a>
+        </li>
         {% endif %}
 
-        <a href="{% url 'public_home' %}" target="_blank" class="btn btn-outline-light btn-sm ms-2">
-            🌍 Site public
-        </a>
-
-        <!-- UTILISATEUR CONNECTÉ -->
         <li class="nav-item">
-          <span class="nav-link text-white-50 d-flex align-items-center gap-1">
-            <i class="bi bi-person-circle"></i>
-            <span>{{ user.username }}</span>
-          </span>
+          <a href="{% url 'public_home' %}" target="_blank" class="btn btn-outline-light btn-sm ms-lg-2">
+            🌍 Site public
+          </a>
         </li>
 
-        <!-- LOGOUT -->
-        <li class="nav-item ms-lg-2">
-          <form method="post" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-light btn-sm">
-              Déconnexion
-            </button>
-          </form>
+        <li class="nav-item dropdown">
+          <button class="nav-link dropdown-toggle btn btn-link text-white text-decoration-none"
+                  type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle me-1"></i> {{ user.username }}
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <form method="post" action="{% url 'logout' %}" class="px-3 py-1">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-light btn-sm w-100">
+                  Déconnexion
+                </button>
+              </form>
+            </li>
+          </ul>
         </li>
 
       </ul>
@@ -123,12 +179,10 @@
         </li>
       </ul>
       {% endif %}
-
     </div>
   </div>
 </nav>
 
-<!-- LAYOUT -->
 <div class="container-fluid py-4">
   <div class="row g-4">
 
@@ -142,9 +196,7 @@
           </a>
 
           {% if can_view_associations or can_view_personnes or can_view_beneficiaires %}
-          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">
-            Organisation
-          </div>
+          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">Organisation</div>
 
           {% if can_view_associations %}
           <a class="list-group-item list-group-item-action" href="{% url 'associations_liste' %}">
@@ -159,9 +211,9 @@
           {% endif %}
 
           {% if can_edit_membres %}
-            <a class="list-group-item list-group-item-action" href="{% url 'membres_a_valider' %}">
-              <i class="bi bi-person-check-fill me-2"></i> Membres à valider
-            </a>
+          <a class="list-group-item list-group-item-action" href="{% url 'membres_a_valider' %}">
+            <i class="bi bi-person-check-fill me-2"></i> Membres à valider
+          </a>
           {% endif %}
 
           {% if can_view_beneficiaires %}
@@ -170,27 +222,22 @@
           </a>
           {% endif %}
 
-          <a class="list-group-item list-group-item-action" href="{% url 'bureau_liste' %}" class="nav-link">
+          <a class="list-group-item list-group-item-action" href="{% url 'bureau_liste' %}">
             <i class="bi bi-people me-2"></i> Bureau
           </a>
           {% endif %}
 
           {% if can_view_cotisations or can_view_transactions %}
-          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">
-            Finances
-          </div>
+          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">Finances</div>
 
           {% if can_view_cotisations %}
           <a class="list-group-item list-group-item-action" href="{% url 'cotisations_liste' %}">
             <i class="bi bi-cash-coin me-2"></i> Cotisations
           </a>
+          <a class="list-group-item list-group-item-action" href="{% url 'contributions_deces_liste' %}">
+            <i class="bi bi-heart-pulse me-2"></i> Cotisations décès
+          </a>
           {% endif %}
-
-          {% if can_view_cotisations %}
-            <a class="list-group-item list-group-item-action" href="{% url 'contributions_deces_liste' %}">
-              <i class="bi bi-heart-pulse me-2"></i> Cotisations décès
-            </a>
-        {% endif %}
 
           {% if can_view_transactions %}
           <a class="list-group-item list-group-item-action" href="{% url 'transactions_liste' %}">
@@ -199,11 +246,8 @@
           {% endif %}
           {% endif %}
 
-
           {% if can_view_informations or can_view_activites or can_view_documents %}
-          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">
-            Communication
-          </div>
+          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">Communication</div>
 
           {% if can_view_informations %}
           <a class="list-group-item list-group-item-action" href="{% url 'informations_liste' %}">
@@ -224,19 +268,13 @@
           {% endif %}
           {% endif %}
 
-
           {% if can_view_alertes or can_view_rapatriements %}
-          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">
-            Suivi
-          </div>
+          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">Suivi</div>
 
           {% if can_view_alertes %}
           <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-            href="{% url 'alertes_liste' %}">
-            <span>
-              <i class="bi bi-bell me-2"></i> Alertes
-            </span>
-
+             href="{% url 'alertes_liste' %}">
+            <span><i class="bi bi-bell me-2"></i> Alertes</span>
             {% if total_alertes and total_alertes > 0 %}
             <span class="badge bg-danger rounded-pill">{{ total_alertes }}</span>
             {% endif %}
@@ -245,16 +283,13 @@
 
           {% if can_view_rapatriements %}
           <a class="list-group-item list-group-item-action" href="{% url 'rapatriements_liste' %}">
-            <i class="bi bi-heart-pulse me-2"></i>Rapatriements
+            <i class="bi bi-heart-pulse me-2"></i> Rapatriements
           </a>
           {% endif %}
           {% endif %}
 
-
           {% if can_view_reports or can_view_emails %}
-          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">
-            Pilotage
-          </div>
+          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold small">Pilotage</div>
 
           {% if can_view_reports %}
           <a class="list-group-item list-group-item-action" href="{% url 'rapports' %}">
@@ -271,7 +306,7 @@
 
         </div>
       </div>
-  </aside>
+    </aside>
 
     <main class="col-xl-10 col-12">
     {% else %}
@@ -288,8 +323,8 @@
       {% endif %}
 
       {% block content %}{% endblock %}
-
     </main>
+
   </div>
 </div>
 

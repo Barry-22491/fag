@@ -1,55 +1,136 @@
 {% extends 'base.html' %}
 {% load i18n %}
+
 {% block title %}Cotisations{% endblock %}
+
 {% block content %}
 <div class="card border-0 shadow-sm">
   <div class="card-body">
+
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
       <div>
         <h1 class="h4 mb-1">Cotisations</h1>
         <p class="text-muted mb-0">Résumé financier des associations</p>
       </div>
+
       <div class="d-flex gap-2 flex-wrap">
+
         {% if can_edit_cotisations %}
-            <a href="{% url 'cotisation_create' %}" class="btn btn-primary">
-              <i class="bi bi-plus-lg"></i> Ajouter manuellement
-            </a>
+        <div class="dropdown">
+          <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            Actions
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="{% url 'cotisation_create' %}" class="dropdown-item">
+                Ajouter manuellement
+              </a>
+            </li>
+
+            <li>
+              <a href="{% url 'paiement_association_create' %}" class="dropdown-item">
+                Encaisser un paiement
+              </a>
+            </li>
+
+            {% if can_generate_cotisations %}
+            <li>
+              <a href="{% url 'generer_cotisations' %}"
+                 class="dropdown-item"
+                 onclick="return confirm('Générer les cotisations du mois ?')">
+                Générer le mois
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
         {% endif %}
-        {% if can_edit_cotisations %}
-          <a href="{% url 'paiement_association_create' %}" class="btn btn-outline-primary">
-            <i class="bi bi-cash-coin"></i> Encaisser un paiement
-          </a>
-        {% endif %}
-        {% if can_generate_cotisations %}
-        <a href="{% url 'generer_cotisations' %}"
-           class="btn btn-warning"
-           onclick="return confirm('Générer les cotisations du mois ?')">
-          <i class="bi bi-arrow-repeat"></i> Générer le mois
-        </a>
-        {% endif %}
+
         {% if can_export_cotisations %}
-        <a href="{% url 'export_cotisations_excel' %}" class="btn btn-success">
-          <i class="bi bi-file-earmark-excel"></i> Export Excel
-        </a>
-        <a href="{% url 'export_cotisations_pdf'%}" class="btn btn-danger">
-          <i class="bi bi-file-earmark-pdf"></i> Export PDF
-        </a>
+        <div class="dropdown">
+          <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            Exports
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <a href="{% url 'export_cotisations_excel' %}?{{ request.GET.urlencode }}" class="dropdown-item">
+                Résumé Excel
+              </a>
+            </li>
+
+            <li>
+              <a href="{% url 'export_cotisations_pdf' %}?{{ request.GET.urlencode }}" class="dropdown-item">
+                Résumé PDF
+              </a>
+            </li>
+
+            <li><hr class="dropdown-divider"></li>
+
+            <li>
+              <a href="{% url 'export_cotisations_detail_excel' %}?{{ request.GET.urlencode }}" class="dropdown-item">
+                Détail Excel
+              </a>
+            </li>
+
+            <li>
+              <a href="{% url 'export_cotisations_detail_pdf' %}?{{ request.GET.urlencode }}" class="dropdown-item">
+                Détail PDF
+              </a>
+            </li>
+          </ul>
+        </div>
         {% endif %}
+
       </div>
     </div>
+
     <form method="get" class="row g-2 mb-4">
       <div class="col-12 col-md-3">
-        <input type="text" name="association" value="{{ request.GET.association }}" class="form-control" placeholder="Association">
+        <input type="text"
+               name="association"
+               value="{{ request.GET.association }}"
+               class="form-control"
+               placeholder="Association">
       </div>
+
       <div class="col-12 col-md-2">
-        <input type="text" name="code" value="{{ request.GET.code }}" class="form-control" placeholder="Code">
+        <input type="text"
+               name="code"
+               value="{{ request.GET.code }}"
+               class="form-control"
+               placeholder="Code">
       </div>
+
       <div class="col-6 col-md-2">
-        <input type="number" name="annee" value="{{ request.GET.annee }}" class="form-control" placeholder="Année">
+        <input type="number"
+               name="annee"
+               value="{{ request.GET.annee }}"
+               class="form-control"
+               placeholder="Année">
       </div>
+
       <div class="col-6 col-md-2">
-        <input type="number" name="mois" value="{{ request.GET.mois }}" class="form-control" placeholder="Mois">
+        <input type="number"
+               name="mois"
+               value="{{ request.GET.mois }}"
+               class="form-control"
+               placeholder="Mois">
       </div>
+
+      <div class="col-6 col-md-2">
+        <input type="date"
+               name="date_debut"
+               value="{{ request.GET.date_debut }}"
+               class="form-control">
+      </div>
+
+      <div class="col-6 col-md-2">
+        <input type="date"
+               name="date_fin"
+               value="{{ request.GET.date_fin }}"
+               class="form-control">
+      </div>
+
       <div class="col-12 col-md-2">
         <select name="statut" class="form-select">
           <option value="">Tous les statuts</option>
@@ -59,10 +140,20 @@
           <option value="en_attente" {% if request.GET.statut == 'en_attente' %}selected{% endif %}>En attente</option>
         </select>
       </div>
+
       <div class="col-12 col-md-1">
-        <button class="btn btn-outline-secondary w-100">Filtrer</button>
+        <button class="btn btn-outline-secondary w-100">
+          Filtrer
+        </button>
+      </div>
+
+      <div class="col-12 col-md-1">
+        <a href="{% url 'cotisations_liste' %}" class="btn btn-light w-100">
+          Reset
+        </a>
       </div>
     </form>
+
     <div class="row g-3 mb-4">
       <div class="col-12 col-md-3">
         <div class="card bg-light border-0">
@@ -72,6 +163,7 @@
           </div>
         </div>
       </div>
+
       <div class="col-12 col-md-3">
         <div class="card bg-light border-0">
           <div class="card-body">
@@ -80,6 +172,7 @@
           </div>
         </div>
       </div>
+
       <div class="col-12 col-md-3">
         <div class="card bg-light border-0">
           <div class="card-body">
@@ -90,6 +183,7 @@
           </div>
         </div>
       </div>
+
       <div class="col-12 col-md-3">
         <div class="card bg-light border-0">
           <div class="card-body">
@@ -99,9 +193,11 @@
         </div>
       </div>
     </div>
+
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-body">
         <h2 class="h5 mb-3">Résumé par association</h2>
+
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
@@ -119,12 +215,14 @@
                 <th>Situation</th>
               </tr>
             </thead>
+
             <tbody>
               {% for item in resume_associations %}
               <tr class="{% if item.reste > 0 %}table-danger{% elif item.avance > 0 %}table-info{% else %}table-success{% endif %}">
                 <td>
                   <span class="badge bg-dark">{{ item.code }}</span>
                 </td>
+
                 <td class="fw-semibold">{{ item.association }}</td>
                 <td>{{ item.mensuel_attendu }}</td>
                 <td>{{ item.mensuel_paye }}</td>
@@ -132,6 +230,7 @@
                 <td>{{ item.deces_paye }}</td>
                 <td class="fw-semibold">{{ item.total_attendu }}</td>
                 <td class="fw-semibold">{{ item.total_paye }}</td>
+
                 <td class="fw-bold">
                   {% if item.reste > 0 %}
                     <span class="text-danger">{{ item.reste }}</span>
@@ -139,6 +238,7 @@
                     <span class="text-success">0</span>
                   {% endif %}
                 </td>
+
                 <td class="fw-bold">
                   {% if item.avance > 0 %}
                     <span class="text-success">{{ item.avance }}</span>
@@ -146,6 +246,7 @@
                     <span class="text-muted">0</span>
                   {% endif %}
                 </td>
+
                 <td>
                   {% if item.reste > 0 %}
                     <span class="badge bg-danger">En retard</span>
@@ -156,6 +257,7 @@
                   {% endif %}
                 </td>
               </tr>
+
               {% empty %}
               <tr>
                 <td colspan="11" class="text-center text-muted py-4">
@@ -166,12 +268,15 @@
             </tbody>
           </table>
         </div>
+
       </div>
     </div>
+
     {% if afficher_detail_mensuel %}
     <div class="card border-0 shadow-sm">
       <div class="card-body">
         <h2 class="h5 mb-3">Détail mensuel</h2>
+
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
@@ -180,12 +285,14 @@
                 <th>Période</th>
                 <th>Attendu</th>
                 <th>Payé</th>
+                <th>Date paiement</th>
                 <th>Statut</th>
                 {% if can_edit_cotisations %}
                   <th class="text-end">Actions</th>
                 {% endif %}
               </tr>
             </thead>
+
             <tbody>
               {% for cotisation in page_obj %}
               <tr>
@@ -193,6 +300,8 @@
                 <td>{{ cotisation.mois }}/{{ cotisation.annee }}</td>
                 <td>{{ cotisation.montant_attendu }}</td>
                 <td>{{ cotisation.montant_paye }}</td>
+                <td>{{ cotisation.date_paiement|date:"d/m/Y"|default:"-" }}</td>
+
                 <td>
                   {% if cotisation.statut == 'paye' %}
                     <span class="badge bg-success">Payé</span>
@@ -204,12 +313,14 @@
                     <span class="badge bg-secondary">En attente</span>
                   {% endif %}
                 </td>
+
                 {% if can_edit_cotisations %}
                 <td class="text-end">
                   <div class="btn-group btn-group-sm">
                     <a href="{% url 'cotisation_detail' cotisation.pk %}" class="btn btn-outline-primary">
                       Voir
                     </a>
+
                     {% if can_finance_override %}
                       <a href="{% url 'cotisation_update' cotisation.pk %}" class="btn btn-outline-warning">
                         Modifier
@@ -219,9 +330,10 @@
                 </td>
                 {% endif %}
               </tr>
+
               {% empty %}
               <tr>
-                <td colspan="{% if can_edit_cotisations %}6{% else %}5{% endif %}" class="text-center text-muted py-4">
+                <td colspan="{% if can_edit_cotisations %}7{% else %}6{% endif %}" class="text-center text-muted py-4">
                   Aucune cotisation trouvée.
                 </td>
               </tr>
@@ -229,10 +341,12 @@
             </tbody>
           </table>
         </div>
+
         {% include 'partials/pagination.html' %}
       </div>
     </div>
     {% endif %}
+
   </div>
 </div>
 {% endblock %}

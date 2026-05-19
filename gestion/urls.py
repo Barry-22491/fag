@@ -96,5 +96,16 @@ urlpatterns = [
     path("cotisations-deces/export/pdf/",views.export_contributions_deces_pdf,name="export_contributions_deces_pdf"),
 
     path("paiements-associations/ajouter/",views.paiement_association_create,name="paiement_association_create"),
+
+    path("cotisations/export/detail/excel/", views.export_cotisations_detail_excel, name="export_cotisations_detail_excel"),
+    path("cotisations/export/detail/pdf/", views.export_cotisations_detail_pdf, name="export_cotisations_detail_pdf"),
+
+    path("cotisations-deces/export/excel/", views.export_contributions_deces_excel, name="export_contributions_deces_excel"),
+    path("cotisations-deces/export/pdf/", views.export_contributions_deces_pdf, name="export_contributions_deces_pdf"),
+
+    path("personnes/export/excel/", views.export_personnes_excel, name="export_personnes_excel"),
+    path("personnes/export/pdf/", views.export_personnes_pdf, name="export_personnes_pdf"),
+
+    
 ]
 

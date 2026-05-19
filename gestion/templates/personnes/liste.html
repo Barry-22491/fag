@@ -4,68 +4,143 @@
 {% block content %}
 <div class="card border-0 shadow-sm">
   <div class="card-body">
+
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
       <div>
         <h1 class="h4 mb-1">Personnes</h1>
         <p class="text-muted mb-0">Gestion des personnes membres</p>
       </div>
 
-      <div class="d-flex gap-2">
-          {% if can_export_personnes %}
-            <a href="{% url 'export_personnes_excel' %}?{{ request.GET.urlencode }}"
-              class="btn btn-success">
-              <i class="bi bi-file-earmark-excel"></i>
-              Excel
-            </a>
-          {% endif %}
+      <div class="d-flex gap-2 flex-wrap">
 
-          {% if can_edit_membres or can_propose_membres %}
-            <a href="{% url 'personne_create' %}" class="btn btn-primary">
-              Ajouter
-            </a>
-          {% endif %}
+        {% if can_export_personnes %}
+        <div class="dropdown">
+          <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            Exports
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <a href="{% url 'export_personnes_excel' %}?{{ request.GET.urlencode }}" class="dropdown-item">
+                Export Excel
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'export_personnes_pdf' %}?{{ request.GET.urlencode }}" class="dropdown-item">
+                Export PDF
+              </a>
+            </li>
+          </ul>
+        </div>
+        {% endif %}
+
+        {% if can_edit_membres or can_propose_membres %}
+          <a href="{% url 'personne_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Ajouter
+          </a>
+        {% endif %}
+
       </div>
-
     </div>
 
-   <form method="get" class="row g-2 mb-3">
-        <div class="col-12 col-md-5">
-          <input type="text" name="q" value="{{ q|default:'' }}" class="form-control" placeholder="Nom association...">
-        </div>
+    <form method="get" class="row g-2 mb-4">
+      <div class="col-12 col-md-4">
+        <input type="text"
+               name="q"
+               value="{{ q|default:'' }}"
+               class="form-control"
+               placeholder="Nom, prénom, email...">
+      </div>
 
-        <div class="col-12 col-md-4">
-          <input type="text" name="ville" value="{{ request.GET.ville|default:'' }}" class="form-control" placeholder="Ville...">
-        </div>
+      <div class="col-12 col-md-3">
+        <input type="text"
+               name="association"
+               value="{{ request.GET.association|default:'' }}"
+               class="form-control"
+               placeholder="Association...">
+      </div>
 
-        <div class="col-12 col-md-auto">
-          <button class="btn btn-outline-secondary w-100">Rechercher</button>
-        </div>
-        
-  </form>
+      <div class="col-12 col-md-2">
+        <input type="text"
+               name="ville"
+               value="{{ request.GET.ville|default:'' }}"
+               class="form-control"
+               placeholder="Ville...">
+      </div>
+
+      <div class="col-12 col-md-2">
+        <select name="statut" class="form-select">
+          <option value="">Tous les statuts</option>
+          <option value="actif" {% if request.GET.statut == 'actif' %}selected{% endif %}>Actif</option>
+          <option value="decede" {% if request.GET.statut == 'decede' %}selected{% endif %}>Décédé</option>
+          <option value="inactif" {% if request.GET.statut == 'inactif' %}selected{% endif %}>Inactif</option>
+        </select>
+      </div>
+
+      <div class="col-6 col-md-1">
+        <button class="btn btn-outline-secondary w-100">
+          Filtrer
+        </button>
+      </div>
+
+      <div class="col-6 col-md-1">
+        <a href="{% url 'personnes_liste' %}" class="btn btn-light w-100">
+          Reset
+        </a>
+      </div>
+    </form>
 
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
-            <th>Numero</th>
+            <th>Numéro</th>
             <th>Nom complet</th>
+            <th>Association</th>
+            <th>Statut</th>
             <th>Email</th>
             <th>Téléphone</th>
             <th>Ville</th>
             <th class="text-end">Actions</th>
           </tr>
         </thead>
+
         <tbody>
           {% for personne in page_obj %}
           <tr>
             <td>{{ personne.numero|default:"-" }}</td>
-            <td class="fw-semibold">{{ personne.prenom }} {{ personne.nom }}</td>
+
+            <td class="fw-semibold">
+              {{ personne.prenom }} {{ personne.nom }}
+            </td>
+
+            <td>
+              {% for adhesion in personne.adhesions.all %}
+                <div>{{ adhesion.association.entite.nom }}</div>
+              {% empty %}
+                <span class="text-muted">-</span>
+              {% endfor %}
+            </td>
+
+            <td>
+              {% if personne.statut == "actif" %}
+                <span class="badge bg-success">Actif</span>
+              {% elif personne.statut == "decede" %}
+                <span class="badge bg-dark">Décédé</span>
+              {% else %}
+                <span class="badge bg-secondary">{{ personne.statut }}</span>
+              {% endif %}
+            </td>
+
             <td>{{ personne.email|default:"-" }}</td>
             <td>{{ personne.telephone|default:"-" }}</td>
             <td>{{ personne.ville|default:"-" }}</td>
+
             <td class="text-end">
               <div class="btn-group btn-group-sm">
-                <a href="{% url 'personne_detail' personne.pk %}" class="btn btn-outline-primary">Voir</a>
+                <a href="{% url 'personne_detail' personne.pk %}" class="btn btn-outline-primary">
+                  Voir
+                </a>
+
                 {% if can_edit_membres %}
                   <a href="{% url 'personne_update' personne.pk %}" class="btn btn-outline-warning">
                     Modifier
@@ -74,9 +149,12 @@
               </div>
             </td>
           </tr>
+
           {% empty %}
           <tr>
-            <td colspan="5" class="text-center text-muted py-4">Aucune personne trouvée.</td>
+            <td colspan="8" class="text-center text-muted py-4">
+              Aucune personne trouvée.
+            </td>
           </tr>
           {% endfor %}
         </tbody>

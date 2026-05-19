@@ -16,13 +16,8 @@ from django.contrib.auth.forms import PasswordResetForm # type: ignore
 import deepl # type: ignore
 from django.conf import settings # type: ignore
 from openpyxl import Workbook # type: ignore
-from reportlab.lib.pagesizes import A4 # type: ignore
-from reportlab.platypus import SimpleDocTemplate # type: ignore
-from reportlab.platypus import Paragraph # type: ignore
-from reportlab.platypus import Spacer # type: ignore
-from reportlab.platypus import Table # type: ignore
-from reportlab.platypus import TableStyle # type: ignore
-from reportlab.platypus import PageBreak # type: ignore
+from reportlab.lib.pagesizes import A4, landscape # type: ignore
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer,Table,TableStyle,PageBreak  # type: ignore
 from reportlab.lib import colors # type: ignore
 from reportlab.lib.styles import getSampleStyleSheet # type: ignore
 from collections import defaultdict
@@ -30,6 +25,8 @@ from decimal import Decimal, ROUND_UP
 from django.utils.safestring import mark_safe # type: ignore
 from urllib.parse import quote
 from django.db import transaction
+from django.utils.dateparse import parse_date
+
 
 
 
@@ -144,7 +141,7 @@ def dashboard(request):
 
         activites_a_venir = ActiviteCulturelle.objects.filter(
             entite=federation,
-            date__date__gte=date.today()
+            date__gte=date.today()
         ).order_by("date")[:5]
 
         informations_recentes = Information.objects.filter(
@@ -188,8 +185,8 @@ def dashboard(request):
 
         alertes_activites = ActiviteCulturelle.objects.filter(
             entite=federation,
-            date__date__gte=date.today(),
-            date__date__lte=limite
+            date__gte=date.today(),
+            date__lte=limite
         ).order_by("date")[:5]
 
         return render(request, "dashboard_federation.html", {
@@ -229,7 +226,7 @@ def dashboard(request):
 
         nouveaux_membres = Personne.objects.filter(
             adhesions__association=association,
-            adhesions__created_at__date__gte=date.today().replace(day=1)
+            adhesions__created_at__gte=date.today().replace(day=1)
         ).distinct().count()
 
         beneficiaires_count = BeneficiaireFederation.objects.filter(
@@ -272,7 +269,7 @@ def dashboard(request):
 
         activites_a_venir = ActiviteCulturelle.objects.filter(
             entite=association.federation,
-            date__date__gte=date.today()
+            date__gte=date.today()
         ).order_by("date")[:5]
 
         informations_recentes = Information.objects.filter(
@@ -326,8 +323,8 @@ def alertes_liste(request):
 
     activites = ActiviteCulturelle.objects.filter(
         entite__in=federations,
-        date__date__gte=today,
-        date__date__lte=today + timedelta(days=7)
+        date__gte=today,
+        date__lte=today + timedelta(days=7)
     ).order_by('date')
 
     return render(request, 'alertes/liste.html', {
@@ -518,15 +515,20 @@ def personnes_liste(request):
     qs = Personne.objects.none()
 
     federation = federations.first()
+
     if federation and user_has_permission(request.user, federation, "membres_view_all"):
         qs = Personne.objects.filter(
             adhesions__association__federation=federation
+        ).prefetch_related(
+            "adhesions__association__entite"
         ).distinct()
 
     elif associations.exists():
         if any(user_has_permission(request.user, ent, "membres_view_own") for ent in associations):
             qs = Personne.objects.filter(
                 adhesions__association__entite__in=associations
+            ).prefetch_related(
+                "adhesions__association__entite"
             ).distinct()
         else:
             return HttpResponseForbidden("Accès refusé.")
@@ -534,14 +536,32 @@ def personnes_liste(request):
         return HttpResponseForbidden("Accès refusé.")
 
     q = request.GET.get("q")
+    association = request.GET.get("association")
+    ville = request.GET.get("ville")
+    statut = request.GET.get("statut")
+
     if q:
         qs = qs.filter(
             Q(nom__icontains=q) |
             Q(prenom__icontains=q) |
-            Q(email__icontains=q)
+            Q(email__icontains=q) |
+            Q(telephone__icontains=q) |
+            Q(numero__icontains=q)
         ).distinct()
 
+    if association:
+        qs = qs.filter(
+            adhesions__association__entite__nom__icontains=association
+        ).distinct()
+
+    if ville:
+        qs = qs.filter(ville__icontains=ville)
+
+    if statut:
+        qs = qs.filter(statut=statut)
+
     page_obj = paginate(request, qs.order_by("nom", "prenom"))
+
     return render(request, "personnes/liste.html", {
         "page_obj": page_obj,
         "q": q,
@@ -3181,3 +3201,496 @@ def generer_contributions_deces(dossier):
     ])
 
     return created
+def export_vide(request, message="Aucune donnée à exporter."):
+    messages.warning(request, message)
+    return redirect(request.META.get("HTTP_REFERER", "cotisations_liste"))
+
+
+def filtrer_cotisations_mensuelles(qs, request):
+    association = request.GET.get("association")
+    code = request.GET.get("code")
+    annee = request.GET.get("annee")
+    mois = request.GET.get("mois")
+    statut = request.GET.get("statut")
+    date_debut = request.GET.get("date_debut")
+    date_fin = request.GET.get("date_fin")
+
+    if association:
+        qs = qs.filter(affiliation__association__entite__nom__icontains=association)
+
+    if code:
+        qs = qs.filter(affiliation__association__code_paiement__icontains=code)
+
+    if annee:
+        qs = qs.filter(annee=annee)
+
+    if mois:
+        qs = qs.filter(mois=mois)
+
+    if statut:
+        qs = qs.filter(statut=statut)
+
+    debut = parse_date(date_debut) if date_debut else None
+    fin = parse_date(date_fin) if date_fin else None
+
+    if debut and fin:
+        qs = qs.filter(
+            Q(annee__gt=debut.year) |
+            Q(annee=debut.year, mois__gte=debut.month)
+        ).filter(
+            Q(annee__lt=fin.year) |
+            Q(annee=fin.year, mois__lte=fin.month)
+        )
+
+    elif debut:
+        qs = qs.filter(
+            Q(annee__gt=debut.year) |
+            Q(annee=debut.year, mois__gte=debut.month)
+        )
+
+    elif fin:
+        qs = qs.filter(
+            Q(annee__lt=fin.year) |
+            Q(annee=fin.year, mois__lte=fin.month)
+        )
+
+    return qs
+
+
+def filtrer_contributions_deces(qs, request):
+    association = request.GET.get("association")
+    statut = request.GET.get("statut")
+    date_debut = request.GET.get("date_debut")
+    date_fin = request.GET.get("date_fin")
+
+    if association:
+        qs = qs.filter(association__entite__nom__icontains=association)
+
+    if statut:
+        qs = qs.filter(statut=statut)
+
+    if date_debut:
+        qs = qs.filter(date_paiement__gte=date_debut)
+
+    if date_fin:
+        qs = qs.filter(date_paiement__lte=date_fin)
+
+    return qs
+
+
+def filtrer_membres(qs, request):
+    association = request.GET.get("association")
+    statut = request.GET.get("statut")
+    ville = request.GET.get("ville")
+    q = request.GET.get("q")
+
+    if q:
+        qs = qs.filter(
+            Q(nom__icontains=q) |
+            Q(prenom__icontains=q) |
+            Q(email__icontains=q) |
+            Q(telephone__icontains=q) |
+            Q(numero__icontains=q)
+        )
+
+    if association:
+        qs = qs.filter(adhesions__association__entite__nom__icontains=association)
+
+    if ville:
+        qs = qs.filter(ville__icontains=ville)
+
+    if statut:
+        qs = qs.filter(statut=statut)
+
+    return qs.distinct()
+
+
+@login_required
+def export_cotisations_detail_excel(request):
+    federations = get_user_entites(request.user).filter(type="federation")
+    federation = federations.first()
+
+    if not federation or not user_has_permission(request.user, federation, "cotisations_export"):
+        return HttpResponseForbidden("Accès refusé.")
+
+    qs = CotisationAssociationMensuelle.objects.filter(
+        affiliation__federation=federation
+    ).select_related(
+        "affiliation__association__entite",
+        "modifie_par",
+    )
+
+    qs = filtrer_cotisations_mensuelles(qs, request)
+
+    if not qs.exists():
+        return export_vide(request, "Aucune cotisation trouvée pour cet export.")
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Détail mensuel"
+
+    ws.append([
+        "Association",
+        "Identifiant",
+        "Mois",
+        "Année",
+        "Attendu",
+        "Payé",
+        "Reste",
+        "Statut",
+        "Date paiement",
+        "Mode paiement",
+        "Modifié par",
+        "Date modification",
+    ])
+
+    for c in qs.order_by("-annee", "-mois"):
+        reste = c.montant_attendu - c.montant_paye
+
+        ws.append([
+            c.affiliation.association.entite.nom,
+            c.affiliation.association.code_paiement,
+            c.mois,
+            c.annee,
+            c.montant_attendu,
+            c.montant_paye,
+            max(reste, 0),
+            c.get_statut_display(),
+            c.date_paiement.strftime("%d/%m/%Y") if c.date_paiement else "",
+            c.mode_paiement or "",
+            c.modifie_par.username if c.modifie_par else "",
+            c.date_modification_paiement.strftime("%d/%m/%Y %H:%M") if c.date_modification_paiement else "",
+        ])
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="cotisations_mensuelles_detail.xlsx"'
+    wb.save(response)
+    return response
+
+
+@login_required
+def export_cotisations_detail_pdf(request):
+    federations = get_user_entites(request.user).filter(type="federation")
+    federation = federations.first()
+
+    if not federation or not user_has_permission(request.user, federation, "cotisations_export"):
+        return HttpResponseForbidden("Accès refusé.")
+
+    qs = CotisationAssociationMensuelle.objects.filter(
+        affiliation__federation=federation
+    ).select_related(
+        "affiliation__association__entite"
+    )
+
+    qs = filtrer_cotisations_mensuelles(qs, request)
+
+    if not qs.exists():
+        return export_vide(request, "Aucune cotisation trouvée pour cet export.")
+
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="cotisations_mensuelles_detail.pdf"'
+
+    doc = SimpleDocTemplate(response, pagesize=landscape(A4))
+    styles = getSampleStyleSheet()
+
+    elements = [
+        Paragraph("Détail des cotisations mensuelles", styles["Title"]),
+        Spacer(1, 12),
+    ]
+
+    data = [[
+        "Association",
+        "Code",
+        "Période",
+        "Attendu",
+        "Payé",
+        "Reste",
+        "Statut",
+        "Date paiement",
+    ]]
+
+    for c in qs.order_by("-annee", "-mois"):
+        reste = c.montant_attendu - c.montant_paye
+
+        data.append([
+            c.affiliation.association.entite.nom,
+            c.affiliation.association.code_paiement or "",
+            f"{c.mois}/{c.annee}",
+            str(c.montant_attendu),
+            str(c.montant_paye),
+            str(max(reste, 0)),
+            c.get_statut_display(),
+            c.date_paiement.strftime("%d/%m/%Y") if c.date_paiement else "",
+        ])
+
+    table = Table(data, repeatRows=1)
+
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 8),
+    ]))
+
+    elements.append(table)
+    doc.build(elements)
+
+    return response
+
+
+@login_required
+def export_contributions_deces_excel(request):
+    federations = get_user_entites(request.user).filter(type="federation")
+    federation = federations.first()
+
+    if not federation or not user_has_permission(request.user, federation, "rapatriements_view"):
+        return HttpResponseForbidden("Accès refusé.")
+
+    qs = ContributionDecesAssociation.objects.filter(
+        dossier__affiliation__federation=federation
+    ).select_related(
+        "association__entite",
+        "dossier__personne",
+        "dossier__affiliation__association__entite",
+    )
+
+    qs = filtrer_contributions_deces(qs, request)
+
+    if not qs.exists():
+        return export_vide(request, "Aucune cotisation décès trouvée pour cet export.")
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Cotisations décès"
+
+    ws.append([
+        "Association",
+        "Identifiant",
+        "Défunt",
+        "Association du défunt",
+        "Attendu",
+        "Payé",
+        "Reste",
+        "Statut",
+        "Date paiement",
+    ])
+
+    for c in qs.order_by("association__entite__nom"):
+        reste = c.montant_attendu - c.montant_paye
+
+        ws.append([
+            c.association.entite.nom,
+            c.association.code_paiement,
+            str(c.dossier.personne),
+            c.dossier.affiliation.association.entite.nom,
+            c.montant_attendu,
+            c.montant_paye,
+            max(reste, 0),
+            c.get_statut_display(),
+            c.date_paiement.strftime("%d/%m/%Y") if c.date_paiement else "",
+        ])
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="cotisations_deces.xlsx"'
+    wb.save(response)
+    return response
+
+
+@login_required
+def export_contributions_deces_pdf(request):
+    federations = get_user_entites(request.user).filter(type="federation")
+    federation = federations.first()
+
+    if not federation or not user_has_permission(request.user, federation, "rapatriements_view"):
+        return HttpResponseForbidden("Accès refusé.")
+
+    qs = ContributionDecesAssociation.objects.filter(
+        dossier__affiliation__federation=federation
+    ).select_related(
+        "association__entite",
+        "dossier__personne",
+        "dossier__affiliation__association__entite",
+    )
+
+    qs = filtrer_contributions_deces(qs, request)
+
+    if not qs.exists():
+        return export_vide(request, "Aucune cotisation décès trouvée pour cet export.")
+
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="cotisations_deces.pdf"'
+
+    doc = SimpleDocTemplate(response, pagesize=landscape(A4))
+    styles = getSampleStyleSheet()
+
+    elements = [
+        Paragraph("Cotisations décès", styles["Title"]),
+        Spacer(1, 12),
+    ]
+
+    data = [[
+        "Association",
+        "Défunt",
+        "Attendu",
+        "Payé",
+        "Reste",
+        "Statut",
+        "Date paiement",
+    ]]
+
+    for c in qs.order_by("association__entite__nom"):
+        reste = c.montant_attendu - c.montant_paye
+
+        data.append([
+            c.association.entite.nom,
+            str(c.dossier.personne),
+            str(c.montant_attendu),
+            str(c.montant_paye),
+            str(max(reste, 0)),
+            c.get_statut_display(),
+            c.date_paiement.strftime("%d/%m/%Y") if c.date_paiement else "",
+        ])
+
+    table = Table(data, repeatRows=1)
+
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 8),
+    ]))
+
+    elements.append(table)
+    doc.build(elements)
+
+    return response
+
+
+@login_required
+def export_personnes_excel(request):
+    federations = get_user_entites(request.user).filter(type="federation")
+    federation = federations.first()
+
+    if not federation or not user_has_permission(request.user, federation, "personnes_view"):
+        return HttpResponseForbidden("Accès refusé.")
+
+    qs = Personne.objects.filter(
+        adhesions__association__federation=federation
+    ).prefetch_related(
+        "adhesions__association__entite"
+    ).distinct()
+
+    qs = filtrer_membres(qs, request)
+
+    if not qs.exists():
+        return export_vide(request, "Aucun membre trouvé pour cet export.")
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Membres"
+
+    ws.append([
+        "Numéro",
+        "Nom",
+        "Prénom",
+        "Association",
+        "Statut",
+        "Téléphone",
+        "Email",
+    ])
+
+    for p in qs.order_by("nom", "prenom"):
+        associations = ", ".join(
+            adhesion.association.entite.nom
+            for adhesion in p.adhesions.all()
+        )
+
+        ws.append([
+            p.numero,
+            p.nom,
+            p.prenom,
+            associations,
+            p.statut,
+            p.telephone,
+            p.email,
+        ])
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="membres.xlsx"'
+    wb.save(response)
+    return response
+
+
+@login_required
+def export_personnes_pdf(request):
+    federations = get_user_entites(request.user).filter(type="federation")
+    federation = federations.first()
+
+    if not federation or not user_has_permission(request.user, federation, "personnes_view"):
+        return HttpResponseForbidden("Accès refusé.")
+
+    qs = Personne.objects.filter(
+        adhesions__association__federation=federation
+    ).prefetch_related(
+        "adhesions__association__entite"
+    ).distinct()
+
+    qs = filtrer_membres(qs, request)
+
+    if not qs.exists():
+        return export_vide(request, "Aucun membre trouvé pour cet export.")
+
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="membres.pdf"'
+
+    doc = SimpleDocTemplate(response, pagesize=landscape(A4))
+    styles = getSampleStyleSheet()
+
+    elements = [
+        Paragraph("Liste des membres", styles["Title"]),
+        Spacer(1, 12),
+    ]
+
+    data = [[
+        "Numéro",
+        "Nom",
+        "Prénom",
+        "Association",
+        "Statut",
+        "Téléphone",
+    ]]
+
+    for p in qs.order_by("nom", "prenom"):
+        associations = ", ".join(
+            adhesion.association.entite.nom
+            for adhesion in p.adhesions.all()
+        )
+
+        data.append([
+            p.numero or "",
+            p.nom,
+            p.prenom,
+            associations,
+            p.statut,
+            p.telephone or "",
+        ])
+
+    table = Table(data, repeatRows=1)
+
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 8),
+    ]))
+
+    elements.append(table)
+    doc.build(elements)
+
+    return response
