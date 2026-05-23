@@ -81,7 +81,7 @@
           <ul class="dropdown-menu dropdown-menu-end">
             {% if can_view_cotisations %}
             <li><a class="dropdown-item" href="{% url 'cotisations_liste' %}">Cotisations</a></li>
-            <li><a class="dropdown-item" href="{% url 'contributions_deces_liste' %}">Cotisations décès</a></li>
+            <li><a class="dropdown-item" href="{% url 'contributions_deces_liste' %}">Contributions décès</a></li>
             {% endif %}
             {% if can_view_transactions %}
             <li><a class="dropdown-item" href="{% url 'transactions_liste' %}">Transactions</a></li>
@@ -235,7 +235,7 @@
             <i class="bi bi-cash-coin me-2"></i> Cotisations
           </a>
           <a class="list-group-item list-group-item-action" href="{% url 'contributions_deces_liste' %}">
-            <i class="bi bi-heart-pulse me-2"></i> Cotisations décès
+            <i class="bi bi-heart-pulse me-2"></i> Contributions décès
           </a>
           {% endif %}
 
