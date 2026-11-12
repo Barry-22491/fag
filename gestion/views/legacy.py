@@ -979,8 +979,23 @@ def cotisations_liste(request):
 
     for association_id, item in resume.items():
         item["association_id"] = association_id
+        item["mensuel_reste"] = max(
+            (item["mensuel_attendu"] or 0) - (item["mensuel_paye"] or 0),
+            0,
+        )
+        item["deces_reste"] = max(
+            (item["deces_attendu"] or 0) - (item["deces_paye"] or 0),
+            0,
+        )
         item["total_attendu"] = item["mensuel_attendu"] + item["deces_attendu"]
         item["total_paye"] = item["mensuel_paye"] + item["deces_paye"]
+
+        if item["total_attendu"]:
+            item["taux_paiement"] = round(
+                (item["total_paye"] / item["total_attendu"]) * 100, 1
+            )
+        else:
+            item["taux_paiement"] = 100
 
         avance_existante = item.get("avance", 0)
         solde_net = item["total_attendu"] - item["total_paye"] - avance_existante
@@ -989,26 +1004,37 @@ def cotisations_liste(request):
             item["reste"] = solde_net
             item["avance"] = 0
             item["situation"] = "En retard"
+            item["priorite"] = 0
         else:
             item["reste"] = 0
             item["avance"] = abs(solde_net)
 
             if item["avance"] > 0:
                 item["situation"] = "En avance"
+                item["priorite"] = 2
             else:
                 item["situation"] = "À jour"
+                item["priorite"] = 1
 
         resume_associations.append(item)
 
+    # Retards d'abord, puis à jour, puis en avance ; à priorité égale : plus gros reste
     resume_associations = sorted(
         resume_associations,
-        key=lambda x: x["association"]
+        key=lambda x: (
+            x["priorite"],
+            -(x["reste"] or 0),
+            x["association"] or "",
+        ),
     )
 
     total_attendu_global = sum(item["total_attendu"] for item in resume_associations)
     total_paye_global = sum(item["total_paye"] for item in resume_associations)
     total_reste_global = sum(item["reste"] for item in resume_associations)
     total_avance_global = sum(item["avance"] for item in resume_associations)
+    nb_en_retard = sum(1 for item in resume_associations if item["reste"] > 0)
+    nb_a_jour = sum(1 for item in resume_associations if item["situation"] == "À jour")
+    nb_en_avance = sum(1 for item in resume_associations if item["avance"] > 0)
 
     afficher_detail_mensuel = bool(
         association or annee or mois or statut
@@ -1023,6 +1049,9 @@ def cotisations_liste(request):
         "total_paye": total_paye_global,
         "total_reste": total_reste_global,
         "total_avance": total_avance_global,
+        "nb_en_retard": nb_en_retard,
+        "nb_a_jour": nb_a_jour,
+        "nb_en_avance": nb_en_avance,
         "afficher_detail_mensuel": afficher_detail_mensuel,
     })
 

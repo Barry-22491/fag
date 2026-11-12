@@ -175,75 +175,117 @@
     </div>
 
     <div class="mb-4">
-      <h2 class="h5 mb-3">Résumé par association</h2>
+      <div class="resume-toolbar">
+        <div>
+          <h2 class="h5 mb-1">Résumé par association</h2>
+          <p class="text-muted small mb-0">
+            {{ resume_associations|length }} association{{ resume_associations|length|pluralize }}
+            · retards en tête
+          </p>
+        </div>
 
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <div class="resume-chips" id="resume-chips" role="group" aria-label="Filtrer par situation">
+            <button type="button" class="resume-chip is-active" data-filter="all">
+              Toutes ({{ resume_associations|length }})
+            </button>
+            <button type="button" class="resume-chip" data-filter="retard">
+              En retard ({{ nb_en_retard }})
+            </button>
+            <button type="button" class="resume-chip" data-filter="ok">
+              À jour ({{ nb_a_jour }})
+            </button>
+            <button type="button" class="resume-chip" data-filter="avance">
+              En avance ({{ nb_en_avance }})
+            </button>
+          </div>
+
+          <input type="search"
+                 id="resume-search"
+                 class="form-control form-control-sm resume-search"
+                 placeholder="Rechercher une association…"
+                 autocomplete="off">
+        </div>
+      </div>
+
+      <div class="table-responsive" style="max-height: 32rem;">
+        <table class="table table-hover align-middle mb-0 table-resume" id="resume-table">
           <thead class="table-light">
             <tr>
-              <th>Code</th>
               <th>Association</th>
-              <th class="text-end">Mensuel dû</th>
-              <th class="text-end">Mensuel payé</th>
-              <th class="text-end">Décès dû</th>
-              <th class="text-end">Décès payé</th>
-              <th class="text-end">Total doit</th>
-              <th class="text-end">Total payé</th>
-              <th class="text-end">Reste</th>
-              <th class="text-end">Avance</th>
-              <th>Situation</th>
+              <th class="text-end">Mensuel</th>
+              <th class="text-end">Décès</th>
+              <th class="text-end">Total</th>
+              <th>Solde</th>
               {% if can_edit_cotisations %}
-              <th></th>
+              <th class="text-end">Action</th>
               {% endif %}
             </tr>
           </thead>
 
           <tbody>
             {% for item in resume_associations %}
-            <tr>
+            <tr class="{% if item.reste > 0 %}resume-retard{% elif item.avance > 0 %}resume-avance{% else %}resume-ok{% endif %}"
+                data-situation="{% if item.reste > 0 %}retard{% elif item.avance > 0 %}avance{% else %}ok{% endif %}"
+                data-search="{{ item.code|default:'' }} {{ item.association|default:'' }}">
               <td>
-                <span class="badge bg-dark">{{ item.code }}</span>
-              </td>
-
-              <td class="fw-semibold">{{ item.association }}</td>
-              <td class="text-end">{{ item.mensuel_attendu|floatformat:2 }} €</td>
-              <td class="text-end">{{ item.mensuel_paye|floatformat:2 }} €</td>
-              <td class="text-end">{{ item.deces_attendu|floatformat:2 }} €</td>
-              <td class="text-end">{{ item.deces_paye|floatformat:2 }} €</td>
-              <td class="text-end fw-semibold">{{ item.total_attendu|floatformat:2 }} €</td>
-              <td class="text-end fw-semibold">{{ item.total_paye|floatformat:2 }} €</td>
-
-              <td class="text-end fw-bold">
-                {% if item.reste > 0 %}
-                  <span class="text-danger">{{ item.reste|floatformat:2 }} €</span>
-                {% else %}
-                  <span class="text-success">0,00 €</span>
+                <div class="resume-asso-name">{{ item.association }}</div>
+                {% if item.code %}
+                <div class="resume-asso-code">{{ item.code }}</div>
                 {% endif %}
               </td>
 
-              <td class="text-end fw-bold">
-                {% if item.avance > 0 %}
-                  <span class="text-success">{{ item.avance|floatformat:2 }} €</span>
-                {% else %}
-                  <span class="text-muted">0,00 €</span>
+              <td class="text-end">
+                <div class="resume-amount-pair">
+                  <div class="paye">{{ item.mensuel_paye|floatformat:2 }} €</div>
+                  <div class="du">/ {{ item.mensuel_attendu|floatformat:2 }} €</div>
+                </div>
+                {% if item.mensuel_reste > 0 %}
+                <div class="text-danger small">reste {{ item.mensuel_reste|floatformat:2 }} €</div>
                 {% endif %}
               </td>
 
-              <td>
+              <td class="text-end">
+                <div class="resume-amount-pair">
+                  <div class="paye">{{ item.deces_paye|floatformat:2 }} €</div>
+                  <div class="du">/ {{ item.deces_attendu|floatformat:2 }} €</div>
+                </div>
+                {% if item.deces_reste > 0 %}
+                <div class="text-danger small">reste {{ item.deces_reste|floatformat:2 }} €</div>
+                {% endif %}
+              </td>
+
+              <td class="text-end">
+                <div class="resume-amount-pair">
+                  <div class="paye">{{ item.total_paye|floatformat:2 }} €</div>
+                  <div class="du">/ {{ item.total_attendu|floatformat:2 }} €</div>
+                </div>
+                <div class="progress resume-progress" role="progressbar"
+                     aria-valuenow="{{ item.taux_paiement }}" aria-valuemin="0" aria-valuemax="100"
+                     title="{{ item.taux_paiement }} % payé">
+                  <div class="progress-bar {% if item.taux_paiement >= 100 %}bg-success{% elif item.taux_paiement >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
+                       style="width: {% if item.taux_paiement > 100 %}100{% else %}{{ item.taux_paiement }}{% endif %}%;"></div>
+                </div>
+              </td>
+
+              <td class="resume-solde">
                 {% if item.reste > 0 %}
-                  <span class="badge bg-danger">En retard</span>
+                  <span class="badge bg-danger mb-1">En retard</span>
+                  <div class="montant text-danger">{{ item.reste|floatformat:2 }} €</div>
                 {% elif item.avance > 0 %}
-                  <span class="badge bg-info text-dark">En avance</span>
+                  <span class="badge bg-info text-dark mb-1">En avance</span>
+                  <div class="montant text-success">+{{ item.avance|floatformat:2 }} €</div>
                 {% else %}
-                  <span class="badge bg-success">À jour</span>
+                  <span class="badge bg-success mb-1">À jour</span>
+                  <div class="montant text-success">0,00 €</div>
                 {% endif %}
               </td>
 
               {% if can_edit_cotisations %}
-              <td class="text-end">
+              <td class="text-end resume-actions">
                 {% if item.association_id %}
                 <a href="{% url 'paiement_association_create' %}?association={{ item.association_id }}"
-                   class="btn btn-sm btn-outline-primary">
+                   class="btn btn-sm {% if item.reste > 0 %}btn-primary{% else %}btn-outline-primary{% endif %}">
                   Encaisser
                 </a>
                 {% endif %}
@@ -252,12 +294,17 @@
             </tr>
 
             {% empty %}
-            <tr>
-              <td colspan="{% if can_edit_cotisations %}12{% else %}11{% endif %}" class="text-center text-muted py-4">
+            <tr id="resume-empty-default">
+              <td colspan="{% if can_edit_cotisations %}6{% else %}5{% endif %}" class="text-center text-muted py-4">
                 Aucun résumé disponible.
               </td>
             </tr>
             {% endfor %}
+            <tr id="resume-empty-filter" class="d-none">
+              <td colspan="{% if can_edit_cotisations %}6{% else %}5{% endif %}" class="text-center text-muted py-4">
+                Aucune association ne correspond à ce filtre.
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -339,3 +386,54 @@
   </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const table = document.getElementById("resume-table");
+  if (!table) return;
+
+  const rows = Array.from(table.querySelectorAll("tbody tr[data-situation]"));
+  const searchInput = document.getElementById("resume-search");
+  const chips = document.getElementById("resume-chips");
+  const emptyFilter = document.getElementById("resume-empty-filter");
+  let situationFilter = "all";
+
+  function applyFilters() {
+    const query = (searchInput && searchInput.value || "").trim().toLowerCase();
+    let visible = 0;
+
+    rows.forEach(function (row) {
+      const situation = row.dataset.situation || "";
+      const haystack = (row.dataset.search || "").toLowerCase();
+      const matchSituation = situationFilter === "all" || situation === situationFilter;
+      const matchSearch = !query || haystack.indexOf(query) !== -1;
+      const show = matchSituation && matchSearch;
+      row.classList.toggle("d-none", !show);
+      if (show) visible += 1;
+    });
+
+    if (emptyFilter) {
+      emptyFilter.classList.toggle("d-none", visible !== 0 || rows.length === 0);
+    }
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener("input", applyFilters);
+  }
+
+  if (chips) {
+    chips.addEventListener("click", function (event) {
+      const button = event.target.closest("[data-filter]");
+      if (!button) return;
+      situationFilter = button.dataset.filter || "all";
+      chips.querySelectorAll(".resume-chip").forEach(function (chip) {
+        chip.classList.toggle("is-active", chip === button);
+      });
+      applyFilters();
+    });
+  }
+})();
+</script>
+{% endblock %}
+

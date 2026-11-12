@@ -54,3 +54,121 @@ body {
   text-align: center;
   color: #6c757d;
 }
+
+/* Résumé cotisations par association */
+.resume-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.resume-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.resume-chip {
+  border: 1px solid #dee2e6;
+  background: #fff;
+  color: #495057;
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.resume-chip.is-active,
+.resume-chip:hover {
+  border-color: #0d6efd;
+  color: #0d6efd;
+  background: #eef5ff;
+}
+
+.resume-search {
+  max-width: 280px;
+  min-width: 200px;
+}
+
+.table-resume {
+  --bs-table-hover-bg: #f3f7ff;
+}
+
+.table-resume thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f8f9fa;
+  white-space: nowrap;
+  border-bottom-width: 1px;
+}
+
+.table-resume tbody tr.resume-retard {
+  box-shadow: inset 3px 0 0 #dc3545;
+}
+
+.table-resume tbody tr.resume-avance {
+  box-shadow: inset 3px 0 0 #0dcaf0;
+}
+
+.table-resume tbody tr.resume-ok {
+  box-shadow: inset 3px 0 0 #198754;
+}
+
+.resume-asso-name {
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.resume-asso-code {
+  font-size: 0.78rem;
+  color: #6c757d;
+}
+
+.resume-amount-pair {
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.resume-amount-pair .paye {
+  font-weight: 600;
+}
+
+.resume-amount-pair .du {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.resume-progress {
+  height: 0.35rem;
+  margin-top: 0.35rem;
+  background: #e9ecef;
+}
+
+.resume-progress .progress-bar {
+  border-radius: 999px;
+}
+
+.resume-solde {
+  min-width: 7.5rem;
+}
+
+.resume-solde .montant {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.resume-actions .btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+  .resume-search {
+    max-width: none;
+    width: 100%;
+  }
+}
