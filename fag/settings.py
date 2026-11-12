@@ -21,15 +21,46 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-07!ympj4366p)in-g#7i2)wxel$*zbs26jw(+*h0$mh_rfxu+q'
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-07!ympj4366p)in-g#7i2)wxel$*zbs26jw(+*h0$mh_rfxu+q",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Local: True par défaut. Prod: DJANGO_DEBUG=False
+DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in ("1", "true", "yes")
 
-ALLOWED_HOSTS = os.environ.get(
-    "ALLOWED_HOSTS",
-    "localhost,127.0.0.1"
-).split(",")
+# Domaine officiel
+SITE_DOMAIN = os.environ.get("SITE_DOMAIN", "fag-nrw.de")
+SITE_URL = os.environ.get("SITE_URL", f"https://{SITE_DOMAIN}")
+
+# Local + domaine. Prod: définir aussi via ALLOWED_HOSTS si besoin
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get(
+        "ALLOWED_HOSTS",
+        f"localhost,127.0.0.1,{SITE_DOMAIN},www.{SITE_DOMAIN}",
+    ).split(",")
+    if host.strip()
+]
+
+# Sécurité HTTPS (activée seulement hors DEBUG, pour l'hébergement du domaine)
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
+    CSRF_TRUSTED_ORIGINS = [
+        origin.strip()
+        for origin in os.environ.get(
+            "CSRF_TRUSTED_ORIGINS",
+            f"https://{SITE_DOMAIN},https://www.{SITE_DOMAIN}",
+        ).split(",")
+        if origin.strip()
+    ]
 
 
 # Application definition
@@ -117,21 +148,23 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # la configuration des comptes utilisateur-12.04.2026
-LOGOUT_REDIRECT_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = "/fr/dashboard/"
+LOGOUT_REDIRECT_URL = "/accounts/login/"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-#configuration pour envoi un e-mail - 16.04.2026
+# configuration email — IONOS / fag-nrw.de (plus de Gmail)
 #EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST = "smtp.ionos.de"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_TIMEOUT = 20
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "aliou2014barry@gmail.com")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "mvkeodkwpkfjjrns")
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_HOST_USER = "noreply@fag-nrw.de"
+# Mets ici le mot de passe IONOS de noreply@fag-nrw.de
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "Admin12112026@")
+DEFAULT_FROM_EMAIL = "noreply@fag-nrw.de"
+CONTACT_EMAIL = "info@fag-nrw.de"
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/

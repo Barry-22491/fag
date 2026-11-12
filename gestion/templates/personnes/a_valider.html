@@ -25,12 +25,15 @@
             <td>{{ adhesion.association.entite.nom }}</td>
             <td>{{ adhesion.created_at|date:"d/m/Y H:i" }}</td>
             <td class="text-end">
-              <a href="{% url 'adhesion_valider' adhesion.pk %}" class="btn btn-sm btn-success">
-                Valider
-              </a>
-              <a href="{% url 'adhesion_refuser' adhesion.pk %}" class="btn btn-sm btn-outline-danger">
-                Refuser
-              </a>
+              <form method="post" action="{% url 'adhesion_valider' adhesion.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-success">Valider</button>
+              </form>
+              <form method="post" action="{% url 'adhesion_refuser' adhesion.pk %}" class="d-inline"
+                    onsubmit="return confirm('Refuser cette demande ?')">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger">Refuser</button>
+              </form>
             </td>
           </tr>
           {% empty %}

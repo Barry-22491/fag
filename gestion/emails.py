@@ -3,7 +3,37 @@ from django.core.mail import send_mail
 from django.core.mail.backends.smtp import EmailBackend
 from smtplib import SMTPException
 from .models import HistoriqueEmail
-from django.utils import timezone
+
+
+def _smtp_connection():
+    return EmailBackend(
+        host=settings.EMAIL_HOST,
+        port=settings.EMAIL_PORT,
+        username=settings.EMAIL_HOST_USER,
+        password=settings.EMAIL_HOST_PASSWORD,
+        use_tls=getattr(settings, "EMAIL_USE_TLS", False),
+        use_ssl=getattr(settings, "EMAIL_USE_SSL", False),
+        timeout=getattr(settings, "EMAIL_TIMEOUT", 20),
+    )
+
+
+def _normaliser_type_email(type_email):
+    valides = {choice[0] for choice in HistoriqueEmail.TYPE_CHOICES}
+    if type_email in valides:
+        return type_email
+    return "general"
+
+
+def _historiser(destinataire, type_email, sujet, succes, commentaire="", cotisation=None, activite=None):
+    HistoriqueEmail.objects.create(
+        destinataire=destinataire,
+        type_email=_normaliser_type_email(type_email),
+        sujet=sujet[:200],
+        succes=succes,
+        commentaire=(commentaire or "")[:2000],
+        cotisation=cotisation,
+        activite=activite,
+    )
 
 
 def envoyer_email_simple(
@@ -14,46 +44,41 @@ def envoyer_email_simple(
     cotisation=None,
     activite=None,
 ):
+    destinataires = [email for email in destinataires if email]
     if not destinataires:
         return False
 
+    type_email = type_email or "notification_activite"
+
     try:
-        connection = EmailBackend(
-            host=settings.EMAIL_HOST,
-            port=settings.EMAIL_PORT,
-            username=settings.EMAIL_HOST_USER,
-            password=settings.EMAIL_HOST_PASSWORD,
-            use_tls=getattr(settings, "EMAIL_USE_TLS", False),
-            use_ssl=getattr(settings, "EMAIL_USE_SSL", False),
-            timeout=getattr(settings, "EMAIL_TIMEOUT", 20),
-        )
         send_mail(
             subject=sujet,
             message=message,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=destinataires,
             fail_silently=False,
-            connection=connection,
+            connection=_smtp_connection(),
         )
     except (SMTPException, OSError) as exc:
         for email in destinataires:
-            HistoriqueEmail.objects.create(
+            _historiser(
                 destinataire=email,
-                type_email=type_email or "notification_activite",
+                type_email=type_email,
                 sujet=sujet,
                 succes=False,
-                commentaire=str(exc)[:500],
+                commentaire=str(exc),
                 cotisation=cotisation,
                 activite=activite,
             )
         return False
 
     for email in destinataires:
-        HistoriqueEmail.objects.create(
+        _historiser(
             destinataire=email,
-            type_email=type_email or "notification_activite",
+            type_email=type_email,
             sujet=sujet,
             succes=True,
+            commentaire=message[:500],
             cotisation=cotisation,
             activite=activite,
         )
@@ -85,7 +110,7 @@ def envoyer_rappel_cotisation(cotisation):
         sujet=sujet,
         message=message,
         destinataires=[email],
-        type_email='rappel_cotisation',
+        type_email="rappel_cotisation",
         cotisation=cotisation,
     )
 
@@ -113,7 +138,7 @@ def envoyer_confirmation_paiement(cotisation):
         sujet=sujet,
         message=message,
         destinataires=[email],
-        type_email='confirmation_paiement',
+        type_email="confirmation_paiement",
         cotisation=cotisation,
     )
 
@@ -133,7 +158,7 @@ def envoyer_notification_activite(activite, destinataires):
         sujet=sujet,
         message=message,
         destinataires=destinataires,
-        type_email='notification_activite',
+        type_email="notification_activite",
         activite=activite,
     )
 
@@ -147,41 +172,52 @@ def envoyer_email_historise(
     utilisateur=None,
     entite=None,
     fail_silently=True,
+    cotisation=None,
+    activite=None,
 ):
+    """Envoi email compatible avec le modèle HistoriqueEmail actuel."""
     destinataires = [email for email in destinataires if email]
-
-    historique = HistoriqueEmail.objects.create(
-        sujet=sujet,
-        message=message,
-        destinataires=", ".join(destinataires),
-        type_email=type_email,
-        envoye_par=utilisateur,
-        entite=entite,
-        statut="en_attente",
-    )
+    type_email = _normaliser_type_email(type_email)
 
     if not destinataires:
-        historique.statut = "erreur"
-        historique.erreur = "Aucun destinataire."
-        historique.save()
         return False
+
+    auteur = f" par {utilisateur}" if utilisateur else ""
+    entite_info = f" [{entite}]" if entite else ""
 
     try:
         send_mail(
             subject=sujet,
             message=message,
-            from_email=None,
+            from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=destinataires,
-            fail_silently=fail_silently,
+            fail_silently=False,
+            connection=_smtp_connection(),
+        )
+    except Exception as exc:
+        if not fail_silently:
+            raise
+        for email in destinataires:
+            _historiser(
+                destinataire=email,
+                type_email=type_email,
+                sujet=sujet,
+                succes=False,
+                commentaire=f"Erreur{auteur}{entite_info}: {exc}",
+                cotisation=cotisation,
+                activite=activite,
+            )
+        return False
+
+    for email in destinataires:
+        _historiser(
+            destinataire=email,
+            type_email=type_email,
+            sujet=sujet,
+            succes=True,
+            commentaire=f"{message[:400]}{auteur}{entite_info}",
+            cotisation=cotisation,
+            activite=activite,
         )
 
-        historique.statut = "envoye"
-        historique.date_envoi = timezone.now()
-        historique.save()
-        return True
-
-    except Exception as e:
-        historique.statut = "erreur"
-        historique.erreur = str(e)
-        historique.save()
-        return False
+    return True

@@ -307,6 +307,11 @@ def dashboard(request):
 @login_required
 def alertes_liste(request):
     federations = get_user_entites(request.user).filter(type='federation')
+    federation = federations.first()
+
+    if not federation or not user_has_permission(request.user, federation, "alertes_view"):
+        return HttpResponseForbidden("Accès refusé.")
+
     today = date.today()
     current_year = today.year
     current_month = today.month
@@ -757,6 +762,7 @@ def membres_a_valider(request):
 
 
 @login_required
+@require_POST
 def adhesion_valider(request, pk):
     federations = get_user_entites(request.user).filter(type="federation")
     federation = federations.first()
@@ -784,6 +790,7 @@ def adhesion_valider(request, pk):
 
 
 @login_required
+@require_POST
 def adhesion_refuser(request, pk):
     federations = get_user_entites(request.user).filter(type="federation")
     federation = federations.first()
@@ -1348,59 +1355,60 @@ def generer_cotisations(request):
     auto_paid = 0
     partial_paid = 0
 
-    for aff in affiliations:
-        cotisation, was_created = CotisationAssociationMensuelle.objects.get_or_create(
-            affiliation=aff,
-            annee=annee,
-            mois=mois,
-            defaults={
-                "montant_attendu": aff.montant_mensuel,
-                "montant_paye": 0,
-                "statut": "en_attente",
-            },
-        )
+    with transaction.atomic():
+        for aff in affiliations:
+            cotisation, was_created = CotisationAssociationMensuelle.objects.get_or_create(
+                affiliation=aff,
+                annee=annee,
+                mois=mois,
+                defaults={
+                    "montant_attendu": aff.montant_mensuel,
+                    "montant_paye": 0,
+                    "statut": "en_attente",
+                },
+            )
 
-        if not was_created:
-            skipped += 1
-            continue
+            if not was_created:
+                skipped += 1
+                continue
 
-        created += 1
+            created += 1
 
-        avances = PaiementAssociation.objects.filter(
-            association=aff.association,
-            montant_avance__gt=0
-        ).order_by("date_paiement", "created_at")
+            avances = PaiementAssociation.objects.select_for_update().filter(
+                association=aff.association,
+                montant_avance__gt=0
+            ).order_by("date_paiement", "created_at")
 
-        reste_a_payer = cotisation.montant_attendu - cotisation.montant_paye
+            reste_a_payer = cotisation.montant_attendu - cotisation.montant_paye
 
-        for paiement in avances:
-            if reste_a_payer <= 0:
-                break
+            for paiement in avances:
+                if reste_a_payer <= 0:
+                    break
 
-            montant_utilise = min(paiement.montant_avance, reste_a_payer)
+                montant_utilise = min(paiement.montant_avance, reste_a_payer)
 
-            cotisation.montant_paye += montant_utilise
-            cotisation.date_paiement = paiement.date_paiement
-            cotisation.mode_paiement = paiement.mode_paiement
-            cotisation.modifie_par = request.user
-            cotisation.date_modification_paiement = timezone.now()
+                cotisation.montant_paye += montant_utilise
+                cotisation.date_paiement = paiement.date_paiement
+                cotisation.mode_paiement = paiement.mode_paiement
+                cotisation.modifie_par = request.user
+                cotisation.date_modification_paiement = timezone.now()
 
-            paiement.montant_avance -= montant_utilise
-            paiement.montant_affecte += montant_utilise
-            paiement.save(update_fields=["montant_avance", "montant_affecte"])
+                paiement.montant_avance -= montant_utilise
+                paiement.montant_affecte += montant_utilise
+                paiement.save(update_fields=["montant_avance", "montant_affecte"])
 
-            reste_a_payer -= montant_utilise
+                reste_a_payer -= montant_utilise
 
-        if cotisation.montant_paye >= cotisation.montant_attendu:
-            cotisation.statut = "paye"
-            auto_paid += 1
-        elif cotisation.montant_paye > 0:
-            cotisation.statut = "partiel"
-            partial_paid += 1
-        else:
-            cotisation.statut = "en_attente"
+            if cotisation.montant_paye >= cotisation.montant_attendu:
+                cotisation.statut = "paye"
+                auto_paid += 1
+            elif cotisation.montant_paye > 0:
+                cotisation.statut = "partiel"
+                partial_paid += 1
+            else:
+                cotisation.statut = "en_attente"
 
-        cotisation.save()
+            cotisation.save()
 
     messages.success(
         request,
@@ -1948,6 +1956,7 @@ def document_create(request):
     })
 
 @login_required
+@require_POST
 def document_update_statut(request, pk, statut):
     statuts_autorises = ["nouveau", "en_cours", "traite", "rejete"]
 
@@ -2111,6 +2120,7 @@ def envoyer_rappel_cotisation_view(request, pk):
 # fonction pour rappel de deces - 17.05.2026
 
 @login_required
+@require_POST
 def envoyer_rappel_deces_view(request, pk):
     contribution = get_object_or_404(
         ContributionDecesAssociation.objects.select_related(
@@ -2412,7 +2422,7 @@ def public_contact(request):
                 subject=f"[Contact public] {sujet}",
                 body=f"Nom : {nom}\nEmail : {email}\n\nMessage :\n{message}",
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[settings.DEFAULT_FROM_EMAIL],
+                to=[getattr(settings, "CONTACT_EMAIL", settings.DEFAULT_FROM_EMAIL)],
                 reply_to=[email],
             )
 
@@ -2822,148 +2832,6 @@ def poste_create(request):
     })
 
 @login_required
-def export_personnes_excel(request):
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Personnes"
-
-    headers = [
-        "Numero",
-        "Nom",
-        "Prénom",
-        "Email",
-        "Téléphone",
-        "Ville",
-    ]
-
-    ws.append(headers)
-
-    personnes = Personne.objects.all().order_by("nom")
-
-    for personne in personnes:
-        ws.append([
-            personne.numero,
-            personne.nom,
-            personne.prenom,
-            personne.email,
-            personne.telephone,
-            personne.ville,
-        ])
-
-    response = HttpResponse(
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-    response["Content-Disposition"] = (
-        'attachment; filename="personnes.xlsx"'
-    )
-
-    wb.save(response)
-
-    return response
-
-@login_required
-def export_contributions_deces_excel(request):
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Cotisations décès"
-
-    headers = [
-        "Association",
-        "Dossier",
-        "Montant attendu",
-        "Montant payé",
-        "Statut",
-        "Date paiement",
-    ]
-
-    ws.append(headers)
-
-    contributions = ContributionDecesAssociation.objects.select_related(
-        "association__entite",
-        "dossier",
-    ).all()
-
-    for item in contributions:
-        ws.append([
-            item.association.entite.nom,
-            item.dossier.id,
-            float(item.montant_attendu),
-            float(item.montant_paye),
-            item.get_statut_display(),
-            item.date_paiement.strftime("%d/%m/%Y") if item.date_paiement else "",
-        ])
-
-    response = HttpResponse(
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-    response["Content-Disposition"] = (
-        'attachment; filename="cotisations_deces.xlsx"'
-    )
-
-    wb.save(response)
-
-    return response
-
-@login_required
-def export_contributions_deces_pdf(request):
-    response = HttpResponse(content_type="application/pdf")
-
-    response["Content-Disposition"] = (
-        'attachment; filename="cotisations_deces.pdf"'
-    )
-
-    doc = SimpleDocTemplate(
-        response,
-        pagesize=A4,
-    )
-
-    styles = getSampleStyleSheet()
-    elements = []
-
-    title = Paragraph(
-        "Cotisations décès",
-        styles["Heading1"],
-    )
-
-    elements.append(title)
-    elements.append(Spacer(1, 20))
-
-    data = [[
-        "Association",
-        "Montant attendu",
-        "Montant payé",
-        "Statut",
-    ]]
-
-    contributions = ContributionDecesAssociation.objects.select_related(
-        "association__entite"
-    ).all()
-
-    for item in contributions:
-        data.append([
-            item.association.entite.nom,
-            str(item.montant_attendu),
-            str(item.montant_paye),
-            item.get_statut_display(),
-        ])
-
-    table = Table(data)
-
-    table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-        ("GRID", (0, 0), (-1, -1), 1, colors.black),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-    ]))
-
-    elements.append(table)
-
-    doc.build(elements)
-
-    return response
-
-@login_required
 def paiement_association_create(request):
     federations = get_user_entites(request.user).filter(type="federation")
     federation = federations.first()
@@ -2978,80 +2846,81 @@ def paiement_association_create(request):
         )
 
         if form.is_valid():
-            paiement = form.save(commit=False)
-            paiement.enregistre_par = request.user
-            paiement.save()
+            with transaction.atomic():
+                paiement = form.save(commit=False)
+                paiement.enregistre_par = request.user
+                paiement.save()
 
-            association = paiement.association
-            montant_restant = paiement.montant
+                association = paiement.association
+                montant_restant = paiement.montant
 
-            # 1. Payer d'abord les cotisations mensuelles anciennes
-            cotisations = CotisationAssociationMensuelle.objects.filter(
-                affiliation__association=association
-            ).exclude(
-                statut="paye"
-            ).order_by("annee", "mois")
+                # 1. Payer d'abord les cotisations mensuelles anciennes
+                cotisations = CotisationAssociationMensuelle.objects.select_for_update().filter(
+                    affiliation__association=association
+                ).exclude(
+                    statut="paye"
+                ).order_by("annee", "mois")
 
-            for cotisation in cotisations:
-                if montant_restant <= 0:
-                    break
+                for cotisation in cotisations:
+                    if montant_restant <= 0:
+                        break
 
-                dette = cotisation.montant_attendu - cotisation.montant_paye
+                    dette = cotisation.montant_attendu - cotisation.montant_paye
 
-                if dette <= 0:
-                    continue
+                    if dette <= 0:
+                        continue
 
-                montant_applique = min(montant_restant, dette)
+                    montant_applique = min(montant_restant, dette)
 
-                cotisation.montant_paye += montant_applique
-                cotisation.date_paiement = paiement.date_paiement
-                cotisation.mode_paiement = paiement.mode_paiement
-                cotisation.modifie_par = request.user
-                cotisation.date_modification_paiement = timezone.now()
+                    cotisation.montant_paye += montant_applique
+                    cotisation.date_paiement = paiement.date_paiement
+                    cotisation.mode_paiement = paiement.mode_paiement
+                    cotisation.modifie_par = request.user
+                    cotisation.date_modification_paiement = timezone.now()
 
-                if cotisation.montant_paye >= cotisation.montant_attendu:
-                    cotisation.statut = "paye"
-                else:
-                    cotisation.statut = "partiel"
+                    if cotisation.montant_paye >= cotisation.montant_attendu:
+                        cotisation.statut = "paye"
+                    else:
+                        cotisation.statut = "partiel"
 
-                cotisation.save()
-                montant_restant -= montant_applique
+                    cotisation.save()
+                    montant_restant -= montant_applique
 
-            # 2. Payer ensuite les cotisations décès / rapatriement
-            contributions = ContributionDecesAssociation.objects.filter(
-                association=association
-            ).exclude(
-                statut="paye"
-            ).order_by("created_at")
+                # 2. Payer ensuite les cotisations décès / rapatriement
+                contributions = ContributionDecesAssociation.objects.select_for_update().filter(
+                    association=association
+                ).exclude(
+                    statut="paye"
+                ).order_by("created_at")
 
-            for contribution in contributions:
-                if montant_restant <= 0:
-                    break
+                for contribution in contributions:
+                    if montant_restant <= 0:
+                        break
 
-                dette = contribution.montant_attendu - contribution.montant_paye
+                    dette = contribution.montant_attendu - contribution.montant_paye
 
-                if dette <= 0:
-                    continue
+                    if dette <= 0:
+                        continue
 
-                montant_applique = min(montant_restant, dette)
+                    montant_applique = min(montant_restant, dette)
 
-                contribution.montant_paye += montant_applique
-                contribution.date_paiement = paiement.date_paiement
+                    contribution.montant_paye += montant_applique
+                    contribution.date_paiement = paiement.date_paiement
 
-                if contribution.montant_paye >= contribution.montant_attendu:
-                    contribution.statut = "paye"
-                else:
-                    contribution.statut = "partiel"
+                    if contribution.montant_paye >= contribution.montant_attendu:
+                        contribution.statut = "paye"
+                    else:
+                        contribution.statut = "partiel"
 
-                contribution.save()
-                montant_restant -= montant_applique
+                    contribution.save()
+                    montant_restant -= montant_applique
 
-            # 3. Le reste devient une avance
-            paiement.montant_affecte = paiement.montant - montant_restant
-            paiement.montant_avance = montant_restant
-            paiement.save(update_fields=["montant_affecte", "montant_avance"])
+                # 3. Le reste devient une avance
+                paiement.montant_affecte = paiement.montant - montant_restant
+                paiement.montant_avance = montant_restant
+                paiement.save(update_fields=["montant_affecte", "montant_avance"])
 
-            # 4. Email de confirmation
+            # 4. Email de confirmation (hors transaction financière)
             president = association.get_president()
 
             destinataires = []

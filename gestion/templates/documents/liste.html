@@ -40,9 +40,19 @@
                 {% endif %}
 
                 {% if can_traiter_documents %}
-                  <a href="{% url 'document_update_statut' doc.pk 'en_cours' %}" class="btn btn-sm btn-warning">En cours</a>
-                  <a href="{% url 'document_update_statut' doc.pk 'traite' %}" class="btn btn-sm btn-success">Traité</a>
-                  <a href="{% url 'document_update_statut' doc.pk 'rejete' %}" class="btn btn-sm btn-danger">Rejeter</a>
+                  <form method="post" action="{% url 'document_update_statut' doc.pk 'en_cours' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-warning">En cours</button>
+                  </form>
+                  <form method="post" action="{% url 'document_update_statut' doc.pk 'traite' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-success">Traité</button>
+                  </form>
+                  <form method="post" action="{% url 'document_update_statut' doc.pk 'rejete' %}" class="d-inline"
+                        onsubmit="return confirm('Rejeter ce document ?')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger">Rejeter</button>
+                  </form>
                 {% endif %}
               </td>
             </tr>

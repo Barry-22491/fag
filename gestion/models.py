@@ -744,6 +744,9 @@ class DossierRapatriement(TimeStampedModel):
         default=False
     )
     def clean(self):
+        if not self.personne_id or not self.affiliation_id:
+            return
+
         is_beneficiaire = BeneficiaireFederation.objects.filter(
             personne=self.personne,
             affiliation=self.affiliation,
@@ -848,6 +851,9 @@ class HistoriqueEmail(TimeStampedModel):
         ("rappel_cotisation", "Rappel cotisation"),
         ("confirmation_paiement", "Confirmation paiement"),
         ("notification_activite", "Notification activité"),
+        ("rappel_deces", "Rappel cotisation décès"),
+        ("rapatriement", "Rapatriement"),
+        ("general", "Général"),
     ]
 
     destinataire = models.EmailField()

@@ -28,7 +28,10 @@ ROLE_PERMISSIONS = {
         "dashboard_view",
         "finance_override",
         "envoyer_rappel_deces_view",
-        
+        "alertes_view",
+        "users_manage",
+        "personnes_view",
+        "bureau_view",
     },
     "federation_finances": {
         "associations_view",
@@ -47,6 +50,8 @@ ROLE_PERMISSIONS = {
         "rapatriements_edit",
         "finance_override",
         "envoyer_rappel_deces_view",
+        "alertes_view",
+        "personnes_view",
     },
     "federation_social": {
         "associations_view",
@@ -97,6 +102,9 @@ ROLE_PERMISSIONS = {
         "rapports_view",
         "emails_view",
         "informations_view",
+        "alertes_view",
+        "personnes_view",
+        "dashboard_view",
     },
    "association_president": {
     "association_view_own",
