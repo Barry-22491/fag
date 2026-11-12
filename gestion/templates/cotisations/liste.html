@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% load i18n %}
 
 {% block title %}Cotisations{% endblock %}
 
@@ -17,7 +16,7 @@
 
         {% if can_edit_cotisations %}
         <div class="dropdown">
-          <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
             Actions
           </button>
           <ul class="dropdown-menu">
@@ -35,11 +34,14 @@
 
             {% if can_generate_cotisations %}
             <li>
-              <a href="{% url 'generer_cotisations' %}"
-                 class="dropdown-item"
-                 onclick="return confirm('Générer les cotisations du mois ?')">
-                Générer le mois
-              </a>
+              <form method="post"
+                    action="{% url 'generer_cotisations' %}"
+                    onsubmit="return confirm('Générer les cotisations du mois ?')">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item">
+                  Générer le mois
+                </button>
+              </form>
             </li>
             {% endif %}
           </ul>
@@ -48,7 +50,7 @@
 
         {% if can_export_cotisations %}
         <div class="dropdown">
-          <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
             Exports
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
@@ -84,17 +86,21 @@
       </div>
     </div>
 
-    <form method="get" class="row g-2 mb-4">
-      <div class="col-12 col-md-3">
+    <form method="get" class="row g-3 mb-4 align-items-end">
+      <div class="col-12 col-md-4">
+        <label for="filtre-association" class="form-label">Association</label>
         <input type="text"
+               id="filtre-association"
                name="association"
                value="{{ request.GET.association }}"
                class="form-control"
-               placeholder="Association">
+               placeholder="Nom de l'association">
       </div>
 
-      <div class="col-12 col-md-2">
+      <div class="col-6 col-md-2">
+        <label for="filtre-code" class="form-label">Code</label>
         <input type="text"
+               id="filtre-code"
                name="code"
                value="{{ request.GET.code }}"
                class="form-control"
@@ -102,38 +108,33 @@
       </div>
 
       <div class="col-6 col-md-2">
+        <label for="filtre-annee" class="form-label">Année</label>
         <input type="number"
+               id="filtre-annee"
                name="annee"
                value="{{ request.GET.annee }}"
                class="form-control"
-               placeholder="Année">
+               placeholder="AAAA"
+               min="2000"
+               max="2100">
       </div>
 
       <div class="col-6 col-md-2">
+        <label for="filtre-mois" class="form-label">Mois</label>
         <input type="number"
+               id="filtre-mois"
                name="mois"
                value="{{ request.GET.mois }}"
                class="form-control"
-               placeholder="Mois">
+               placeholder="1-12"
+               min="1"
+               max="12">
       </div>
 
       <div class="col-6 col-md-2">
-        <input type="date"
-               name="date_debut"
-               value="{{ request.GET.date_debut }}"
-               class="form-control">
-      </div>
-
-      <div class="col-6 col-md-2">
-        <input type="date"
-               name="date_fin"
-               value="{{ request.GET.date_fin }}"
-               class="form-control">
-      </div>
-
-      <div class="col-12 col-md-2">
-        <select name="statut" class="form-select">
-          <option value="">Tous les statuts</option>
+        <label for="filtre-statut" class="form-label">Statut</label>
+        <select id="filtre-statut" name="statut" class="form-select">
+          <option value="">Tous</option>
           <option value="paye" {% if request.GET.statut == 'paye' %}selected{% endif %}>Payé</option>
           <option value="partiel" {% if request.GET.statut == 'partiel' %}selected{% endif %}>Partiel</option>
           <option value="impaye" {% if request.GET.statut == 'impaye' %}selected{% endif %}>Impayé</option>
@@ -141,13 +142,31 @@
         </select>
       </div>
 
-      <div class="col-12 col-md-1">
-        <button class="btn btn-outline-secondary w-100">
+      <div class="col-6 col-md-3">
+        <label for="filtre-date-debut" class="form-label">Date début</label>
+        <input type="date"
+               id="filtre-date-debut"
+               name="date_debut"
+               value="{{ request.GET.date_debut }}"
+               class="form-control">
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label for="filtre-date-fin" class="form-label">Date fin</label>
+        <input type="date"
+               id="filtre-date-fin"
+               name="date_fin"
+               value="{{ request.GET.date_fin }}"
+               class="form-control">
+      </div>
+
+      <div class="col-6 col-md-3">
+        <button type="submit" class="btn btn-outline-secondary w-100">
           Filtrer
         </button>
       </div>
 
-      <div class="col-12 col-md-1">
+      <div class="col-6 col-md-3">
         <a href="{% url 'cotisations_liste' %}" class="btn btn-light w-100">
           Reset
         </a>
@@ -156,194 +175,181 @@
 
     <div class="row g-3 mb-4">
       <div class="col-12 col-md-3">
-        <div class="card bg-light border-0">
-          <div class="card-body">
-            <div class="text-muted small">Total doit</div>
-            <div class="fs-4 fw-bold">{{ total_attendu }}</div>
+        <div class="bg-light rounded p-3">
+          <div class="text-muted small">Total doit</div>
+          <div class="fs-4 fw-bold">{{ total_attendu|floatformat:2 }} €</div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <div class="bg-light rounded p-3">
+          <div class="text-muted small">Total payé</div>
+          <div class="fs-4 fw-bold text-success">{{ total_paye|floatformat:2 }} €</div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <div class="bg-light rounded p-3">
+          <div class="text-muted small">Reste à payer</div>
+          <div class="fs-4 fw-bold {% if total_reste > 0 %}text-danger{% else %}text-success{% endif %}">
+            {{ total_reste|floatformat:2 }} €
           </div>
         </div>
       </div>
 
       <div class="col-12 col-md-3">
-        <div class="card bg-light border-0">
-          <div class="card-body">
-            <div class="text-muted small">Total payé</div>
-            <div class="fs-4 fw-bold text-success">{{ total_paye }}</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-md-3">
-        <div class="card bg-light border-0">
-          <div class="card-body">
-            <div class="text-muted small">Reste à payer</div>
-            <div class="fs-4 fw-bold {% if total_reste > 0 %}text-danger{% else %}text-success{% endif %}">
-              {{ total_reste }}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-md-3">
-        <div class="card bg-light border-0">
-          <div class="card-body">
-            <div class="text-muted small">Avance</div>
-            <div class="fs-4 fw-bold text-success">{{ total_avance }}</div>
-          </div>
+        <div class="bg-light rounded p-3">
+          <div class="text-muted small">Avance</div>
+          <div class="fs-4 fw-bold text-success">{{ total_avance|floatformat:2 }} €</div>
         </div>
       </div>
     </div>
 
-    <div class="card border-0 shadow-sm mb-4">
-      <div class="card-body">
-        <h2 class="h5 mb-3">Résumé par association</h2>
+    <div class="mb-4">
+      <h2 class="h5 mb-3">Résumé par association</h2>
 
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Code</th>
-                <th>Association</th>
-                <th>Mensuel dû</th>
-                <th>Mensuel payé</th>
-                <th>Décès dû</th>
-                <th>Décès payé</th>
-                <th>Total doit</th>
-                <th>Total payé</th>
-                <th>Reste</th>
-                <th>Avance</th>
-                <th>Situation</th>
-              </tr>
-            </thead>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Code</th>
+              <th>Association</th>
+              <th class="text-end">Mensuel dû</th>
+              <th class="text-end">Mensuel payé</th>
+              <th class="text-end">Décès dû</th>
+              <th class="text-end">Décès payé</th>
+              <th class="text-end">Total doit</th>
+              <th class="text-end">Total payé</th>
+              <th class="text-end">Reste</th>
+              <th class="text-end">Avance</th>
+              <th>Situation</th>
+            </tr>
+          </thead>
 
-            <tbody>
-              {% for item in resume_associations %}
-              <tr class="{% if item.reste > 0 %}table-danger{% elif item.avance > 0 %}table-info{% else %}table-success{% endif %}">
-                <td>
-                  <span class="badge bg-dark">{{ item.code }}</span>
-                </td>
+          <tbody>
+            {% for item in resume_associations %}
+            <tr>
+              <td>
+                <span class="badge bg-dark">{{ item.code }}</span>
+              </td>
 
-                <td class="fw-semibold">{{ item.association }}</td>
-                <td>{{ item.mensuel_attendu }}</td>
-                <td>{{ item.mensuel_paye }}</td>
-                <td>{{ item.deces_attendu }}</td>
-                <td>{{ item.deces_paye }}</td>
-                <td class="fw-semibold">{{ item.total_attendu }}</td>
-                <td class="fw-semibold">{{ item.total_paye }}</td>
+              <td class="fw-semibold">{{ item.association }}</td>
+              <td class="text-end">{{ item.mensuel_attendu|floatformat:2 }} €</td>
+              <td class="text-end">{{ item.mensuel_paye|floatformat:2 }} €</td>
+              <td class="text-end">{{ item.deces_attendu|floatformat:2 }} €</td>
+              <td class="text-end">{{ item.deces_paye|floatformat:2 }} €</td>
+              <td class="text-end fw-semibold">{{ item.total_attendu|floatformat:2 }} €</td>
+              <td class="text-end fw-semibold">{{ item.total_paye|floatformat:2 }} €</td>
 
-                <td class="fw-bold">
-                  {% if item.reste > 0 %}
-                    <span class="text-danger">{{ item.reste }}</span>
-                  {% else %}
-                    <span class="text-success">0</span>
-                  {% endif %}
-                </td>
+              <td class="text-end fw-bold">
+                {% if item.reste > 0 %}
+                  <span class="text-danger">{{ item.reste|floatformat:2 }} €</span>
+                {% else %}
+                  <span class="text-success">0,00 €</span>
+                {% endif %}
+              </td>
 
-                <td class="fw-bold">
-                  {% if item.avance > 0 %}
-                    <span class="text-success">{{ item.avance }}</span>
-                  {% else %}
-                    <span class="text-muted">0</span>
-                  {% endif %}
-                </td>
+              <td class="text-end fw-bold">
+                {% if item.avance > 0 %}
+                  <span class="text-success">{{ item.avance|floatformat:2 }} €</span>
+                {% else %}
+                  <span class="text-muted">0,00 €</span>
+                {% endif %}
+              </td>
 
-                <td>
-                  {% if item.reste > 0 %}
-                    <span class="badge bg-danger">En retard</span>
-                  {% elif item.avance > 0 %}
-                    <span class="badge bg-info text-dark">En avance</span>
-                  {% else %}
-                    <span class="badge bg-success">À jour</span>
-                  {% endif %}
-                </td>
-              </tr>
+              <td>
+                {% if item.reste > 0 %}
+                  <span class="badge bg-danger">En retard</span>
+                {% elif item.avance > 0 %}
+                  <span class="badge bg-info text-dark">En avance</span>
+                {% else %}
+                  <span class="badge bg-success">À jour</span>
+                {% endif %}
+              </td>
+            </tr>
 
-              {% empty %}
-              <tr>
-                <td colspan="11" class="text-center text-muted py-4">
-                  Aucun résumé disponible.
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
+            {% empty %}
+            <tr>
+              <td colspan="11" class="text-center text-muted py-4">
+                Aucun résumé disponible.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
 
     {% if afficher_detail_mensuel %}
-    <div class="card border-0 shadow-sm">
-      <div class="card-body">
-        <h2 class="h5 mb-3">Détail mensuel</h2>
+    <div>
+      <h2 class="h5 mb-3">Détail mensuel</h2>
 
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Association</th>
-                <th>Période</th>
-                <th>Attendu</th>
-                <th>Payé</th>
-                <th>Date paiement</th>
-                <th>Statut</th>
-                {% if can_edit_cotisations %}
-                  <th class="text-end">Actions</th>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Association</th>
+              <th>Période</th>
+              <th class="text-end">Attendu</th>
+              <th class="text-end">Payé</th>
+              <th>Date paiement</th>
+              <th>Statut</th>
+              {% if can_edit_cotisations %}
+                <th class="text-end">Actions</th>
+              {% endif %}
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for cotisation in page_obj %}
+            <tr>
+              <td>{{ cotisation.affiliation.association.entite.nom }}</td>
+              <td>{{ cotisation.mois }}/{{ cotisation.annee }}</td>
+              <td class="text-end">{{ cotisation.montant_attendu|floatformat:2 }} €</td>
+              <td class="text-end">{{ cotisation.montant_paye|floatformat:2 }} €</td>
+              <td>{{ cotisation.date_paiement|date:"d/m/Y"|default:"-" }}</td>
+
+              <td>
+                {% if cotisation.statut == 'paye' %}
+                  <span class="badge bg-success">Payé</span>
+                {% elif cotisation.statut == 'partiel' %}
+                  <span class="badge bg-warning text-dark">Partiel</span>
+                {% elif cotisation.statut == 'impaye' %}
+                  <span class="badge bg-danger">Impayé</span>
+                {% else %}
+                  <span class="badge bg-secondary">En attente</span>
                 {% endif %}
-              </tr>
-            </thead>
+              </td>
 
-            <tbody>
-              {% for cotisation in page_obj %}
-              <tr>
-                <td>{{ cotisation.affiliation.association.entite.nom }}</td>
-                <td>{{ cotisation.mois }}/{{ cotisation.annee }}</td>
-                <td>{{ cotisation.montant_attendu }}</td>
-                <td>{{ cotisation.montant_paye }}</td>
-                <td>{{ cotisation.date_paiement|date:"d/m/Y"|default:"-" }}</td>
+              {% if can_edit_cotisations %}
+              <td class="text-end">
+                <div class="btn-group btn-group-sm">
+                  <a href="{% url 'cotisation_detail' cotisation.pk %}" class="btn btn-outline-primary">
+                    Voir
+                  </a>
 
-                <td>
-                  {% if cotisation.statut == 'paye' %}
-                    <span class="badge bg-success">Payé</span>
-                  {% elif cotisation.statut == 'partiel' %}
-                    <span class="badge bg-warning text-dark">Partiel</span>
-                  {% elif cotisation.statut == 'impaye' %}
-                    <span class="badge bg-danger">Impayé</span>
-                  {% else %}
-                    <span class="badge bg-secondary">En attente</span>
-                  {% endif %}
-                </td>
-
-                {% if can_edit_cotisations %}
-                <td class="text-end">
-                  <div class="btn-group btn-group-sm">
-                    <a href="{% url 'cotisation_detail' cotisation.pk %}" class="btn btn-outline-primary">
-                      Voir
+                  {% if can_finance_override %}
+                    <a href="{% url 'cotisation_update' cotisation.pk %}" class="btn btn-outline-warning">
+                      Modifier
                     </a>
+                  {% endif %}
+                </div>
+              </td>
+              {% endif %}
+            </tr>
 
-                    {% if can_finance_override %}
-                      <a href="{% url 'cotisation_update' cotisation.pk %}" class="btn btn-outline-warning">
-                        Modifier
-                      </a>
-                    {% endif %}
-                  </div>
-                </td>
-                {% endif %}
-              </tr>
-
-              {% empty %}
-              <tr>
-                <td colspan="{% if can_edit_cotisations %}7{% else %}6{% endif %}" class="text-center text-muted py-4">
-                  Aucune cotisation trouvée.
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
-        {% include 'partials/pagination.html' %}
+            {% empty %}
+            <tr>
+              <td colspan="{% if can_edit_cotisations %}7{% else %}6{% endif %}" class="text-center text-muted py-4">
+                Aucune cotisation trouvée.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
+
+      {% include 'partials/pagination.html' %}
     </div>
     {% endif %}
 

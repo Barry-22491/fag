@@ -26,6 +26,7 @@ from django.utils.safestring import mark_safe # type: ignore
 from urllib.parse import quote
 from django.db import transaction
 from django.utils.dateparse import parse_date
+from django.views.decorators.http import require_POST
 
 
 
@@ -860,9 +861,12 @@ def cotisations_liste(request):
     mois = request.GET.get("mois")
     statut = request.GET.get("statut")
     association = request.GET.get("association")
+    date_debut = request.GET.get("date_debut")
+    date_fin = request.GET.get("date_fin")
+
+    qs = filtrer_cotisations_mensuelles(qs, request)
 
     if code:
-        qs = qs.filter(affiliation__association__code_paiement__icontains=code)
         contributions_deces = contributions_deces.filter(
             association__code_paiement__icontains=code
         )
@@ -871,7 +875,6 @@ def cotisations_liste(request):
         )
 
     if association:
-        qs = qs.filter(affiliation__association__entite__nom__icontains=association)
         contributions_deces = contributions_deces.filter(
             association__entite__nom__icontains=association
         )
@@ -879,14 +882,7 @@ def cotisations_liste(request):
             association__entite__nom__icontains=association
         )
 
-    if annee:
-        qs = qs.filter(annee=annee)
-
-    if mois:
-        qs = qs.filter(mois=mois)
-
     if statut:
-        qs = qs.filter(statut=statut)
         contributions_deces = contributions_deces.filter(statut=statut)
 
     resume = defaultdict(lambda: {
@@ -998,7 +994,9 @@ def cotisations_liste(request):
     total_reste_global = sum(item["reste"] for item in resume_associations)
     total_avance_global = sum(item["avance"] for item in resume_associations)
 
-    afficher_detail_mensuel = bool(code or association or annee or mois or statut)
+    afficher_detail_mensuel = bool(
+        code or association or annee or mois or statut or date_debut or date_fin
+    )
 
     page_obj = paginate(request, qs.order_by("-annee", "-mois"))
 
@@ -1329,6 +1327,7 @@ def export_cotisations_pdf(request):
 
     return response
 @login_required
+@require_POST
 def generer_cotisations(request):
     federations = get_user_entites(request.user).filter(type="federation")
     federation = federations.first()
@@ -1337,8 +1336,8 @@ def generer_cotisations(request):
         return HttpResponseForbidden("Accès refusé.")
 
     try:
-        annee = int(request.GET.get("annee", date.today().year))
-        mois = int(request.GET.get("mois", date.today().month))
+        annee = int(request.POST.get("annee", date.today().year))
+        mois = int(request.POST.get("mois", date.today().month))
     except ValueError:
         messages.error(request, "Année ou mois invalide.")
         return redirect("cotisations_liste")
@@ -1659,11 +1658,12 @@ def rapatriement_create(request):
             )
 
             # Générer les contributions décès selon le coût réel
+            nb = 0
             if dossier.cout_total > 0 and not dossier.contributions_generees:
                 nb = generer_contributions_deces(dossier)
                 associations = Association.objects.filter(
                     federation=dossier.affiliation.federation
-                    ).select_related("entite")
+                ).select_related("entite")
 
                 emails = [
                     association.email
@@ -1673,35 +1673,37 @@ def rapatriement_create(request):
 
                 if emails:
                     envoyer_email_historise(
-                    sujet="Nouveau dossier de rapatriement",
-                    message=(
-                        f"Bonjour,\n\n"
-                        f"Un nouveau dossier de rapatriement a été créé.\n\n"
-                        f"Défunt : {dossier.personne}\n"
-                        f"Association : {dossier.affiliation.association.entite.nom}\n"
-                        f"Date décès : {dossier.date_deces}\n"
-                        f"Lieu décès : {dossier.lieu_deces}\n"
-                        f"Pays décès : {dossier.pays_deces or '-'}\n"
-                        f"Destination : {dossier.destination_rapatriement}\n"
-                        f"Coût total : {dossier.cout_total} €\n"
-                        f"Part par association : {dossier.montant_par_association} €\n\n"
-                        f"Merci de consulter votre espace membre pour le suivi.\n\n"
-                        f"Cordialement,\n"
-                        f"FAG NRW e.V."
+                        sujet="Nouveau dossier de rapatriement",
+                        message=(
+                            f"Bonjour,\n\n"
+                            f"Un nouveau dossier de rapatriement a été créé.\n\n"
+                            f"Défunt : {dossier.personne}\n"
+                            f"Association : {dossier.affiliation.association.entite.nom}\n"
+                            f"Date décès : {dossier.date_deces}\n"
+                            f"Lieu décès : {dossier.lieu_deces}\n"
+                            f"Pays décès : {dossier.pays_deces or '-'}\n"
+                            f"Destination : {dossier.destination_rapatriement}\n"
+                            f"Coût total : {dossier.cout_total} €\n"
+                            f"Part par association : {dossier.montant_par_association} €\n\n"
+                            f"Merci de consulter votre espace membre pour le suivi.\n\n"
+                            f"Cordialement,\n"
+                            f"FAG NRW e.V."
                         ),
                         destinataires=emails,
                         type_email="rapatriement",
                         utilisateur=request.user,
                         entite=dossier.affiliation.federation,
-                     )
-            messages.success(
+                    )
+
+            if nb > 0:
+                messages.success(
                     request,
                     f"Dossier créé avec succès. {nb} contributions décès générées automatiquement."
                 )
-        else:
+            else:
                 messages.success(request, "Dossier créé avec succès.")
 
-        return redirect("rapatriements_liste")
+            return redirect("rapatriements_liste")
 
     else:
         form = DossierRapatriementForm()
