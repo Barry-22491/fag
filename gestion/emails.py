@@ -321,6 +321,42 @@ def envoyer_notification_activite(activite, destinataires):
     )
 
 
+def envoyer_notification_information(information, destinataires):
+    titre = information.titre_fr or information.titre
+    contenu = information.contenu_fr or information.contenu
+    sujet = f"{information.get_type_information_display()} : {titre}"
+    message = (
+        f"Bonjour,\n\n"
+        f"Une information de la fédération vient d'être publiée.\n\n"
+        f"Type : {information.get_type_information_display()}\n"
+        f"Priorité : {information.get_priorite_display()}\n"
+        f"Titre : {titre}\n\n"
+        f"{contenu}\n"
+    )
+    if information.titre_de or information.contenu_de:
+        message += (
+            f"\n--- Deutsch ---\n"
+            f"{information.titre_de or titre}\n\n"
+            f"{information.contenu_de or ''}\n"
+        )
+    if information.titre_en or information.contenu_en:
+        message += (
+            f"\n--- English ---\n"
+            f"{information.titre_en or titre}\n\n"
+            f"{information.contenu_en or ''}\n"
+        )
+    if information.est_public:
+        message += "\nCette information est aussi visible sur le site public.\n"
+    message += "\nCordialement,\nBureau exécutif — FAG NRW e.V."
+
+    return envoyer_email_simple(
+        sujet=sujet,
+        message=message,
+        destinataires=destinataires,
+        type_email="notification_information",
+    )
+
+
 def envoyer_email_historise(
     *,
     sujet,

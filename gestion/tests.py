@@ -474,6 +474,51 @@ class EmailHistoriseTests(TestCase):
         self.assertEqual(HistoriqueEmail.objects.get().type_email, "general")
 
 
+class InformationPublicationEmailTests(FederationFixturesMixin, TestCase):
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_information_publiee_notifie_les_associations(self):
+        response = self.client.post(
+            reverse("information_create"),
+            data={
+                "titre_fr": "Assemblée",
+                "contenu_fr": "Rendez-vous samedi.",
+                "titre_de": "Versammlung",
+                "contenu_de": "Treffen am Samstag.",
+                "titre_en": "",
+                "contenu_en": "",
+                "type_information": "convocation",
+                "priorite": "importante",
+                "statut": "publie",
+                "envoyer_email": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn(self.association.email, mail.outbox[0].to)
+        self.assertIn("Assemblée", mail.outbox[0].body)
+        self.assertIn("Versammlung", mail.outbox[0].body)
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_brouillon_n_envoie_pas_d_email(self):
+        response = self.client.post(
+            reverse("information_create"),
+            data={
+                "titre_fr": "Brouillon",
+                "contenu_fr": "Pas encore.",
+                "titre_de": "",
+                "contenu_de": "",
+                "titre_en": "",
+                "contenu_en": "",
+                "type_information": "note",
+                "priorite": "normale",
+                "statut": "brouillon",
+                "envoyer_email": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(mail.outbox), 0)
+
+
 class InformationFormTests(TestCase):
     def test_champs_traduction_optionnels(self):
         federation = Entite.objects.create(nom="FAG", type="federation")

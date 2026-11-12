@@ -86,6 +86,7 @@ from ..emails import (
     envoyer_rappel_cotisation as envoyer_email_rappel_cotisation,
     envoyer_confirmation_paiement,
     envoyer_notification_activite,
+    envoyer_notification_information,
     envoyer_email_historise,
     envoyer_notification_generation_cotisation,
 )
@@ -2392,7 +2393,23 @@ def information_create(request):
                 info.date_publication = timezone.now()
 
             info.save()
-            messages.success(request, "Information publiée avec succès.")
+
+            if info.statut == "publie" and info.envoyer_email:
+                destinataires = list(
+                    Association.objects.filter(federation=federation)
+                    .exclude(email="")
+                    .values_list("email", flat=True)
+                )
+                if destinataires and envoyer_notification_information(info, destinataires):
+                    messages.success(request, "Information publiée. Les associations ont été notifiées.")
+                elif destinataires:
+                    messages.warning(request, "Information publiée, mais l'email n'a pas pu être envoyé.")
+                else:
+                    messages.warning(request, "Information publiée. Aucune association n'a d'adresse email.")
+            elif info.envoyer_email and info.statut != "publie":
+                messages.success(request, "Information enregistrée. L'email partira lorsqu'elle sera publiée.")
+            else:
+                messages.success(request, "Information publiée avec succès.")
             return redirect("informations_liste")
 
     else:

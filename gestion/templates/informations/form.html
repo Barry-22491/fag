@@ -156,9 +156,10 @@
       {% if form.envoyer_email %}
         <div class="form-check mb-4">
           {{ form.envoyer_email }}
-          <label class="form-check-label">
-            Envoyer une notification email
+          <label class="form-check-label" for="{{ form.envoyer_email.id_for_label }}">
+            Envoyer un email aux associations
           </label>
+          <div class="form-text">Uniquement si le statut est « Publié ».</div>
         </div>
       {% endif %}
 
