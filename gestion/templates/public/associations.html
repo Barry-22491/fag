@@ -1,23 +1,53 @@
 {% extends "public/base_public.html" %}
-{% block title %}Associations{% endblock %}
 {% load i18n %}
 
-{% block content %}
-<h1 class="h3 mb-4">{%trans "Associations membres"%}</h1>
+{% block title %}{% trans "Associations" %}{% endblock %}
 
-<div class="row g-3">
-  {% for association in associations %}
-  <div class="col-md-4">
-    <div class="card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <h2 class="h5">{{ association.entite.nom }}</h2>
-        <p class="text-muted mb-1">{{ association.ville }}</p>
-        <p class="small mb-0">{{ association.email|default:"" }}</p>
-      </div>
+{% block content %}
+<section class="public-section">
+  <div class="container">
+    <div class="mb-4 col-lg-8">
+      <span class="public-kicker">{% trans "Réseau" %}</span>
+      <h1 class="public-section-title">{% trans "Associations membres" %}</h1>
+      <p class="public-section-lead mb-0">
+        {% trans "Les associations affiliées qui forment le réseau de la fédération en Rhénanie-du-Nord-Westphalie." %}
+      </p>
     </div>
+
+    {% if associations %}
+    <div class="public-asso-grid">
+      {% for association in associations %}
+      <article class="public-asso-item">
+        {% if association.entite.logo %}
+          <img src="{{ association.entite.logo.url }}"
+               alt=""
+               class="public-asso-logo">
+        {% else %}
+          <div class="public-asso-fallback" aria-hidden="true">
+            {{ association.entite.abreviation|default:association.entite.nom|slice:":2"|upper }}
+          </div>
+        {% endif %}
+
+        <h2 class="h5 mb-2">{{ association.entite.nom }}</h2>
+
+        <p class="mb-1 text-muted">
+          <i class="bi bi-geo-alt" aria-hidden="true"></i>
+          {{ association.ville }}
+        </p>
+
+        {% if association.adresse %}
+        <p class="small text-muted mb-2">{{ association.adresse }}</p>
+        {% endif %}
+
+        {% if association.email %}
+        <a href="mailto:{{ association.email }}" class="small">{{ association.email }}</a>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="public-empty">{% trans "Aucune association affichée." %}</p>
+    {% endif %}
   </div>
-  {% empty %}
-  <p class="text-muted">{%trans "Aucune association affichée."%}</p>
-  {% endfor %}
-</div>
+</section>
 {% endblock %}

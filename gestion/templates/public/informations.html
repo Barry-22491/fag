@@ -1,26 +1,35 @@
 {% extends "public/base_public.html" %}
-{% block title %}Informations{% endblock %}
 {% load i18n %}
 
+{% block title %}{% trans "Informations" %}{% endblock %}
+
 {% block content %}
-<h1 class="h3 mb-4">{%trans "Communiqués publics"%}</h1>
-
-<div class="row g-3">
-  {% for info in infos %}
-  <div class="col-md-6">
-    <div class="card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <h2 class="h5">{{ info.titre_traduit }}</h2>
-        <p class="small text-muted">{{ info.created_at|date:"d/m/Y" }}</p>
-        <p>{{ info.contenu_traduit|linebreaks }}</p>
-      </div>
+<section class="public-section">
+  <div class="container">
+    <div class="mb-4 col-lg-8">
+      <span class="public-kicker">{% trans "Communiqués" %}</span>
+      <h1 class="public-section-title">{% trans "Informations publiques" %}</h1>
+      <p class="public-section-lead mb-0">
+        {% trans "Annonces et communiqués officiels de la fédération." %}
+      </p>
     </div>
+
+    {% if infos %}
+    <div class="public-event-grid">
+      {% for info in infos %}
+      <article class="public-info-item">
+        <div class="public-event-date">
+          <i class="bi bi-megaphone" aria-hidden="true"></i>
+          {{ info.created_at|date:"d/m/Y" }}
+        </div>
+        <h2 class="h5 mb-2">{{ info.titre_traduit }}</h2>
+        <div class="mb-0">{{ info.contenu_traduit|truncatewords:55|linebreaks }}</div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="public-empty">{% trans "Aucune information publique." %}</p>
+    {% endif %}
   </div>
-  {% empty %}
-  <p class="text-muted">{%trans "Aucune information publique."%}</p>
-  {% endfor %}
-</div>
+</section>
 {% endblock %}
-
-
-{{ info.contenu_traduit|linebreaks }}

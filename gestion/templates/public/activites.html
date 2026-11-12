@@ -1,26 +1,46 @@
 {% extends "public/base_public.html" %}
-{% block title %}Activités{% endblock %}
 {% load i18n %}
 
+{% block title %}{% trans "Activités" %}{% endblock %}
+
 {% block content %}
-<h1 class="h3 mb-4">{%trans "Activités publiques"%}</h1>
-
-<div class="row g-3">
-  {% for activite in activites %}
-  <div class="col-md-6">
-    <div class="card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <h2 class="h5">{{ activite.titre_traduit }}</h2>
-        <p class="text-muted mb-1">{{ activite.date|date:"d/m/Y H:i" }}</p>
-        <p class="mb-1">{{ activite.lieu|default:"" }}</p>
-        <p class="small text-muted">{{ activite.description_traduite|linebreaks }}</p>
-      </div>
+<section class="public-section">
+  <div class="container">
+    <div class="mb-4 col-lg-8">
+      <span class="public-kicker">{% trans "Agenda public" %}</span>
+      <h1 class="public-section-title">{% trans "Activités publiques" %}</h1>
+      <p class="public-section-lead mb-0">
+        {% trans "Conférences, rencontres culturelles et actions ouvertes au public." %}
+      </p>
     </div>
+
+    {% if activites %}
+    <div class="public-event-grid">
+      {% for activite in activites %}
+      <article class="public-event-item">
+        <div class="public-event-date">
+          <i class="bi bi-calendar3" aria-hidden="true"></i>
+          {{ activite.date|date:"d/m/Y H:i" }}
+        </div>
+
+        <h2 class="h5 mb-2">{{ activite.titre_traduit }}</h2>
+
+        {% if activite.lieu %}
+        <p class="text-muted mb-2">
+          <i class="bi bi-geo-alt" aria-hidden="true"></i>
+          {{ activite.lieu }}
+        </p>
+        {% endif %}
+
+        {% if activite.description_traduite %}
+        <p class="mb-0">{{ activite.description_traduite|truncatewords:40|linebreaksbr }}</p>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="public-empty">{% trans "Aucune activité publique." %}</p>
+    {% endif %}
   </div>
-  {% empty %}
-  <p class="text-muted">{%trans "Aucune activité publique."%}</p>
-  {% endfor %}
-</div>
+</section>
 {% endblock %}
-
-

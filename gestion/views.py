@@ -8,7 +8,7 @@ import pandas as pd # type: ignore
 from reportlab.pdfgen import canvas # type: ignore
 from django.shortcuts import get_object_or_404, redirect, render # type: ignore
 from django.utils import timezone # type: ignore
-from django.core.mail import send_mail # type: ignore
+from django.core.mail import EmailMessage, send_mail # type: ignore
 from .decorators import role_required
 from django.shortcuts import render # type: ignore
 from django.contrib.auth.models import User # type: ignore
@@ -23,6 +23,8 @@ from reportlab.lib.styles import getSampleStyleSheet # type: ignore
 from collections import defaultdict
 from decimal import Decimal, ROUND_UP
 from django.utils.safestring import mark_safe # type: ignore
+from django.utils.dateparse import parse_date
+from django.utils.translation import gettext as _
 from urllib.parse import quote
 from django.db import transaction
 from django.views.decorators.http import require_POST
@@ -2296,13 +2298,28 @@ def information_create(request):
 #la partie publique 25.04.2026
 
 def public_home(request):
-    federation = Entite.objects.filter(type="federation").first()
+    now = timezone.now()
 
-    activites = ActiviteCulturelle.objects.filter(est_public=True).order_by("date")[:3]
-    infos = Information.objects.filter(est_public=True, statut="publie").order_by("-created_at")[:3]
+    activites = list(
+        ActiviteCulturelle.objects
+        .filter(est_public=True, date__gte=now)
+        .order_by("date")[:3]
+    )
+
+    if len(activites) < 3:
+        activites = list(
+            ActiviteCulturelle.objects
+            .filter(est_public=True)
+            .order_by("-date")[:3]
+        )
+
+    infos = (
+        Information.objects
+        .filter(est_public=True, statut="publie")
+        .order_by("-created_at")[:3]
+    )
 
     return render(request, "public/home.html", {
-        "federation": federation,
         "activites": activites,
         "infos": infos,
     })
@@ -2338,16 +2355,26 @@ def public_about(request):
     })
 
 def public_associations(request):
-    associations = Association.objects.all()
+    associations = (
+        Association.objects
+        .filter(affiliations__statut="active")
+        .select_related("entite")
+        .distinct()
+        .order_by("entite__nom")
+    )
     return render(request, "public/associations.html", {
-        "associations": associations
+        "associations": associations,
     })
 
 
 def public_activites(request):
-    activites = ActiviteCulturelle.objects.filter(est_public=True)
+    activites = (
+        ActiviteCulturelle.objects
+        .filter(est_public=True)
+        .order_by("-date")
+    )
     return render(request, "public/activites.html", {
-        "activites": activites
+        "activites": activites,
     })
 
 
@@ -2358,7 +2385,7 @@ def public_informations(request):
     ).order_by("-created_at")
 
     return render(request, "public/informations.html", {
-        "infos": infos
+        "infos": infos,
     })
 
 def public_contact(request):
@@ -2378,21 +2405,29 @@ def public_contact(request):
                 message=message,
             )
 
-            send_mail(
-                f"[Contact public] {sujet}",
-                f"Nom : {nom}\nEmail : {email}\n\nMessage :\n{message}",
-                email,
-                ["aliou2014barry@gmail.com"],
-                fail_silently=True,
+            mail = EmailMessage(
+                subject=f"[Contact public] {sujet}",
+                body=f"Nom : {nom}\nEmail : {email}\n\nMessage :\n{message}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[settings.DEFAULT_FROM_EMAIL],
+                reply_to=[email],
             )
 
-            messages.success(request, "Votre message a été envoyé avec succès.")
+            try:
+                mail.send(fail_silently=False)
+                messages.success(request, _("Votre message a été envoyé avec succès."))
+            except Exception:
+                messages.warning(
+                    request,
+                    _("Votre message a été enregistré, mais l'envoi email a échoué."),
+                )
+
             return redirect("public_contact")
     else:
         form = ContactPublicForm()
 
     return render(request, "public/contact.html", {
-        "form": form
+        "form": form,
     })
 
 @login_required

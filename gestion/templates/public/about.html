@@ -4,53 +4,162 @@
 {% block title %}{% trans "À propos" %}{% endblock %}
 
 {% block content %}
+<section class="public-section">
+  <div class="container">
 
-<section class="mb-5">
-  <div class="card border-0 shadow-sm">
-    <div class="card-body p-4 p-lg-5">
-      <h1 class="h3 mb-3">{% trans "À propos de la fédération" %}</h1>
-
+    <div class="public-panel p-4 p-lg-5 mb-5">
+      <span class="public-kicker">{% trans "À propos" %}</span>
+      <h1 class="public-section-title mb-3">
+        {% trans "Fédération des Associations Guinéennes de Rhénanie-du-Nord-Westphalie (FAG-NRW e.V.)" %}
+      </h1>
+      <p class="lead text-muted mb-3">
+        {% trans "Ensemble pour une communauté unie, engagée et solidaire" %}
+      </p>
       <p class="text-muted mb-0">
-        {% trans "La fédération regroupe plusieurs associations membres et coordonne les activités, communications et services au bénéfice de la communauté." %}
+        {% blocktrans trimmed %}
+        La Fédération des Associations Guinéennes de Rhénanie-du-Nord-Westphalie (FAG-NRW e.V.) est l'organisation faîtière
+        qui rassemble les associations guinéennes ainsi que leurs partenaires établis dans le Land de Rhénanie-du-Nord-Westphalie et au-delà.
+        Créée pour fédérer les initiatives de la communauté guinéenne, la Fédération représente les intérêts de ses membres,
+        coordonne leurs actions et favorise la coopération entre les associations, les institutions publiques,
+        les organisations de la société civile et les partenaires internationaux.
+        Indépendante, apolitique et à but non lucratif, la FAG-NRW agit dans le respect des lois de la République fédérale d'Allemagne
+        et des valeurs de solidarité, de diversité, de respect mutuel et d'intérêt général.
+        {% endblocktrans %}
       </p>
     </div>
-  </div>
-</section>
 
-<section class="mb-5">
-  <div class="row g-4">
-    <div class="col-md-6">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-body p-4">
-          <h2 class="h5 mb-3">{% trans "Notre mission" %}</h2>
+    <div class="row g-4 mb-5">
+      <div class="col-md-6">
+        <div class="public-panel h-100">
+          <h2 class="h5 mb-3">{% trans "Notre vision" %}</h2>
           <p class="text-muted mb-0">
-            {%trans "--------------------------------------"%}
+            {% blocktrans trimmed %}
+            Nous aspirons à une communauté guinéenne forte, unie et pleinement intégrée,
+            qui contribue activement au développement de la société allemande tout en maintenant des liens solides avec la Guinée.
+            Notre ambition est de devenir un acteur reconnu du dialogue interculturel,
+            de la coopération internationale et de l'engagement citoyen.
+            {% endblocktrans %}
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="public-panel h-100">
+          <h2 class="h5 mb-3">{% trans "Notre mission" %}</h2>
+          <h3 class="h6 mb-3">{% trans "La FAG-NRW a pour mission de :" %}</h3>
+          <ul class="text-muted mb-0">
+            <li>{% trans "fédérer les associations guinéennes de Rhénanie-du-Nord-Westphalie" %}</li>
+            <li>{% trans "représenter leurs intérêts auprès des institutions allemandes et des partenaires" %}</li>
+            <li>{% trans "coordonner les initiatives communes de ses membres" %}</li>
+            <li>{% trans "promouvoir la solidarité et la cohésion de la communauté guinéenne" %}</li>
+            <li>{% trans "encourager les échanges entre les peuples et les cultures" %}</li>
+            <li>{% trans "soutenir les actions de coopération entre l'Allemagne et la Guinée" %}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="public-panel h-100">
+          <h2 class="h5 mb-3">{% trans "Nos valeurs" %}</h2>
+          <p>{% trans "Les actions de la Fédération reposent sur des valeurs fortes :" %}</p>
+          <ul class="text-muted mb-0">
+            <li>{% trans "Solidarité" %}</li>
+            <li>{% trans "Respect" %}</li>
+            <li>{% trans "Tolérance" %}</li>
+            <li>{% trans "Diversité culturelle" %}</li>
+            <li>{% trans "Dialogue" %}</li>
+            <li>{% trans "Transparence" %}</li>
+            <li>{% trans "Responsabilité" %}</li>
+            <li>{% trans "Engagement citoyen" %}</li>
+            <li>{% trans "Coopération" %}</li>
+            <li>{% trans "Esprit d'équipe" %}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="public-panel h-100">
+          <h2 class="h5 mb-3">{% trans "Nos objectifs" %}</h2>
+          <p>{% trans "La Fédération œuvre notamment pour :" %}</p>
+          <ul class="text-muted mb-0">
+            <li>{% trans "promouvoir la culture guinéenne en Allemagne" %}</li>
+            <li>{% trans "favoriser le dialogue interculturel et la compréhension entre les peuples" %}</li>
+            <li>{% trans "accompagner l'intégration des Guinéens dans la société allemande" %}</li>
+            <li>{% trans "développer les relations d'amitié entre l'Allemagne et la Guinée" %}</li>
+            <li>{% trans "créer des partenariats avec les institutions publiques, privées et associatives" %}</li>
+            <li>{% trans "soutenir les initiatives de développement portées par ses associations membres" %}</li>
+            <li>{% trans "promouvoir l'éducation, la formation et l'engagement bénévole" %}</li>
+            <li>{% trans "soutenir les personnes vulnérables, notamment les réfugiés et les personnes confrontées à des situations de précarité" %}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="public-panel h-100">
+          <h2 class="h5 mb-3">{% trans "Nos actions" %}</h2>
+          <p>{% trans "Afin de remplir sa mission, la FAG-NRW organise et soutient notamment :" %}</p>
+          <ul class="text-muted mb-0">
+            <li>{% trans "des rencontres entre les associations membres" %}</li>
+            <li>{% trans "des conférences, séminaires et tables rondes" %}</li>
+            <li>{% trans "des journées culturelles et festivals guinéens" %}</li>
+            <li>{% trans "des activités sportives et éducatives" %}</li>
+            <li>{% trans "des projets d'intégration et de participation citoyenne" %}</li>
+            <li>{% trans "des programmes de coopération au développement" %}</li>
+            <li>{% trans "des actions de solidarité et d'entraide" %}</li>
+            <li>{% trans "des médiations en cas de différends entre membres" %}</li>
+            <li>{% trans "des événements favorisant le vivre-ensemble et le renforcement des liens communautaires" %}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="public-panel h-100">
+          <h2 class="h5 mb-3">{% trans "Notre engagement" %}</h2>
+          <p class="mb-0">
+            {% blocktrans trimmed %}
+            La FAG-NRW agit exclusivement dans un but d'intérêt général.
+            Toutes les ressources de la Fédération sont consacrées à la réalisation de ses missions.
+            Aucun bénéfice n'est distribué aux membres, et l'ensemble des activités est mené
+            dans le respect des principes de transparence, de bonne gouvernance et de gestion responsable.
+            Notre engagement repose sur le bénévolat, la coopération et le service de la communauté.
+            {% endblocktrans %}
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="public-panel h-100">
+          <h2 class="h5 mb-3">{% trans "Notre siège" %}</h2>
+          <p class="mb-0">
+            {% blocktrans trimmed %}
+            Le siège de la Fédération est établi à Dortmund, en Rhénanie-du-Nord-Westphalie.
+            La FAG-NRW exerce ses activités principalement dans ce Land, tout en développant des partenariats
+            à l'échelle nationale et internationale afin de renforcer les échanges,
+            la coopération et le développement durable entre l'Allemagne et la Guinée.
+            {% endblocktrans %}
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="public-panel h-100">
+          <h2 class="h5 mb-3">{% trans "Construisons ensemble l'avenir" %}</h2>
+          <p class="mb-0">
+            {% blocktrans trimmed %}
+            À travers ses associations membres et ses partenaires, la FAG-NRW œuvre chaque jour
+            pour une communauté plus unie, plus forte et plus engagée.
+            Ensemble, nous développons des projets porteurs de solidarité,
+            d'intégration, de dialogue interculturel et de coopération
+            entre la Guinée, l'Allemagne et le reste du monde.
+            {% endblocktrans %}
           </p>
         </div>
       </div>
     </div>
 
-    <div class="col-md-6">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-body p-4">
-          <h2 class="h5 mb-3">{% trans "Nos objectifs" %}</h2>
-          <ul class="text-muted mb-0">
-            <li>{% trans "1" %}</li>
-            <li>{% trans "2" %}</li>
-            <li>{% trans "3" %}</li>
-            <li>{% trans "4" %}</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="mb-5">
-  <div class="text-center mb-4">
-    <h2 class="h4 fw-bold">{% trans "Bureau exécutif" %}</h2>
-
-    {% if bureau %}
+    <div class="text-center mb-4">
+      <h2 class="public-section-title">{% trans "Bureau exécutif" %}</h2>
+      {% if bureau %}
       <p class="text-muted mb-0">
         {% trans "Mandat" %} :
         {{ bureau.date_debut|date:"d/m/Y" }}
@@ -60,68 +169,56 @@
           - {% trans "En cours" %}
         {% endif %}
       </p>
-    {% endif %}
-  </div>
+      {% endif %}
+    </div>
 
-  <div class="row g-4">
-    {% for membre in membres_bureau %}
+    <div class="row g-4 mb-5">
+      {% for membre in membres_bureau %}
       <div class="col-12 col-md-6 col-lg-4">
-        <div class="card border-0 shadow-sm text-center h-100">
-          <div class="card-body p-4">
-
-            {% if membre.adhesion.personne.photo %}
-              <img src="{{ membre.adhesion.personne.photo.url }}"
-                   class="rounded-circle mb-3"
-                   width="110"
-                   height="110"
-                   style="object-fit: cover;">
-            {% else %}
-              <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3"
-                   style="width:110px;height:110px;">
-                <i class="bi bi-person fs-1 text-muted"></i>
-              </div>
-            {% endif %}
-
-            <h5 class="fw-bold mb-1">
-              {{ membre.adhesion.personne.prenom }}
-              {{ membre.adhesion.personne.nom }}
-            </h5>
-
-            <div class="text-primary fw-semibold mb-2">
-              {{ membre.poste.nom }}
+        <div class="public-panel text-center h-100">
+          {% if membre.adhesion.personne.photo %}
+            <img src="{{ membre.adhesion.personne.photo.url }}"
+                 alt=""
+                 class="rounded-circle mb-3"
+                 width="110"
+                 height="110"
+                 style="object-fit: cover;">
+          {% else %}
+            <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3"
+                 style="width:110px;height:110px;">
+              <i class="bi bi-person fs-1 text-muted"></i>
             </div>
+          {% endif %}
 
-            <div class="text-muted small">
-              {{ membre.adhesion.association.entite.nom }}
-            </div>
-
+          <h3 class="h5 fw-bold mb-1">
+            {{ membre.adhesion.personne.prenom }}
+            {{ membre.adhesion.personne.nom }}
+          </h3>
+          <div class="fw-semibold mb-2" style="color: var(--fag-forest);">
+            {{ membre.poste.nom }}
+          </div>
+          <div class="text-muted small">
+            {{ membre.adhesion.association.entite.nom }}
           </div>
         </div>
       </div>
-    {% empty %}
+      {% empty %}
       <div class="col-12">
-        <div class="alert alert-light text-center">
-          {% trans "Aucun bureau exécutif actif." %}
-        </div>
+        <p class="public-empty text-center">{% trans "Aucun bureau exécutif actif." %}</p>
       </div>
-    {% endfor %}
-  </div>
-</section>
+      {% endfor %}
+    </div>
 
-<section>
-  <div class="card border-0 shadow-sm">
-    <div class="card-body p-4">
+    <div class="public-panel">
       <h2 class="h5 mb-3">{% trans "Associations membres" %}</h2>
-
       <p class="text-muted mb-3">
         {% trans "La fédération rassemble des associations engagées au service de la communauté." %}
       </p>
-
-      <a href="{% url 'public_associations' %}" class="btn btn-outline-primary">
+      <a href="{% url 'public_associations' %}" class="btn btn-fag-outline">
         {% trans "Voir les associations" %}
       </a>
     </div>
+
   </div>
 </section>
-
 {% endblock %}
