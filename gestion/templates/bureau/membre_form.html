@@ -4,20 +4,32 @@
 {% block content %}
 <div class="card border-0 shadow-sm">
   <div class="card-body">
-        <p class="text-muted mb-3">
-          Un membre du bureau exécutif est choisi parmi les membres validés
-          des associations affiliées à la fédération.
+        <h1 class="h4 mb-2">{{ title }}</h1>
+        <p class="text-muted mb-4">
+          Choisis la personne parmi les membres validés. Un simple membre élu
+          apparaît ici avec le rôle « Membre ». Son adhésion doit être validée
+          avant de pouvoir le sélectionner.
         </p>
 
-    <form method="post">
-      {% csrf_token %}
-
-      {{ form.poste.as_field_group }}
-      {{ form.adhesion.as_field_group }}
-
-      <button type="submit" class="btn btn-primary">Ajouter</button>
-      <a href="{% url 'bureau_liste' %}" class="btn btn-light">Annuler</a>
-    </form>
+        <form method="post" class="row g-3">
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="col-12">
+            <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+              <div class="form-text">{{ field.help_text }}</div>
+            {% endif %}
+            {% for error in field.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+          {% endfor %}
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+            <a href="{% url 'bureau_liste' %}" class="btn btn-light">Annuler</a>
+          </div>
+        </form>
   </div>
 </div>
 {% endblock %}

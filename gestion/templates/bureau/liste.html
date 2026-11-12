@@ -20,6 +20,11 @@
       </p>
     {% endif %}
   </div>
+  {% if can_manage_users and bureau %}
+  <a href="{% url 'bureau_membre_create' %}" class="btn btn-primary">
+    Ajouter un membre
+  </a>
+  {% endif %}
 </div>
 
 {% if bureau %}

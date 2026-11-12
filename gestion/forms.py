@@ -126,7 +126,7 @@ class PosteForm(BootstrapFormMixin, forms.ModelForm):
 class BureauMembreForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = BureauMembre
-        fields = ["bureau", "poste", "adhesion"]
+        fields = ["poste", "adhesion"]
 
     def __init__(self, *args, **kwargs):
         bureau = kwargs.pop("bureau", None)
@@ -143,17 +143,27 @@ class BureauMembreForm(BootstrapFormMixin, forms.ModelForm):
         if bureau:
             if bureau.entite.type == "association":
                 qs = qs.filter(association__entite=bureau.entite)
-
             elif bureau.entite.type == "federation":
                 qs = qs.filter(
                     association__affiliations__federation=bureau.entite,
                     association__affiliations__statut="active",
                 ).distinct()
                 self.fields["adhesion"].help_text = (
-                    "Tout membre validé d'une association affiliée peut être élu."
+                    "Président, membre du bureau ou simple membre : "
+                    "toute adhésion validée d'une association affiliée."
                 )
 
-        self.fields["adhesion"].queryset = qs
+        self.fields["adhesion"].queryset = qs.order_by(
+            "association__entite__nom",
+            "personne__nom",
+            "personne__prenom",
+        )
+        self.fields["adhesion"].label_from_instance = (
+            lambda adhesion: (
+                f"{adhesion.personne.prenom} {adhesion.personne.nom} — "
+                f"{adhesion.association.entite.nom} ({adhesion.get_role_display()})"
+            )
+        )
 
 
 class BeneficiaireFederationForm(BootstrapFormMixin,forms.ModelForm):
@@ -449,7 +459,7 @@ class InvitationUtilisateurForm(BootstrapFormMixin, forms.Form):
         label="Personne",
         queryset=Adhesion.objects.none(),
         required=False,
-        help_text="Responsable d'association, ou membre du bureau exécutif. Un élu du bureau doit déjà être membre d'une association affiliée.",
+        help_text="Président ou bureau d'association, ou personne déjà ajoutée au bureau exécutif de la fédération.",
     )
     role_bureau = forms.ChoiceField(
         label="Rôle au bureau exécutif",

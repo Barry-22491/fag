@@ -2785,7 +2785,6 @@ def bureau_membre_create(request):
             return redirect("bureau_liste")
     else:
         form = BureauMembreForm(bureau=bureau)
-        form.fields["bureau"].initial = bureau
 
     return render(request, "bureau/membre_form.html", {
         "form": form,
