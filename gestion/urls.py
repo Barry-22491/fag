@@ -25,6 +25,7 @@ urlpatterns = [
     path('activites/', views.activites_liste, name='activites_liste'),
     path('activites/ajouter/', views.activite_create, name='activite_create'),
     path('activites/<int:pk>/', views.activite_detail, name='activite_detail'),
+    path('activites/<int:pk>/modifier/', views.activite_update, name='activite_update'),
 
     path("informations/", views.informations_liste, name="informations_liste"),
     path("informations/ajouter/", views.information_create, name="information_create"),

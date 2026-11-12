@@ -1830,6 +1830,39 @@ def activite_detail(request, pk):
     return render(request, "activites/detail.html", {"activite": activite})
 
 
+def _appliquer_langue_activite(activite, langue):
+    if langue == "de":
+        activite.titre_de = activite.titre
+        activite.description_de = activite.description
+    elif langue == "en":
+        activite.titre_en = activite.titre
+        activite.description_en = activite.description
+    else:
+        activite.titre_fr = activite.titre
+        activite.description_fr = activite.description
+
+    if not activite.titre_fr:
+        activite.titre_fr = activite.titre
+    if not activite.description_fr:
+        activite.description_fr = activite.description
+
+
+def _notifier_activite(request, activite, federations):
+    destinataires = list(
+        Association.objects.filter(
+            federation__in=federations
+        ).exclude(email="").values_list("email", flat=True)
+    )
+    if not destinataires:
+        messages.success(request, "Activité enregistrée.")
+        return
+
+    if envoyer_notification_activite(activite, destinataires):
+        messages.success(request, "Activité enregistrée. Les associations ont été notifiées.")
+    else:
+        messages.warning(request, "Activité enregistrée, mais l'email n'a pas pu être envoyé.")
+
+
 @login_required
 def activite_create(request):
     federations = get_user_entites(request.user).filter(type="federation")
@@ -1844,44 +1877,50 @@ def activite_create(request):
 
         if form.is_valid():
             activite = form.save(commit=False)
-
-            langue = form.cleaned_data["langue_publication"]
-
-            if langue == "fr":
-                activite.titre_fr = activite.titre
-                activite.description_fr = activite.description
-            elif langue == "de":
-                activite.titre_de = activite.titre
-                activite.description_de = activite.description
-            elif langue == "en":
-                activite.titre_en = activite.titre
-                activite.description_en = activite.description
-
+            _appliquer_langue_activite(activite, form.cleaned_data["langue_publication"])
             activite.save()
-
-            destinataires = list(
-                Association.objects.filter(
-                    federation__in=federations
-                ).exclude(email="").values_list("email", flat=True)
-            )
-
-            try:
-                if destinataires:
-                    envoyer_notification_activite(activite, destinataires)
-                    messages.success(request, "Activité créée avec succès et notification envoyée.")
-                else:
-                    messages.success(request, "Activité créée avec succès.")
-            except Exception:
-                messages.warning(request, "Activité créée, mais notification email non envoyée.")
-
-            return redirect("activites_liste")
+            _notifier_activite(request, activite, federations)
+            return redirect("activite_detail", pk=activite.pk)
     else:
-        form = ActiviteCulturelleForm()
+        form = ActiviteCulturelleForm(initial={
+            "entite": federation.pk,
+            "langue_publication": "fr",
+        })
         form.fields["entite"].queryset = federations
 
     return render(request, "activites/form.html", {
         "form": form,
         "title": "Créer une activité",
+    })
+
+
+@login_required
+def activite_update(request, pk):
+    activite = get_object_or_404(ActiviteCulturelle, pk=pk)
+    federations = get_user_entites(request.user).filter(type="federation")
+    federation = federations.first()
+
+    if not federation or not user_has_permission(request.user, federation, "activites_create"):
+        return HttpResponseForbidden("Accès refusé.")
+    if activite.entite_id not in federations.values_list("pk", flat=True):
+        return HttpResponseForbidden("Accès refusé.")
+
+    if request.method == "POST":
+        form = ActiviteCulturelleForm(request.POST, instance=activite)
+        form.fields["entite"].queryset = federations
+        if form.is_valid():
+            activite = form.save(commit=False)
+            _appliquer_langue_activite(activite, form.cleaned_data["langue_publication"])
+            activite.save()
+            messages.success(request, "Activité mise à jour.")
+            return redirect("activite_detail", pk=activite.pk)
+    else:
+        form = ActiviteCulturelleForm(instance=activite)
+        form.fields["entite"].queryset = federations
+
+    return render(request, "activites/form.html", {
+        "form": form,
+        "title": "Modifier l'activité",
     })
 
 @login_required

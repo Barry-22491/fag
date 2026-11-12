@@ -159,7 +159,7 @@ def envoyer_notification_generation_cotisation(cotisation):
     association = situation["association"]
     nom = association.entite.nom
 
-    sujet = f"Cotisations {situation['periode']} — {nom}"
+    sujet = f"Cotisations {situation['periode']} - {nom}"
     message = (
         f"Bonjour,\n\n"
         f"Les cotisations du mois de {situation['periode']} ont été générées "
@@ -168,7 +168,7 @@ def envoyer_notification_generation_cotisation(cotisation):
         f"{_bloc_situation(situation)}\n\n"
         f"Merci de régulariser dès que possible.\n"
         f"Cordialement,\n"
-        f"Bureau exécutif — FAG NRW e.V."
+        f"Bureau exécutif - FAG NRW e.V."
     )
 
     destinataires = _destinataires_association(association)
@@ -206,7 +206,7 @@ def envoyer_rappel_cotisation(cotisation):
     if not destinataires:
         return False
 
-    sujet = f"Rappel cotisation — {situation['periode']} — {nom}"
+    sujet = f"Rappel cotisation - {situation['periode']} - {nom}"
     message = (
         f"Bonjour,\n\n"
         f"Nous vous adressons un rappel concernant la situation financière "
@@ -217,7 +217,7 @@ def envoyer_rappel_cotisation(cotisation):
         f"{_bloc_situation(situation)}\n\n"
         f"Merci de procéder au règlement dans les meilleurs délais.\n"
         f"Cordialement,\n"
-        f"Bureau exécutif — FAG NRW e.V."
+        f"Bureau exécutif - FAG NRW e.V."
     )
 
     email_ok = envoyer_email_simple(
@@ -230,7 +230,7 @@ def envoyer_rappel_cotisation(cotisation):
 
     notif_message = _resume_situation_court(
         situation,
-        prefix=f"Rappel cotisation {situation['periode']} — {nom}. ",
+        prefix=f"Rappel cotisation {situation['periode']} - {nom}. ",
     )
     _creer_notifications_cotisation(association, sujet, notif_message)
 
@@ -265,7 +265,7 @@ def envoyer_confirmation_paiement(cotisation):
             "et les contributions décès. Merci pour votre règlement."
         )
 
-    sujet = f"Confirmation de paiement — {situation['periode']} — {nom}"
+    sujet = f"Confirmation de paiement - {situation['periode']} - {nom}"
     message = (
         f"Bonjour,\n\n"
         f"Nous confirmons la réception du paiement de cotisation pour "
@@ -279,7 +279,7 @@ def envoyer_confirmation_paiement(cotisation):
         f"{_bloc_situation(situation)}\n\n"
         f"{conclusion}\n\n"
         f"Cordialement,\n"
-        f"Bureau exécutif — FAG NRW e.V."
+        f"Bureau exécutif - FAG NRW e.V."
     )
 
     email_ok = envoyer_email_simple(
@@ -292,7 +292,7 @@ def envoyer_confirmation_paiement(cotisation):
 
     notif_message = _resume_situation_court(
         situation,
-        prefix=f"Paiement confirmé ({situation['periode']}) — {nom}. ",
+        prefix=f"Paiement confirmé ({situation['periode']}) - {nom}. ",
     )
     _creer_notifications_cotisation(association, sujet, notif_message)
 
@@ -306,7 +306,9 @@ def envoyer_notification_activite(activite, destinataires):
         f"Une activité culturelle est programmée.\n\n"
         f"Titre : {activite.titre}\n"
         f"Date : {activite.date.strftime('%d/%m/%Y %H:%M')}\n"
-        f"Lieu : {activite.lieu or '-'}\n\n"
+        f"Lieu : {activite.lieu or '-'}\n"
+        f"Visibilité : {'Site public' if activite.est_public else 'Interne'}\n"
+        f"Accès : {'Bénéficiaires uniquement' if activite.reserve_aux_beneficiaires else 'Ouvert'}\n\n"
         f"Description : {activite.description or '-'}\n"
     )
 

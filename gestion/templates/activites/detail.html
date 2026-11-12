@@ -8,7 +8,12 @@
     <h1 class="h3 mb-1">{{ activite.titre }}</h1>
     <p class="text-muted mb-0">Détail de l'activité culturelle</p>
   </div>
-  <a href="{% url 'activites_liste' %}" class="btn btn-light">Retour</a>
+  <div class="d-flex gap-2">
+    {% if can_create_activites %}
+    <a href="{% url 'activite_update' activite.pk %}" class="btn btn-warning">Modifier</a>
+    {% endif %}
+    <a href="{% url 'activites_liste' %}" class="btn btn-light">Retour</a>
+  </div>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -28,7 +33,16 @@
 
       <dt class="col-sm-3 text-muted">Réservée</dt>
       <dd class="col-sm-9">
-        {% if activite.reserve_aux_beneficiaires %}Oui{% else %}Non{% endif %}
+        {% if activite.reserve_aux_beneficiaires %}Bénéficiaires uniquement{% else %}Ouvert{% endif %}
+      </dd>
+
+      <dt class="col-sm-3 text-muted">Visibilité</dt>
+      <dd class="col-sm-9">
+        {% if activite.est_public %}
+          Visible sur le site public
+        {% else %}
+          Interne, absente du site public
+        {% endif %}
       </dd>
 
       <dt class="col-sm-3 text-muted">Description</dt>

@@ -16,6 +16,7 @@ from .emails import (
 )
 from .forms import InformationForm
 from .models import (
+    ActiviteCulturelle,
     Adhesion,
     AffiliationAssociation,
     Association,
@@ -352,6 +353,33 @@ class RappelEtConfirmationCotisationTests(FederationFixturesMixin, TestCase):
         self.assertIn("Situation actualisée", body)
         self.assertIn("Retard mensuel", body)
         self.assertIn("150,00", body)
+
+
+class ActiviteCreateTests(FederationFixturesMixin, TestCase):
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_creation_enregistre_la_langue_et_notifie(self):
+        response = self.client.post(
+            reverse("activite_create"),
+            data={
+                "entite": self.federation.pk,
+                "langue_publication": "fr",
+                "titre": "Soirée culturelle",
+                "description": "Programme de la soirée",
+                "date": "2026-12-01T18:30",
+                "lieu": "Dortmund",
+                "capacite": "40",
+                "reserve_aux_beneficiaires": "on",
+                "est_public": "on",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        activite = ActiviteCulturelle.objects.get()
+        self.assertEqual(activite.titre_fr, "Soirée culturelle")
+        self.assertEqual(activite.description_fr, "Programme de la soirée")
+        self.assertTrue(activite.est_public)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Site public", mail.outbox[0].body)
 
 
 class InvitationMotDePasseTests(FederationFixturesMixin, TestCase):

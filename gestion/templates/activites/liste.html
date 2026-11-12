@@ -26,6 +26,7 @@
             <th>Lieu</th>
             <th>Capacité</th>
             <th>Accès</th>
+            <th>Visibilité</th>
             <th class="text-end">Actions</th>
           </tr>
         </thead>
@@ -43,13 +44,23 @@
                 <span class="badge bg-secondary">Ouvert</span>
               {% endif %}
             </td>
+            <td>
+              {% if activite.est_public %}
+                <span class="badge bg-success">Public</span>
+              {% else %}
+                <span class="badge bg-light text-dark border">Interne</span>
+              {% endif %}
+            </td>
             <td class="text-end">
               <a href="{% url 'activite_detail' activite.pk %}" class="btn btn-sm btn-outline-primary">Voir</a>
+              {% if can_create_activites %}
+              <a href="{% url 'activite_update' activite.pk %}" class="btn btn-sm btn-outline-warning">Modifier</a>
+              {% endif %}
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="6" class="text-center text-muted py-4">
+            <td colspan="7" class="text-center text-muted py-4">
               Aucune activité trouvée.
             </td>
           </tr>

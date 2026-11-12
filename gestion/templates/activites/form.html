@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% load i18n %}
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
@@ -7,86 +6,100 @@
   <div class="col-12 col-xl-8">
     <div class="card border-0 shadow-sm">
       <div class="card-body p-4">
-        <h1 class="h4 mb-4">{{ title }}</h1>
+        <h1 class="h4 mb-2">{{ title }}</h1>
+        <p class="text-muted mb-4">
+          La langue choisie est celle du texte saisi. Le site public affiche cette version,
+          puis le français s'il existe.
+        </p>
 
-        <form method="post" class="row g-3">
+        <form method="post" class="row g-3" novalidate>
           {% csrf_token %}
-
-          <div class="col-12">
-            <label class="form-label fw-semibold">{{ form.langue_publication.label }}</label>
-            {{ form.langue_publication }}
-          </div>
-
-          <div class="col-12">
-            <label class="form-label fw-semibold">{{ form.titre.label }}</label>
-            {{ form.titre }}
-          </div>
-
-          <div class="col-12">
-            <label class="form-label fw-semibold">{{ form.description.label }}</label>
-            {{ form.description }}
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">{{ form.entite.label }}</label>
-            {{ form.entite }}
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">{{ form.date.label }}</label>
-            {{ form.date }}
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">{{ form.lieu.label }}</label>
-            {{ form.lieu }}
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">{{ form.capacite.label }}</label>
-            {{ form.capacite }}
-          </div>
-
-          <div class="col-md-6">
-            <div class="form-check mt-4">
-              {{ form.reserve_aux_beneficiaires }}
-              <label class="form-check-label">
-                {{ form.reserve_aux_beneficiaires.label }}
-              </label>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="form-check mt-4">
-              {{ form.est_public }}
-              <label class="form-check-label">
-                {{ form.est_public.label }}
-              </label>
-            </div>
-          </div>
-
-          {% for field in form %}
-            {% for error in field.errors %}
-              <div class="col-12">
-                <div class="text-danger small">{{ field.label }} : {{ error }}</div>
-              </div>
-            {% endfor %}
-          {% endfor %}
 
           {% if form.non_field_errors %}
           <div class="col-12">
             {% for error in form.non_field_errors %}
-              <div class="alert alert-danger">{{ error }}</div>
+              <div class="alert alert-danger mb-0">{{ error }}</div>
             {% endfor %}
           </div>
           {% endif %}
+
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold" for="{{ form.entite.id_for_label }}">{{ form.entite.label }}</label>
+            {{ form.entite }}
+            {% for error in form.entite.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold" for="{{ form.langue_publication.id_for_label }}">{{ form.langue_publication.label }}</label>
+            {{ form.langue_publication }}
+            {% for error in form.langue_publication.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-semibold" for="{{ form.titre.id_for_label }}">{{ form.titre.label }}</label>
+            {{ form.titre }}
+            {% for error in form.titre.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-semibold" for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+            {{ form.description }}
+            {% for error in form.description.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold" for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
+            {{ form.date }}
+            {% for error in form.date.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold" for="{{ form.lieu.id_for_label }}">{{ form.lieu.label }}</label>
+            {{ form.lieu }}
+            {% for error in form.lieu.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold" for="{{ form.capacite.id_for_label }}">{{ form.capacite.label }}</label>
+            {{ form.capacite }}
+            <div class="form-text">Laissez vide s'il n'y a pas de limite.</div>
+            {% for error in form.capacite.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12 col-md-6 d-flex flex-column justify-content-center gap-2">
+            <div class="form-check">
+              {{ form.reserve_aux_beneficiaires }}
+              <label class="form-check-label" for="{{ form.reserve_aux_beneficiaires.id_for_label }}">
+                {{ form.reserve_aux_beneficiaires.label }}
+              </label>
+            </div>
+            <div class="form-check">
+              {{ form.est_public }}
+              <label class="form-check-label" for="{{ form.est_public.id_for_label }}">
+                {{ form.est_public.label }}
+              </label>
+            </div>
+          </div>
 
           <div class="col-12 d-flex justify-content-end gap-2">
             <a href="{% url 'activites_liste' %}" class="btn btn-light">Annuler</a>
             <button type="submit" class="btn btn-primary">Enregistrer</button>
           </div>
         </form>
-
       </div>
     </div>
   </div>

@@ -51,6 +51,7 @@ class DateInput(forms.DateInput):
 
 class DateTimeInput(forms.DateTimeInput):
     input_type = 'datetime-local'
+    format = '%Y-%m-%dT%H:%M'
 
 
 class AssociationForm(BootstrapFormMixin, forms.ModelForm):
@@ -194,6 +195,33 @@ class ActiviteCulturelleForm(BootstrapFormMixin, forms.ModelForm):
             "date": DateTimeInput(),
             "description": forms.Textarea(attrs={"rows": 5}),
         }
+        labels = {
+            "entite": "Fédération",
+            "titre": "Titre",
+            "description": "Description",
+            "date": "Date et heure",
+            "lieu": "Lieu",
+            "capacite": "Capacité",
+            "reserve_aux_beneficiaires": "Réservée aux bénéficiaires",
+            "est_public": "Visible sur le site public",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["date"].input_formats = [
+            "%Y-%m-%dT%H:%M",
+            "%Y-%m-%d %H:%M:%S",
+            "%Y-%m-%d %H:%M",
+        ]
+        self.fields["capacite"].required = False
+        self.fields["lieu"].required = False
+        if self.instance and self.instance.pk and not self.is_bound:
+            if self.instance.titre_de and self.instance.titre == self.instance.titre_de:
+                self.initial["langue_publication"] = "de"
+            elif self.instance.titre_en and self.instance.titre == self.instance.titre_en:
+                self.initial["langue_publication"] = "en"
+            else:
+                self.initial["langue_publication"] = "fr"
 
 
 class TransactionForm(BootstrapFormMixin,forms.ModelForm):
