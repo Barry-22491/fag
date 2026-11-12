@@ -1,3 +1,4 @@
+import secrets
 from datetime import date,timedelta
 from django.contrib import messages  # type: ignore
 from django.contrib.auth.decorators import login_required # type: ignore
@@ -74,6 +75,8 @@ from ..models import (
     BureauMembre,
     Poste,
     PaiementAssociation,
+    Role,
+    UserEntiteRole,
 )
 from ..utils import (
                 get_user_entites, user_has_role, user_has_permission,notifier_users,
@@ -2551,13 +2554,24 @@ def inviter_utilisateur(request):
     if not federation or not user_has_permission(request.user, federation, "users_manage"):
         return HttpResponseForbidden("Accès refusé.")
 
+    entites_invitation = Entite.objects.filter(pk=federation.pk)
+    association_entites = Entite.objects.filter(
+        association__federation=federation
+    )
+    entites_invitation = (entites_invitation | association_entites).distinct().order_by("type", "nom")
+
     if request.method == "POST":
         form = InvitationUtilisateurForm(request.POST)
+        form.fields["entite"].queryset = entites_invitation
 
         if form.is_valid():
             email = form.cleaned_data["email"]
             prenom = form.cleaned_data["prenom"]
             nom = form.cleaned_data["nom"]
+            entite = form.cleaned_data["entite"]
+            role, _created_role = Role.objects.get_or_create(
+                nom=form.cleaned_data["role"]
+            )
 
             user, created = User.objects.get_or_create(
                 username=email,
@@ -2569,25 +2583,46 @@ def inviter_utilisateur(request):
                 }
             )
 
-            if created:
-                user.set_unusable_password()
-                user.save()
+            doit_choisir_mot_de_passe = created or not user.has_usable_password()
+            user.email = email
+            user.first_name = prenom
+            user.last_name = nom
+            user.is_active = True
+            if doit_choisir_mot_de_passe:
+                # Mot de passe aléatoire jamais communiqué : Django n'envoie
+                # le lien de réinitialisation qu'aux comptes qui en ont un.
+                user.set_password(secrets.token_urlsafe(32))
+            user.save()
 
-            reset_form = PasswordResetForm({"email": email})
+            UserEntiteRole.objects.get_or_create(
+                user=user,
+                entite=entite,
+                role=role,
+            )
 
-            if reset_form.is_valid():
-                reset_form.save(
-                    request=request,
-                    use_https=request.is_secure(),
-                    from_email=None,
-                    email_template_name="registration/password_reset_email.html",
-                    subject_template_name="registration/password_reset_subject.txt",
+            if doit_choisir_mot_de_passe:
+                reset_form = PasswordResetForm({"email": email})
+                if reset_form.is_valid():
+                    reset_form.save(
+                        request=request,
+                        use_https=request.is_secure(),
+                        from_email=None,
+                        email_template_name="registration/password_reset_email.txt",
+                        subject_template_name="registration/password_reset_subject.txt",
+                    )
+                messages.success(
+                    request,
+                    "Invitation envoyée. La personne choisit son mot de passe via le lien reçu.",
                 )
-
-            messages.success(request, "Invitation envoyée avec succès.")
+            else:
+                messages.success(
+                    request,
+                    "Rôle ajouté. Ce compte existe déjà et garde son mot de passe.",
+                )
             return redirect("dashboard")
     else:
         form = InvitationUtilisateurForm()
+        form.fields["entite"].queryset = entites_invitation
 
     return render(request, "utilisateurs/inviter.html", {
         "form": form,

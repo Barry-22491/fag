@@ -161,6 +161,12 @@
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li>
+              <a class="dropdown-item" href="{% url 'password_change' %}">
+                Changer mon mot de passe
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
               <form method="post" action="{% url 'logout' %}" class="px-3 py-1">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-light btn-sm w-100">

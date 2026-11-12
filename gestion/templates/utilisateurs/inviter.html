@@ -2,19 +2,32 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="card border-0 shadow-sm">
-  <div class="card-body">
-    <h1 class="h4 mb-3">{{ title }}</h1>
-
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-
-      <button type="submit" class="btn btn-primary">
-        Envoyer l’invitation
-      </button>
-      <a href="{% url 'dashboard' %}" class="btn btn-light">Annuler</a>
-    </form>
+<div class="row justify-content-center">
+  <div class="col-12 col-xl-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-2">{{ title }}</h1>
+        <p class="text-muted mb-4">
+          Aucun mot de passe n'est communiqué. La personne reçoit un lien pour choisir le sien.
+        </p>
+        <form method="post" class="row g-3">
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+          {% endfor %}
+          <div class="col-12 d-flex justify-content-end gap-2">
+            <a href="{% url 'dashboard' %}" class="btn btn-light">Annuler</a>
+            <button type="submit" class="btn btn-primary">Envoyer l'invitation</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

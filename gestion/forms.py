@@ -1,3 +1,4 @@
+from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.models import User # type: ignore
 from django import forms # type: ignore
 from django.utils.translation import gettext_lazy as _ # type: ignore
@@ -333,10 +334,62 @@ class ContributionDecesAssociationForm(BootstrapFormMixin, forms.ModelForm):
 
 # la gestion des utilisateur - 02.05.2026
 
-class InvitationUtilisateurForm(BootstrapFormMixin,forms.Form):
+ROLE_INVITATION_CHOICES = [
+    ("federation_direction", "Direction fédération"),
+    ("federation_finances", "Finances fédération"),
+    ("federation_social", "Social fédération"),
+    ("federation_organisation", "Organisation fédération"),
+    ("federation_projets", "Projets fédération"),
+    ("federation_communication", "Communication fédération"),
+    ("federation_externe", "Externe fédération"),
+    ("federation_lecture", "Lecture fédération"),
+    ("association_president", "Président d'association"),
+    ("association_lecture", "Lecture association"),
+]
+
+
+class InvitationUtilisateurForm(BootstrapFormMixin, forms.Form):
     email = forms.EmailField(label="Email")
-    prenom = forms.CharField(max_length=100,label="Prenom")
-    nom = forms.CharField(max_length=100,label="Nom")
+    prenom = forms.CharField(max_length=100, label="Prénom")
+    nom = forms.CharField(max_length=100, label="Nom")
+    role = forms.ChoiceField(label="Rôle", choices=ROLE_INVITATION_CHOICES)
+    entite = forms.ModelChoiceField(
+        label="Rattachement",
+        queryset=Entite.objects.none(),
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        role = cleaned.get("role")
+        entite = cleaned.get("entite")
+        if not role or not entite:
+            return cleaned
+        if role.startswith("association") and entite.type != "association":
+            self.add_error("entite", "Ce rôle se rattache à une association.")
+        if role.startswith("federation") and entite.type != "federation":
+            self.add_error("entite", "Ce rôle se rattache à la fédération.")
+        return cleaned
+
+
+class MotDePasseOublieForm(BootstrapFormMixin, PasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["email"].label = "Email"
+
+
+class ChangerMotDePasseForm(BootstrapFormMixin, PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["old_password"].label = "Mot de passe actuel"
+        self.fields["new_password1"].label = "Nouveau mot de passe"
+        self.fields["new_password2"].label = "Confirmer le nouveau mot de passe"
+
+
+class DefinirMotDePasseForm(BootstrapFormMixin, SetPasswordForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["new_password1"].label = "Nouveau mot de passe"
+        self.fields["new_password2"].label = "Confirmer le mot de passe"
 
 class AssociationUpdateForm(BootstrapFormMixin, forms.ModelForm):
     nom = forms.CharField(max_length=200, label="Nom de l'association")

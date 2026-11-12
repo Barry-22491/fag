@@ -354,6 +354,54 @@ class RappelEtConfirmationCotisationTests(FederationFixturesMixin, TestCase):
         self.assertIn("150,00", body)
 
 
+class InvitationMotDePasseTests(FederationFixturesMixin, TestCase):
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_invitation_envoie_lien_pour_choisir_le_mot_de_passe(self):
+        response = self.client.post(
+            reverse("inviter_utilisateur"),
+            data={
+                "email": "nouveau@example.com",
+                "prenom": "Awa",
+                "nom": "Diallo",
+                "role": "federation_lecture",
+                "entite": self.federation.pk,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        user = User.objects.get(email="nouveau@example.com")
+        self.assertTrue(user.has_usable_password())
+        self.assertTrue(
+            UserEntiteRole.objects.filter(user=user, entite=self.federation).exists()
+        )
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("/accounts/reset/", mail.outbox[0].body)
+
+    def test_pages_mot_de_passe_accessibles(self):
+        self.client.logout()
+        self.assertEqual(self.client.get(reverse("password_reset")).status_code, 200)
+        login = self.client.get(reverse("login"))
+        self.assertContains(login, "Mot de passe oublié")
+
+        self.client.login(username="admin", password="test-pass-123")
+        self.assertEqual(self.client.get(reverse("password_change")).status_code, 200)
+
+    def test_changement_mot_de_passe(self):
+        response = self.client.post(
+            reverse("password_change"),
+            data={
+                "old_password": "test-pass-123",
+                "new_password1": "Nouveau-mot-de-passe-1",
+                "new_password2": "Nouveau-mot-de-passe-1",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.client.logout()
+        self.assertTrue(
+            self.client.login(username="admin", password="Nouveau-mot-de-passe-1")
+        )
+
+
 class AlertesPermissionTests(FederationFixturesMixin, TestCase):
     def test_alertes_forbidden_for_anonymous(self):
         self.client.logout()
