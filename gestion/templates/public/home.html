@@ -15,7 +15,7 @@
         {% endif %}
       </p>
       <p class="public-hero-lead fade-up-delay">
-        {% trans "Une fédération engagée pour fédérer, représenter et accompagner les associations guinéennes en Rhénanie-du-Nord-Westphalie." %}
+        {% trans "Découvrez nos associations affiliées, nos activités et nos communications officielles." %}
       </p>
       <div class="d-flex gap-2 flex-wrap public-hero-actions fade-up-delay">
         <a href="{% url 'public_activites' %}" class="btn btn-fag-primary">{% trans "Voir les activités" %}</a>
@@ -32,8 +32,8 @@
     <div class="row g-5">
       <div class="col-lg-6">
         <span class="public-kicker">{% trans "Agenda" %}</span>
-        <h2 class="public-section-title">{% trans "Prochaines activités" %}</h2>
-        <p class="public-section-lead">{% trans "Les rendez-vous publics de la fédération et de ses membres." %}</p>
+        <h2 class="public-section-title">{% trans "Dernières activités" %}</h2>
+        <p class="public-section-lead">{% trans "Un réseau d’associations au service de la communauté." %}</p>
 
         <div class="public-feed">
           {% for a in activites %}
@@ -48,7 +48,7 @@
             </div>
           </a>
           {% empty %}
-          <p class="public-empty mb-0">{% trans "Aucune activité publique pour le moment." %}</p>
+          <p class="public-empty mb-0">{% trans "Aucune activité publique." %}</p>
           {% endfor %}
         </div>
       </div>
@@ -56,7 +56,7 @@
       <div class="col-lg-6">
         <span class="public-kicker">{% trans "Actualités" %}</span>
         <h2 class="public-section-title">{% trans "Communiqués récents" %}</h2>
-        <p class="public-section-lead">{% trans "Les informations officielles partagées avec le public." %}</p>
+        <p class="public-section-lead">{% trans "Découvrez nos associations affiliées, nos activités et nos communications officielles." %}</p>
 
         <div class="public-feed">
           {% for i in infos %}
@@ -68,7 +68,7 @@
             </div>
           </a>
           {% empty %}
-          <p class="public-empty mb-0">{% trans "Aucune information publique pour le moment." %}</p>
+          <p class="public-empty mb-0">{% trans "Aucune information publique." %}</p>
           {% endfor %}
         </div>
       </div>
@@ -76,7 +76,7 @@
 
     <div class="d-flex flex-wrap gap-2 mt-5">
       <a href="{% url 'public_associations' %}" class="btn btn-fag-outline">{% trans "Associations membres" %}</a>
-      <a href="{% url 'public_about' %}" class="btn btn-fag-solid">{% trans "Découvrir la fédération" %}</a>
+      <a href="{% url 'public_about' %}" class="btn btn-fag-solid">{% trans "À propos" %}</a>
     </div>
   </div>
 </section>

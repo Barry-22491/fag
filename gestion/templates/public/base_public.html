@@ -62,25 +62,31 @@
           <a class="nav-link {% if request.resolver_match.url_name == 'public_contact' %}active{% endif %}" href="{% url 'public_contact' %}">{% trans "Contact" %}</a>
         </li>
 
+        {% get_current_language as LANGUAGE_CODE %}
         <li class="nav-item dropdown ms-lg-2">
-          <form action="{% url 'set_language' %}" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="{{ request.get_full_path }}">
-            <select name="language"
-                    class="form-select form-select-sm"
-                    onchange="this.form.submit()"
-                    aria-label="{% trans 'Langue' %}">
-              <option value="fr" {% if LANGUAGE_CODE == "fr" %}selected{% endif %}>FR</option>
-              <option value="de" {% if LANGUAGE_CODE == "de" %}selected{% endif %}>DE</option>
-              <option value="en" {% if LANGUAGE_CODE == "en" %}selected{% endif %}>EN</option>
-            </select>
-          </form>
+          <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {{ LANGUAGE_CODE|upper }}
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <a class="dropdown-item {% if LANGUAGE_CODE == 'fr' %}active{% endif %}"
+                 href="/fr{{ request.path|slice:'3:' }}">Français</a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if LANGUAGE_CODE == 'de' %}active{% endif %}"
+                 href="/de{{ request.path|slice:'3:' }}">Deutsch</a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if LANGUAGE_CODE == 'en' %}active{% endif %}"
+                 href="/en{{ request.path|slice:'3:' }}">English</a>
+            </li>
+          </ul>
         </li>
 
         {% if user.is_authenticated %}
         <li class="nav-item ms-lg-2">
           <a href="{% url 'dashboard' %}" class="btn btn-sm btn-dark">
-            {% trans "Espace de gestion" %}
+            {% trans "Retour à l’espace de gestion" %}
           </a>
         </li>
         {% else %}
