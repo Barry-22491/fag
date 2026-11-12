@@ -103,6 +103,7 @@ def get_resume_financier_associations(federation):
     )
 
     resume = defaultdict(lambda: {
+        "association_id": None,
         "code": "",
         "association": "",
         "mensuel_attendu": 0,
@@ -127,6 +128,7 @@ def get_resume_financier_associations(federation):
 
     for item in cotisations_resume:
         association_id = item["affiliation__association_id"]
+        resume[association_id]["association_id"] = association_id
         resume[association_id]["code"] = item["affiliation__association__code_paiement"]
         resume[association_id]["association"] = item["affiliation__association__entite__nom"]
         resume[association_id]["mensuel_attendu"] = item["total_attendu"] or 0
@@ -143,6 +145,7 @@ def get_resume_financier_associations(federation):
 
     for item in deces_resume:
         association_id = item["association_id"]
+        resume[association_id]["association_id"] = association_id
         resume[association_id]["code"] = item["association__code_paiement"]
         resume[association_id]["association"] = item["association__entite__nom"]
         resume[association_id]["deces_attendu"] = item["total_attendu"] or 0
@@ -158,13 +161,15 @@ def get_resume_financier_associations(federation):
 
     for item in avances_resume:
         association_id = item["association_id"]
+        resume[association_id]["association_id"] = association_id
         resume[association_id]["code"] = item["association__code_paiement"]
         resume[association_id]["association"] = item["association__entite__nom"]
         resume[association_id]["avance"] = item["total_avance"] or 0
 
     resume_associations = []
 
-    for item in resume.values():
+    for association_id, item in resume.items():
+        item["association_id"] = association_id
         item["total_attendu"] = item["mensuel_attendu"] + item["deces_attendu"]
         item["total_paye"] = item["mensuel_paye"] + item["deces_paye"]
 
@@ -186,5 +191,5 @@ def get_resume_financier_associations(federation):
                 item["situation"] = "À jour"
 
         resume_associations.append(item)
-        
+
     return sorted(resume_associations, key=lambda x: x["association"])

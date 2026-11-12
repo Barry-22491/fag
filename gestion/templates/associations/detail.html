@@ -16,6 +16,9 @@
           <a href="{% url 'cotisations_liste' %}?association={{ association.entite.nom }}" class="btn btn-outline-primary btn-sm">
             Voir les cotisations
           </a>
+          <a href="{% url 'paiement_association_create' %}?association={{ association.pk }}" class="btn btn-outline-success btn-sm">
+            Encaisser un paiement
+          </a>
           <a href="{% url 'beneficiaires_liste' %}" class="btn btn-outline-secondary btn-sm">
             Voir les bénéficiaires
           </a>

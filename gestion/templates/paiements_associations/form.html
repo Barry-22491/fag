@@ -13,6 +13,11 @@
           devient une avance pour l’association.
         </p>
 
+        <div id="situation-panel" class="alert d-none mb-4" role="status">
+          <div class="fw-semibold mb-1" id="situation-titre"></div>
+          <div class="small mb-0" id="situation-detail"></div>
+        </div>
+
         <form method="post" class="row g-3" novalidate>
           {% csrf_token %}
 
@@ -41,6 +46,9 @@
             <div class="input-group">
               {{ form.montant }}
               <span class="input-group-text">€</span>
+            </div>
+            <div class="form-text" id="montant-aide">
+              Prérempli avec le reste dû quand une association est sélectionnée.
             </div>
             {% for error in form.montant.errors %}
               <div class="text-danger small mt-1">{{ error }}</div>
@@ -99,4 +107,87 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ situations_json|json_script:"situations-data" }}
+<script>
+(function () {
+  const situationsNode = document.getElementById("situations-data");
+  if (!situationsNode) return;
+
+  const situations = JSON.parse(situationsNode.textContent || "{}");
+  const associationField = document.getElementById("{{ form.association.id_for_label }}");
+  const montantField = document.getElementById("{{ form.montant.id_for_label }}");
+  const panel = document.getElementById("situation-panel");
+  const titre = document.getElementById("situation-titre");
+  const detail = document.getElementById("situation-detail");
+  const aide = document.getElementById("montant-aide");
+
+  if (!associationField || !montantField || !panel) return;
+
+  let montantTouche = Boolean(montantField.value);
+
+  montantField.addEventListener("input", function () {
+    montantTouche = true;
+  });
+
+  function formatEuro(value) {
+    return Number(value || 0).toLocaleString("fr-FR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }) + " €";
+  }
+
+  function updateSituation() {
+    const data = situations[associationField.value];
+    if (!data) {
+      panel.classList.add("d-none");
+      panel.classList.remove("alert-danger", "alert-success", "alert-info");
+      return;
+    }
+
+    const mensuelReste = Math.max(0, (data.mensuel_attendu || 0) - (data.mensuel_paye || 0));
+    const decesReste = Math.max(0, (data.deces_attendu || 0) - (data.deces_paye || 0));
+
+    panel.classList.remove("d-none", "alert-danger", "alert-success", "alert-info");
+    if (data.reste > 0) {
+      panel.classList.add("alert-danger");
+      titre.textContent = data.nom + " — reste dû : " + formatEuro(data.reste);
+    } else if (data.avance > 0) {
+      panel.classList.add("alert-info");
+      titre.textContent = data.nom + " — avance disponible : " + formatEuro(data.avance);
+    } else {
+      panel.classList.add("alert-success");
+      titre.textContent = data.nom + " — à jour";
+    }
+
+    detail.textContent =
+      "Mensuel impayé : " + formatEuro(mensuelReste) +
+      " · Décès impayé : " + formatEuro(decesReste) +
+      " · Situation : " + data.situation;
+
+    if (!montantTouche) {
+      if (data.reste > 0) {
+        montantField.value = data.reste.toFixed(2);
+        if (aide) {
+          aide.textContent = "Montant suggéré = reste dû. Vous pouvez le modifier.";
+        }
+      } else {
+        montantField.value = "";
+        if (aide) {
+          aide.textContent = "Aucun reste dû : le montant saisi ira en avance.";
+        }
+      }
+    }
+  }
+
+  associationField.addEventListener("change", function () {
+    montantTouche = false;
+    updateSituation();
+  });
+
+  updateSituation();
+})();
+</script>
 {% endblock %}

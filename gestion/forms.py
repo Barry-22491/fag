@@ -202,6 +202,33 @@ class TransactionForm(BootstrapFormMixin,forms.ModelForm):
         widgets = {
             'date': DateInput(),
         }
+        labels = {
+            "entite": "Entité",
+            "ligne_budget": "Ligne budgétaire",
+            "montant": "Montant",
+            "type": "Type",
+            "date": "Date",
+            "libelle": "Libellé",
+            "donateur": "Donateur",
+        }
+
+    def __init__(self, *args, **kwargs):
+        federation = kwargs.pop("federation", None)
+        super().__init__(*args, **kwargs)
+
+        self.fields["montant"].widget.attrs.setdefault("min", "0.01")
+        self.fields["montant"].widget.attrs.setdefault("step", "0.01")
+
+        if federation is not None:
+            self.fields["entite"].queryset = Entite.objects.filter(pk=federation.pk)
+            if "ligne_budget" in self.fields:
+                ligne_qs = self.fields["ligne_budget"].queryset
+                if hasattr(ligne_qs.model, "entite"):
+                    self.fields["ligne_budget"].queryset = ligne_qs.filter(entite=federation)
+                elif hasattr(ligne_qs.model, "budget"):
+                    self.fields["ligne_budget"].queryset = ligne_qs.filter(
+                        budget__entite=federation
+                    )
 
 
 class DocumentForm(BootstrapFormMixin, forms.ModelForm):

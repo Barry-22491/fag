@@ -131,6 +131,20 @@ class PaiementAssociationTests(FederationFixturesMixin, TestCase):
         )
         self.url = reverse("paiement_association_create")
 
+    def test_formulaire_preremplit_association_et_reste_du(self):
+        response = self.client.get(
+            self.url,
+            {"association": self.association.pk},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertEqual(form.initial.get("association"), self.association.pk)
+        self.assertEqual(form.initial.get("mode_paiement"), "virement")
+        self.assertEqual(form.initial.get("date_paiement"), date.today())
+        self.assertEqual(form.initial.get("montant"), "20.00")
+        self.assertContains(response, "situations-data")
+
     @patch("gestion.views.send_mail")
     def test_paiement_repartit_sur_cotisation(self, mock_send_mail):
         response = self.client.post(

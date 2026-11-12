@@ -192,6 +192,9 @@
               <th class="text-end">Reste</th>
               <th class="text-end">Avance</th>
               <th>Situation</th>
+              {% if can_edit_cotisations %}
+              <th></th>
+              {% endif %}
             </tr>
           </thead>
 
@@ -235,11 +238,22 @@
                   <span class="badge bg-success">À jour</span>
                 {% endif %}
               </td>
+
+              {% if can_edit_cotisations %}
+              <td class="text-end">
+                {% if item.association_id %}
+                <a href="{% url 'paiement_association_create' %}?association={{ item.association_id }}"
+                   class="btn btn-sm btn-outline-primary">
+                  Encaisser
+                </a>
+                {% endif %}
+              </td>
+              {% endif %}
             </tr>
 
             {% empty %}
             <tr>
-              <td colspan="11" class="text-center text-muted py-4">
+              <td colspan="{% if can_edit_cotisations %}12{% else %}11{% endif %}" class="text-center text-muted py-4">
                 Aucun résumé disponible.
               </td>
             </tr>
