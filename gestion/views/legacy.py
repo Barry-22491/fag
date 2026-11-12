@@ -84,6 +84,7 @@ from ..emails import (
     envoyer_confirmation_paiement,
     envoyer_notification_activite,
     envoyer_email_historise,
+    envoyer_notification_generation_cotisation,
 )
 from ..models import HistoriqueEmail
 
@@ -1400,6 +1401,7 @@ def generer_cotisations(request):
     skipped = 0
     auto_paid = 0
     partial_paid = 0
+    cotisations_creees = []
 
     with transaction.atomic():
         for aff in affiliations:
@@ -1455,11 +1457,24 @@ def generer_cotisations(request):
                 cotisation.statut = "en_attente"
 
             cotisation.save()
+            cotisations_creees.append(cotisation.pk)
+
+    emails_envoyes = 0
+    for cotisation in CotisationAssociationMensuelle.objects.filter(
+        pk__in=cotisations_creees
+    ).select_related(
+        "affiliation__association__entite",
+        "affiliation__federation",
+    ):
+        resultat = envoyer_notification_generation_cotisation(cotisation)
+        if resultat.get("email_ok"):
+            emails_envoyes += 1
 
     messages.success(
         request,
         f"{created} cotisations générées, {skipped} déjà existantes. "
-        f"{auto_paid} payées automatiquement par avance, {partial_paid} partiellement payées."
+        f"{auto_paid} payées automatiquement par avance, {partial_paid} partiellement payées. "
+        f"{emails_envoyes} association(s) notifiée(s) par email."
     )
 
     return redirect("cotisations_liste")

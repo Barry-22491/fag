@@ -1,15 +1,36 @@
-from .models import Entite, UserEntiteRole,Personne
-from .permissions import ROLE_PERMISSIONS
-from django.utils import timezone # type: ignore
+from decimal import Decimal
+
+from django.contrib.auth.models import User  # type: ignore
+from django.db.models import Q, Sum  # type: ignore
+from django.utils import timezone  # type: ignore
 from collections import defaultdict
-from django.db.models import Sum # type: ignore
 
 from .models import (
     Association,
     CotisationAssociationMensuelle,
     ContributionDecesAssociation,
+    Entite,
     PaiementAssociation,
+    Personne,
+    UserEntiteRole,
 )
+from .permissions import ROLE_PERMISSIONS
+
+
+MOIS_LABELS_FR = {
+    1: "janvier",
+    2: "février",
+    3: "mars",
+    4: "avril",
+    5: "mai",
+    6: "juin",
+    7: "juillet",
+    8: "août",
+    9: "septembre",
+    10: "octobre",
+    11: "novembre",
+    12: "décembre",
+}
 
 
 
@@ -69,6 +90,72 @@ def notifier_users(users, message, type_notification, lien=None):
 
     if notifications:
         Notification.objects.bulk_create(notifications)
+
+
+def get_association_users(association):
+    """Utilisateurs rattachés à l'entité association."""
+    if not association or not association.entite_id:
+        return User.objects.none()
+    return User.objects.filter(
+        userentiterole__entite_id=association.entite_id
+    ).distinct()
+
+
+def get_situation_cotisation_association(cotisation):
+    """
+    Résumé clair pour une association au moment de la génération du mois :
+    montant mensuel, retard mensuel antérieur, décès en attente.
+    """
+    affiliation = cotisation.affiliation
+    association = affiliation.association
+    zero = Decimal("0.00")
+
+    montant_mensuel = cotisation.montant_attendu or zero
+    montant_mensuel_paye = cotisation.montant_paye or zero
+    montant_mensuel_reste = max(montant_mensuel - montant_mensuel_paye, zero)
+
+    cotisations_anterieures = CotisationAssociationMensuelle.objects.filter(
+        affiliation=affiliation,
+    ).exclude(pk=cotisation.pk).exclude(statut="paye").filter(
+        Q(annee__lt=cotisation.annee)
+        | Q(annee=cotisation.annee, mois__lt=cotisation.mois)
+    )
+
+    retard_mensuel = zero
+    for ancienne in cotisations_anterieures:
+        retard_mensuel += max(
+            (ancienne.montant_attendu or zero) - (ancienne.montant_paye or zero),
+            zero,
+        )
+
+    contributions_deces = ContributionDecesAssociation.objects.filter(
+        association=association,
+    ).exclude(statut="paye")
+
+    montant_deces = zero
+    for contribution in contributions_deces:
+        montant_deces += max(
+            (contribution.montant_attendu or zero) - (contribution.montant_paye or zero),
+            zero,
+        )
+
+    total_a_regler = montant_mensuel_reste + retard_mensuel + montant_deces
+    periode = f"{MOIS_LABELS_FR.get(cotisation.mois, cotisation.mois)} {cotisation.annee}"
+
+    return {
+        "association": association,
+        "periode": periode,
+        "mois": cotisation.mois,
+        "annee": cotisation.annee,
+        "montant_mensuel": montant_mensuel,
+        "montant_mensuel_paye": montant_mensuel_paye,
+        "montant_mensuel_reste": montant_mensuel_reste,
+        "retard_mensuel": retard_mensuel,
+        "montant_deces": montant_deces,
+        "total_a_regler": total_a_regler,
+        "code_paiement": association.code_paiement or "",
+        "statut_mois": cotisation.get_statut_display(),
+    }
 
 
 def generer_numero_personne(federation):

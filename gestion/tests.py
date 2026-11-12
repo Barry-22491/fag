@@ -7,19 +7,23 @@ from django.contrib.messages import get_messages
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from .emails import envoyer_email_historise
+from .emails import envoyer_email_historise, envoyer_notification_generation_cotisation
 from .forms import InformationForm
 from .models import (
     Adhesion,
     AffiliationAssociation,
     Association,
     BeneficiaireFederation,
+    ContributionDecesAssociation,
     CotisationAssociationMensuelle,
     DossierRapatriement,
     Entite,
     HistoriqueEmail,
+    Notification,
     PaiementAssociation,
     Personne,
+    Role,
+    UserEntiteRole,
 )
 
 
@@ -189,6 +193,94 @@ class PaiementAssociationTests(FederationFixturesMixin, TestCase):
         self.assertEqual(self.cotisation.statut, "paye")
         self.assertEqual(paiement.montant_avance, Decimal("30.00"))
         self.assertEqual(paiement.montant_affecte, Decimal("20.00"))
+
+
+class GenerationCotisationNotificationTests(FederationFixturesMixin, TestCase):
+    def setUp(self):
+        super().setUp()
+        CotisationAssociationMensuelle.objects.create(
+            affiliation=self.affiliation,
+            annee=2026,
+            mois=1,
+            montant_attendu=Decimal("20.00"),
+            montant_paye=Decimal("0"),
+            statut="en_attente",
+        )
+        self.dossier = DossierRapatriement.objects.create(
+            personne=self.personne,
+            affiliation=self.affiliation,
+            date_deces=date(2026, 2, 1),
+            lieu_deces="Dortmund",
+            pays_deces="Allemagne",
+            destination_rapatriement="Conakry",
+            cout_total=Decimal("400.00"),
+            personne_contact="Jane",
+            telephone_contact="123",
+            statut="ouvert",
+        )
+        ContributionDecesAssociation.objects.create(
+            dossier=self.dossier,
+            association=self.association,
+            montant_attendu=Decimal("200.00"),
+            montant_paye=Decimal("0"),
+            statut="en_attente",
+        )
+        role = Role.objects.create(nom="president_asso")
+        UserEntiteRole.objects.create(
+            user=self.user,
+            entite=self.asso_entite,
+            role=role,
+        )
+        self.url = reverse("generer_cotisations")
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_generer_mois_notifie_association(self):
+        response = self.client.post(
+            self.url,
+            data={"annee": "2026", "mois": "3"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        cotisation = CotisationAssociationMensuelle.objects.get(
+            affiliation=self.affiliation,
+            annee=2026,
+            mois=3,
+        )
+        self.assertEqual(cotisation.montant_attendu, Decimal("20.00"))
+
+        hist = HistoriqueEmail.objects.filter(type_email="generation_cotisation")
+        self.assertTrue(hist.exists())
+        commentaire = hist.first().commentaire
+        self.assertIn("Montant du mois", commentaire)
+        self.assertIn("Retard mensuel", commentaire)
+        self.assertIn("20,00", commentaire)
+        self.assertIn("200,00", commentaire)
+
+        notif = Notification.objects.filter(
+            type_notification="cotisation",
+            destinataire=self.user,
+        ).first()
+        self.assertIsNotNone(notif)
+        self.assertIn("Retard", notif.message)
+        self.assertIn("Décès", notif.message)
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_situation_detaillee(self):
+        cotisation = CotisationAssociationMensuelle.objects.create(
+            affiliation=self.affiliation,
+            annee=2026,
+            mois=3,
+            montant_attendu=Decimal("20.00"),
+            montant_paye=Decimal("0"),
+            statut="en_attente",
+        )
+        resultat = envoyer_notification_generation_cotisation(cotisation)
+        situation = resultat["situation"]
+        self.assertEqual(situation["montant_mensuel"], Decimal("20.00"))
+        self.assertEqual(situation["retard_mensuel"], Decimal("20.00"))
+        self.assertEqual(situation["montant_deces"], Decimal("200.00"))
+        self.assertEqual(situation["total_a_regler"], Decimal("240.00"))
+        self.assertTrue(resultat["email_ok"])
 
 
 class AlertesPermissionTests(FederationFixturesMixin, TestCase):

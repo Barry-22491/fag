@@ -877,6 +877,7 @@ class HistoriqueEmail(TimeStampedModel):
         ("confirmation_paiement", "Confirmation paiement"),
         ("notification_activite", "Notification activité"),
         ("rappel_deces", "Rappel cotisation décès"),
+        ("generation_cotisation", "Génération cotisation mensuelle"),
         ("rapatriement", "Rapatriement"),
         ("general", "Général"),
     ]

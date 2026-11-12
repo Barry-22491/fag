@@ -1,7 +1,13 @@
 from django.conf import settings
 from django.core.mail import get_connection, send_mail
 from smtplib import SMTPException
-from .models import HistoriqueEmail
+
+from .models import HistoriqueEmail, Notification
+from .utils import get_association_users, get_situation_cotisation_association
+
+
+def _format_euro(montant):
+    return f"{montant:.2f} €".replace(".", ",")
 
 
 def _smtp_connection():
@@ -84,6 +90,88 @@ def envoyer_email_simple(
         )
 
     return True
+
+
+def envoyer_notification_generation_cotisation(cotisation):
+    """
+    Informe l'association après génération du mois :
+    montant mensuel, retard mensuel, contributions décès.
+    """
+    situation = get_situation_cotisation_association(cotisation)
+    association = situation["association"]
+    nom = association.entite.nom
+
+    sujet = f"Cotisations {situation['periode']} — {nom}"
+    message = (
+        f"Bonjour,\n\n"
+        f"Les cotisations du mois de {situation['periode']} ont été générées "
+        f"pour l'association {nom}.\n\n"
+        f"Voici le détail de votre situation :\n\n"
+        f"1) Cotisation mensuelle ({situation['periode']})\n"
+        f"   - Montant du mois : {_format_euro(situation['montant_mensuel'])}\n"
+        f"   - Déjà payé / avance appliquée : {_format_euro(situation['montant_mensuel_paye'])}\n"
+        f"   - Reste à payer ce mois : {_format_euro(situation['montant_mensuel_reste'])}\n"
+        f"   - Statut : {situation['statut_mois']}\n\n"
+        f"2) Retard mensuel (mois antérieurs)\n"
+        f"   - Montant en retard : {_format_euro(situation['retard_mensuel'])}\n\n"
+        f"3) Contributions décès / rapatriement\n"
+        f"   - Montant encore dû : {_format_euro(situation['montant_deces'])}\n\n"
+        f"Total à régler : {_format_euro(situation['total_a_regler'])}\n"
+        f"Identifiant de paiement : {situation['code_paiement'] or '-'}\n\n"
+        f"Merci de régulariser dès que possible.\n"
+        f"Cordialement,\n"
+        f"Bureau exécutif — FAG NRW e.V."
+    )
+
+    destinataires = []
+    if association.email:
+        destinataires.append(association.email)
+
+    president = association.get_president()
+    if president and president.email and president.email not in destinataires:
+        destinataires.append(president.email)
+
+    email_ok = False
+    if destinataires:
+        email_ok = envoyer_email_simple(
+            sujet=sujet,
+            message=message,
+            destinataires=destinataires,
+            type_email="generation_cotisation",
+            cotisation=cotisation,
+        )
+
+    notif_message = (
+        f"Cotisations {situation['periode']} générées pour {nom}. "
+        f"Mensuel : {_format_euro(situation['montant_mensuel'])} "
+        f"(reste {_format_euro(situation['montant_mensuel_reste'])}) · "
+        f"Retard : {_format_euro(situation['retard_mensuel'])} · "
+        f"Décès : {_format_euro(situation['montant_deces'])} · "
+        f"Total : {_format_euro(situation['total_a_regler'])}."
+    )
+
+    users = list(get_association_users(association))
+    notifications = []
+    for user in users:
+        notifications.append(
+            Notification(
+                entite=association.entite,
+                destinataire=user,
+                titre=sujet[:200],
+                message=notif_message,
+                type_notification="cotisation",
+                lien="/cotisations/",
+            )
+        )
+    if notifications:
+        Notification.objects.bulk_create(notifications)
+
+    return {
+        "email_ok": email_ok,
+        "destinataires": destinataires,
+        "users_notifies": len(users),
+        "situation": situation,
+    }
 
 
 def envoyer_rappel_cotisation(cotisation):

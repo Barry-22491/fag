@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.utils import timezone
 
+from .emails import envoyer_notification_generation_cotisation
 from .models import (
     AffiliationAssociation,
     CotisationAssociationMensuelle,
@@ -54,10 +55,11 @@ def _appliquer_avances(cotisation, association):
 def generer_cotisations_auto():
     today = timezone.now()
     created = 0
+    cotisations_creees = []
 
     affiliations = AffiliationAssociation.objects.filter(
         statut="active"
-    ).select_related("association")
+    ).select_related("association", "association__entite")
 
     for aff in affiliations:
         with transaction.atomic():
@@ -76,6 +78,15 @@ def generer_cotisations_auto():
                 continue
 
             _appliquer_avances(cotisation, aff.association)
+            cotisations_creees.append(cotisation.pk)
             created += 1
+
+    for cotisation in CotisationAssociationMensuelle.objects.filter(
+        pk__in=cotisations_creees
+    ).select_related(
+        "affiliation__association__entite",
+        "affiliation__federation",
+    ):
+        envoyer_notification_generation_cotisation(cotisation)
 
     return created
