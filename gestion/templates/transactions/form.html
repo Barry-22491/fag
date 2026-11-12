@@ -8,26 +8,33 @@
       <div class="card-body p-4">
         <h1 class="h4 mb-4">{{ title }}</h1>
 
-        <form method="post" class="row g-3">
+        <form method="post" class="row g-3" novalidate>
           {% csrf_token %}
 
+          {% if form.non_field_errors %}
+          <div class="col-12">
+            {% for error in form.non_field_errors %}
+              <div class="alert alert-danger mb-0">{{ error }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
           {% for field in form %}
-          <div class="col-12 col-md-6">
-            <label class="form-label fw-semibold">{{ field.label }}</label>
-            {{ field }}
+          <div class="col-12 {% if field.name == 'libelle' or field.name == 'donateur' %}col-md-12{% else %}col-md-6{% endif %}">
+            <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {% if field.name == 'montant' %}
+              <div class="input-group">
+                {{ field }}
+                <span class="input-group-text">€</span>
+              </div>
+            {% else %}
+              {{ field }}
+            {% endif %}
             {% for error in field.errors %}
               <div class="text-danger small mt-1">{{ error }}</div>
             {% endfor %}
           </div>
           {% endfor %}
-
-          {% if form.non_field_errors %}
-          <div class="col-12">
-            {% for error in form.non_field_errors %}
-              <div class="alert alert-danger">{{ error }}</div>
-            {% endfor %}
-          </div>
-          {% endif %}
 
           <div class="col-12 d-flex justify-content-end gap-2">
             <a href="{% url 'transactions_liste' %}" class="btn btn-light">Annuler</a>

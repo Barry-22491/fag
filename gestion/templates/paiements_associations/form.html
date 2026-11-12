@@ -2,24 +2,101 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="card border-0 shadow-sm">
-  <div class="card-body">
-    <h1 class="h4 mb-4">{{ title }}</h1>
+<div class="row justify-content-center">
+  <div class="col-12 col-xl-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-2">{{ title }}</h1>
+        <p class="text-muted mb-4">
+          Le montant est réparti automatiquement : d’abord les cotisations mensuelles
+          impayées (les plus anciennes), puis les contributions décès, et le reste
+          devient une avance pour l’association.
+        </p>
 
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
+        <form method="post" class="row g-3" novalidate>
+          {% csrf_token %}
 
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary">
-          Enregistrer et répartir
-        </button>
+          {% if form.non_field_errors %}
+          <div class="col-12">
+            {% for error in form.non_field_errors %}
+              <div class="alert alert-danger mb-0">{{ error }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
 
-        <a href="{% url 'cotisations_liste' %}" class="btn btn-light">
-          Annuler
-        </a>
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold" for="{{ form.association.id_for_label }}">
+              {{ form.association.label }}
+            </label>
+            {{ form.association }}
+            {% for error in form.association.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold" for="{{ form.montant.id_for_label }}">
+              {{ form.montant.label }}
+            </label>
+            <div class="input-group">
+              {{ form.montant }}
+              <span class="input-group-text">€</span>
+            </div>
+            {% for error in form.montant.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold" for="{{ form.date_paiement.id_for_label }}">
+              {{ form.date_paiement.label }}
+            </label>
+            {{ form.date_paiement }}
+            {% for error in form.date_paiement.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold" for="{{ form.mode_paiement.id_for_label }}">
+              {{ form.mode_paiement.label }}
+            </label>
+            {{ form.mode_paiement }}
+            {% for error in form.mode_paiement.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-semibold" for="{{ form.reference.id_for_label }}">
+              {{ form.reference.label }}
+            </label>
+            {{ form.reference }}
+            <div class="form-text">Ex. numéro de virement ou référence bancaire.</div>
+            {% for error in form.reference.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-semibold" for="{{ form.commentaire.id_for_label }}">
+              {{ form.commentaire.label }}
+            </label>
+            {{ form.commentaire }}
+            {% for error in form.commentaire.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12 d-flex justify-content-end gap-2">
+            <a href="{% url 'cotisations_liste' %}" class="btn btn-light">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+              Enregistrer et répartir
+            </button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   </div>
 </div>
 {% endblock %}

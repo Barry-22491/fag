@@ -366,12 +366,22 @@ class PaiementAssociationForm(BootstrapFormMixin, forms.ModelForm):
             "date_paiement": DateInput(),
             "commentaire": forms.Textarea(attrs={"rows": 3}),
         }
+        labels = {
+            "association": "Association",
+            "montant": "Montant reçu",
+            "date_paiement": "Date de paiement",
+            "mode_paiement": "Mode de paiement",
+            "reference": "Référence",
+            "commentaire": "Commentaire",
+        }
 
     def __init__(self, *args, **kwargs):
         federation = kwargs.pop("federation", None)
         super().__init__(*args, **kwargs)
 
         self.fields["association"].queryset = Association.objects.none()
+        self.fields["montant"].widget.attrs.setdefault("min", "0.01")
+        self.fields["montant"].widget.attrs.setdefault("step", "0.01")
 
         if federation:
             self.fields["association"].queryset = Association.objects.filter(
