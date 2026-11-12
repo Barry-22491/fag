@@ -172,18 +172,16 @@ class DossierRapatriementForm(BootstrapFormMixin,forms.ModelForm):
 
 
 class ActiviteCulturelleForm(BootstrapFormMixin, forms.ModelForm):
-    langue_publication = forms.ChoiceField(
-        choices=LANGUE_CHOICES,
-        label=_("Langue de publication")
-    )
-
     class Meta:
         model = ActiviteCulturelle
         fields = [
             "entite",
-            "langue_publication",
-            "titre",
-            "description",
+            "titre_fr",
+            "description_fr",
+            "titre_de",
+            "description_de",
+            "titre_en",
+            "description_en",
             "date",
             "lieu",
             "capacite",
@@ -193,12 +191,18 @@ class ActiviteCulturelleForm(BootstrapFormMixin, forms.ModelForm):
 
         widgets = {
             "date": DateTimeInput(),
-            "description": forms.Textarea(attrs={"rows": 5}),
+            "description_fr": forms.Textarea(attrs={"rows": 5}),
+            "description_de": forms.Textarea(attrs={"rows": 5}),
+            "description_en": forms.Textarea(attrs={"rows": 5}),
         }
         labels = {
             "entite": "Fédération",
-            "titre": "Titre",
-            "description": "Description",
+            "titre_fr": "Titre",
+            "description_fr": "Description",
+            "titre_de": "Titel",
+            "description_de": "Beschreibung",
+            "titre_en": "Title",
+            "description_en": "Description",
             "date": "Date et heure",
             "lieu": "Lieu",
             "capacite": "Capacité",
@@ -215,13 +219,23 @@ class ActiviteCulturelleForm(BootstrapFormMixin, forms.ModelForm):
         ]
         self.fields["capacite"].required = False
         self.fields["lieu"].required = False
-        if self.instance and self.instance.pk and not self.is_bound:
-            if self.instance.titre_de and self.instance.titre == self.instance.titre_de:
-                self.initial["langue_publication"] = "de"
-            elif self.instance.titre_en and self.instance.titre == self.instance.titre_en:
-                self.initial["langue_publication"] = "en"
-            else:
-                self.initial["langue_publication"] = "fr"
+        self.fields["titre_fr"].required = True
+        self.fields["description_fr"].required = False
+        self.fields["titre_de"].required = False
+        self.fields["description_de"].required = False
+        self.fields["titre_en"].required = False
+        self.fields["description_en"].required = False
+        if self.instance and self.instance.pk and not self.instance.titre_fr:
+            self.initial["titre_fr"] = self.instance.titre
+            self.initial["description_fr"] = self.instance.description
+
+    def save(self, commit=True):
+        activite = super().save(commit=False)
+        activite.titre = self.cleaned_data["titre_fr"]
+        activite.description = self.cleaned_data.get("description_fr") or ""
+        if commit:
+            activite.save()
+        return activite
 
 
 class TransactionForm(BootstrapFormMixin,forms.ModelForm):

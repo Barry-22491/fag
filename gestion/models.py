@@ -816,10 +816,9 @@ class ActiviteCulturelle(TimeStampedModel):
             return self.titre_de
         if lang == "en" and self.titre_en:
             return self.titre_en
-        if lang == "fr" and self.titre_fr:
+        if self.titre_fr:
             return self.titre_fr
-
-        return self.titre_fr or self.titre
+        return self.titre
 
     def description_traduite(self):
         lang = get_language()
@@ -828,10 +827,9 @@ class ActiviteCulturelle(TimeStampedModel):
             return self.description_de
         if lang == "en" and self.description_en:
             return self.description_en
-        if lang == "fr" and self.description_fr:
+        if self.description_fr:
             return self.description_fr
-
-        return self.description_fr or self.description
+        return self.description
 
     def __str__(self):
         return self.titre_fr or self.titre

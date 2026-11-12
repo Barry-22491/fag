@@ -8,8 +8,8 @@
       <div class="card-body p-4">
         <h1 class="h4 mb-2">{{ title }}</h1>
         <p class="text-muted mb-4">
-          La langue choisie est celle du texte saisi. Le site public affiche cette version,
-          puis le français s'il existe.
+          Le français est obligatoire. L'allemand et l'anglais sont facultatifs :
+          s'ils sont vides, le site affiche le français.
         </p>
 
         <form method="post" class="row g-3" novalidate>
@@ -23,7 +23,7 @@
           </div>
           {% endif %}
 
-          <div class="col-12 col-md-6">
+          <div class="col-12">
             <label class="form-label fw-semibold" for="{{ form.entite.id_for_label }}">{{ form.entite.label }}</label>
             {{ form.entite }}
             {% for error in form.entite.errors %}
@@ -31,28 +31,56 @@
             {% endfor %}
           </div>
 
-          <div class="col-12 col-md-6">
-            <label class="form-label fw-semibold" for="{{ form.langue_publication.id_for_label }}">{{ form.langue_publication.label }}</label>
-            {{ form.langue_publication }}
-            {% for error in form.langue_publication.errors %}
-              <div class="text-danger small mt-1">{{ error }}</div>
-            {% endfor %}
-          </div>
-
           <div class="col-12">
-            <label class="form-label fw-semibold" for="{{ form.titre.id_for_label }}">{{ form.titre.label }}</label>
-            {{ form.titre }}
-            {% for error in form.titre.errors %}
-              <div class="text-danger small mt-1">{{ error }}</div>
-            {% endfor %}
-          </div>
-
-          <div class="col-12">
-            <label class="form-label fw-semibold" for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
-            {{ form.description }}
-            {% for error in form.description.errors %}
-              <div class="text-danger small mt-1">{{ error }}</div>
-            {% endfor %}
+            <ul class="nav nav-tabs" role="tablist">
+              <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#activite-fr" type="button">Français</button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#activite-de" type="button">Deutsch</button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#activite-en" type="button">English</button>
+              </li>
+            </ul>
+            <div class="tab-content border border-top-0 rounded-bottom p-3">
+              <div class="tab-pane fade show active" id="activite-fr">
+                <div class="mb-3">
+                  <label class="form-label fw-semibold" for="{{ form.titre_fr.id_for_label }}">{{ form.titre_fr.label }}</label>
+                  {{ form.titre_fr }}
+                  {% for error in form.titre_fr.errors %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                  {% endfor %}
+                </div>
+                <div>
+                  <label class="form-label fw-semibold" for="{{ form.description_fr.id_for_label }}">{{ form.description_fr.label }}</label>
+                  {{ form.description_fr }}
+                  {% for error in form.description_fr.errors %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="tab-pane fade" id="activite-de">
+                <div class="mb-3">
+                  <label class="form-label fw-semibold" for="{{ form.titre_de.id_for_label }}">{{ form.titre_de.label }}</label>
+                  {{ form.titre_de }}
+                </div>
+                <div>
+                  <label class="form-label fw-semibold" for="{{ form.description_de.id_for_label }}">{{ form.description_de.label }}</label>
+                  {{ form.description_de }}
+                </div>
+              </div>
+              <div class="tab-pane fade" id="activite-en">
+                <div class="mb-3">
+                  <label class="form-label fw-semibold" for="{{ form.titre_en.id_for_label }}">{{ form.titre_en.label }}</label>
+                  {{ form.titre_en }}
+                </div>
+                <div>
+                  <label class="form-label fw-semibold" for="{{ form.description_en.id_for_label }}">{{ form.description_en.label }}</label>
+                  {{ form.description_en }}
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="col-12 col-md-6">

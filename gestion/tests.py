@@ -362,9 +362,12 @@ class ActiviteCreateTests(FederationFixturesMixin, TestCase):
             reverse("activite_create"),
             data={
                 "entite": self.federation.pk,
-                "langue_publication": "fr",
-                "titre": "Soirée culturelle",
-                "description": "Programme de la soirée",
+                "titre_fr": "Soirée culturelle",
+                "description_fr": "Programme de la soirée",
+                "titre_de": "Kulturabend",
+                "description_de": "Abendprogramm",
+                "titre_en": "",
+                "description_en": "",
                 "date": "2026-12-01T18:30",
                 "lieu": "Dortmund",
                 "capacite": "40",
@@ -376,6 +379,8 @@ class ActiviteCreateTests(FederationFixturesMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         activite = ActiviteCulturelle.objects.get()
         self.assertEqual(activite.titre_fr, "Soirée culturelle")
+        self.assertEqual(activite.titre_de, "Kulturabend")
+        self.assertEqual(activite.titre, "Soirée culturelle")
         self.assertEqual(activite.description_fr, "Programme de la soirée")
         self.assertTrue(activite.est_public)
         self.assertEqual(len(mail.outbox), 1)

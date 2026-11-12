@@ -1830,23 +1830,6 @@ def activite_detail(request, pk):
     return render(request, "activites/detail.html", {"activite": activite})
 
 
-def _appliquer_langue_activite(activite, langue):
-    if langue == "de":
-        activite.titre_de = activite.titre
-        activite.description_de = activite.description
-    elif langue == "en":
-        activite.titre_en = activite.titre
-        activite.description_en = activite.description
-    else:
-        activite.titre_fr = activite.titre
-        activite.description_fr = activite.description
-
-    if not activite.titre_fr:
-        activite.titre_fr = activite.titre
-    if not activite.description_fr:
-        activite.description_fr = activite.description
-
-
 def _notifier_activite(request, activite, federations):
     destinataires = list(
         Association.objects.filter(
@@ -1876,16 +1859,11 @@ def activite_create(request):
         form.fields["entite"].queryset = federations
 
         if form.is_valid():
-            activite = form.save(commit=False)
-            _appliquer_langue_activite(activite, form.cleaned_data["langue_publication"])
-            activite.save()
+            activite = form.save()
             _notifier_activite(request, activite, federations)
             return redirect("activite_detail", pk=activite.pk)
     else:
-        form = ActiviteCulturelleForm(initial={
-            "entite": federation.pk,
-            "langue_publication": "fr",
-        })
+        form = ActiviteCulturelleForm(initial={"entite": federation.pk})
         form.fields["entite"].queryset = federations
 
     return render(request, "activites/form.html", {
@@ -1909,9 +1887,7 @@ def activite_update(request, pk):
         form = ActiviteCulturelleForm(request.POST, instance=activite)
         form.fields["entite"].queryset = federations
         if form.is_valid():
-            activite = form.save(commit=False)
-            _appliquer_langue_activite(activite, form.cleaned_data["langue_publication"])
-            activite.save()
+            activite = form.save()
             messages.success(request, "Activité mise à jour.")
             return redirect("activite_detail", pk=activite.pk)
     else:
