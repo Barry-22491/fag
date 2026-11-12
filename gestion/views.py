@@ -25,7 +25,6 @@ from decimal import Decimal, ROUND_UP
 from django.utils.safestring import mark_safe # type: ignore
 from urllib.parse import quote
 from django.db import transaction
-from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
 
 
@@ -856,30 +855,21 @@ def cotisations_liste(request):
     else:
         return HttpResponseForbidden("Accès refusé.")
 
-    code = request.GET.get("code")
     annee = request.GET.get("annee")
     mois = request.GET.get("mois")
     statut = request.GET.get("statut")
-    association = request.GET.get("association")
-    date_debut = request.GET.get("date_debut")
-    date_fin = request.GET.get("date_fin")
+    association = (request.GET.get("association") or "").strip()
 
     qs = filtrer_cotisations_mensuelles(qs, request)
 
-    if code:
-        contributions_deces = contributions_deces.filter(
-            association__code_paiement__icontains=code
-        )
-        paiements_avance = paiements_avance.filter(
-            association__code_paiement__icontains=code
-        )
-
     if association:
         contributions_deces = contributions_deces.filter(
-            association__entite__nom__icontains=association
+            Q(association__entite__nom__icontains=association) |
+            Q(association__code_paiement__icontains=association)
         )
         paiements_avance = paiements_avance.filter(
-            association__entite__nom__icontains=association
+            Q(association__entite__nom__icontains=association) |
+            Q(association__code_paiement__icontains=association)
         )
 
     if statut:
@@ -995,7 +985,7 @@ def cotisations_liste(request):
     total_avance_global = sum(item["avance"] for item in resume_associations)
 
     afficher_detail_mensuel = bool(
-        code or association or annee or mois or statut or date_debut or date_fin
+        association or annee or mois or statut
     )
 
     page_obj = paginate(request, qs.order_by("-annee", "-mois"))
@@ -3209,19 +3199,16 @@ def export_vide(request, message="Aucune donnée à exporter."):
 
 
 def filtrer_cotisations_mensuelles(qs, request):
-    association = request.GET.get("association")
-    code = request.GET.get("code")
+    association = (request.GET.get("association") or "").strip()
     annee = request.GET.get("annee")
     mois = request.GET.get("mois")
     statut = request.GET.get("statut")
-    date_debut = request.GET.get("date_debut")
-    date_fin = request.GET.get("date_fin")
 
     if association:
-        qs = qs.filter(affiliation__association__entite__nom__icontains=association)
-
-    if code:
-        qs = qs.filter(affiliation__association__code_paiement__icontains=code)
+        qs = qs.filter(
+            Q(affiliation__association__entite__nom__icontains=association) |
+            Q(affiliation__association__code_paiement__icontains=association)
+        )
 
     if annee:
         qs = qs.filter(annee=annee)
@@ -3231,30 +3218,6 @@ def filtrer_cotisations_mensuelles(qs, request):
 
     if statut:
         qs = qs.filter(statut=statut)
-
-    debut = parse_date(date_debut) if date_debut else None
-    fin = parse_date(date_fin) if date_fin else None
-
-    if debut and fin:
-        qs = qs.filter(
-            Q(annee__gt=debut.year) |
-            Q(annee=debut.year, mois__gte=debut.month)
-        ).filter(
-            Q(annee__lt=fin.year) |
-            Q(annee=fin.year, mois__lte=fin.month)
-        )
-
-    elif debut:
-        qs = qs.filter(
-            Q(annee__gt=debut.year) |
-            Q(annee=debut.year, mois__gte=debut.month)
-        )
-
-    elif fin:
-        qs = qs.filter(
-            Q(annee__lt=fin.year) |
-            Q(annee=fin.year, mois__lte=fin.month)
-        )
 
     return qs
 

@@ -87,24 +87,14 @@
     </div>
 
     <form method="get" class="row g-3 mb-4 align-items-end">
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-3">
         <label for="filtre-association" class="form-label">Association</label>
         <input type="text"
                id="filtre-association"
                name="association"
                value="{{ request.GET.association }}"
                class="form-control"
-               placeholder="Nom de l'association">
-      </div>
-
-      <div class="col-6 col-md-2">
-        <label for="filtre-code" class="form-label">Code</label>
-        <input type="text"
-               id="filtre-code"
-               name="code"
-               value="{{ request.GET.code }}"
-               class="form-control"
-               placeholder="Code">
+               placeholder="Nom ou code">
       </div>
 
       <div class="col-6 col-md-2">
@@ -131,7 +121,7 @@
                max="12">
       </div>
 
-      <div class="col-6 col-md-2">
+      <div class="col-12 col-md-2">
         <label for="filtre-statut" class="form-label">Statut</label>
         <select id="filtre-statut" name="statut" class="form-select">
           <option value="">Tous</option>
@@ -142,32 +132,11 @@
         </select>
       </div>
 
-      <div class="col-6 col-md-3">
-        <label for="filtre-date-debut" class="form-label">Date début</label>
-        <input type="date"
-               id="filtre-date-debut"
-               name="date_debut"
-               value="{{ request.GET.date_debut }}"
-               class="form-control">
-      </div>
-
-      <div class="col-6 col-md-3">
-        <label for="filtre-date-fin" class="form-label">Date fin</label>
-        <input type="date"
-               id="filtre-date-fin"
-               name="date_fin"
-               value="{{ request.GET.date_fin }}"
-               class="form-control">
-      </div>
-
-      <div class="col-6 col-md-3">
-        <button type="submit" class="btn btn-outline-secondary w-100">
+      <div class="col-6 col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-secondary flex-fill">
           Filtrer
         </button>
-      </div>
-
-      <div class="col-6 col-md-3">
-        <a href="{% url 'cotisations_liste' %}" class="btn btn-light w-100">
+        <a href="{% url 'cotisations_liste' %}" class="btn btn-light flex-fill">
           Reset
         </a>
       </div>
