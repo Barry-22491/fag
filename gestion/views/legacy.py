@@ -2590,31 +2590,33 @@ def inviter_utilisateur(request):
         form = InvitationUtilisateurForm(request.POST, federation=federation)
 
         if form.is_valid():
-            adhesion = form.cleaned_data["adhesion"]
-            personne = adhesion.personne
-            email = personne.email
+            personne = form.cleaned_data["personne"]
+            email = form.cleaned_data["email"]
+            prenom = form.cleaned_data["prenom"]
+            nom = form.cleaned_data["nom"]
 
             user, created = User.objects.get_or_create(
                 username=email,
                 defaults={
                     "email": email,
-                    "first_name": personne.prenom,
-                    "last_name": personne.nom,
+                    "first_name": prenom,
+                    "last_name": nom,
                     "is_active": True,
                 },
             )
 
             doit_choisir_mot_de_passe = created or not user.has_usable_password()
             user.email = email
-            user.first_name = personne.prenom
-            user.last_name = personne.nom
+            user.first_name = prenom
+            user.last_name = nom
             user.is_active = True
             if doit_choisir_mot_de_passe:
                 user.set_password(secrets.token_urlsafe(32))
             user.save()
 
-            personne.compte = user
-            personne.save(update_fields=["compte"])
+            if personne:
+                personne.compte = user
+                personne.save(update_fields=["compte"])
 
             for entite, role_nom in form.cleaned_data["attributions"]:
                 role, _created_role = Role.objects.get_or_create(nom=role_nom)
@@ -2624,6 +2626,7 @@ def inviter_utilisateur(request):
                     role=role,
                 )
 
+            destinataire = personne or f"{prenom} {nom}"
             if doit_choisir_mot_de_passe:
                 reset_form = PasswordResetForm({"email": email})
                 if reset_form.is_valid():
@@ -2636,12 +2639,12 @@ def inviter_utilisateur(request):
                     )
                 messages.success(
                     request,
-                    f"Invitation envoyée à {personne}. Le lien permet de choisir le mot de passe.",
+                    f"Invitation envoyée à {destinataire}. Le lien permet de choisir le mot de passe.",
                 )
             else:
                 messages.success(
                     request,
-                    f"Accès ajouté pour {personne}. Le mot de passe existant est conservé.",
+                    f"Accès ajouté pour {destinataire}. Le mot de passe existant est conservé.",
                 )
             return redirect("dashboard")
     else:

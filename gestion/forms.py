@@ -431,9 +431,18 @@ def _sur_bureau_federal(adhesion):
 
 
 class InvitationUtilisateurForm(BootstrapFormMixin, forms.Form):
+    mode = forms.ChoiceField(
+        label="Type de compte",
+        choices=[
+            ("membre", "Responsable d'association ou bureau exécutif"),
+            ("administrateur", "Administrateur"),
+        ],
+        initial="membre",
+    )
     adhesion = AdhesionInvitationField(
         label="Personne",
         queryset=Adhesion.objects.none(),
+        required=False,
         help_text="Président, membre du bureau d'association, ou membre du bureau exécutif.",
     )
     role_bureau = forms.ChoiceField(
@@ -442,16 +451,48 @@ class InvitationUtilisateurForm(BootstrapFormMixin, forms.Form):
         required=False,
         help_text="À remplir seulement si la personne siège au bureau exécutif.",
     )
+    prenom = forms.CharField(label="Prénom", max_length=100, required=False)
+    nom = forms.CharField(label="Nom", max_length=100, required=False)
+    email = forms.EmailField(label="Email", required=False)
 
     def __init__(self, *args, federation=None, **kwargs):
+        self.federation = federation
         super().__init__(*args, **kwargs)
         if federation is not None:
             self.fields["adhesion"].queryset = adhesions_invitables(federation)
 
     def clean(self):
         cleaned = super().clean()
+        mode = cleaned.get("mode")
+        if mode == "administrateur":
+            return self._clean_administrateur(cleaned)
+        return self._clean_membre(cleaned)
+
+    def _clean_administrateur(self, cleaned):
+        prenom = (cleaned.get("prenom") or "").strip()
+        nom = (cleaned.get("nom") or "").strip()
+        email = (cleaned.get("email") or "").strip()
+        if not prenom:
+            self.add_error("prenom", "Indiquez le prénom.")
+        if not nom:
+            self.add_error("nom", "Indiquez le nom.")
+        if not email:
+            self.add_error("email", "Indiquez l'email.")
+        elif User.objects.filter(email__iexact=email).exists() or User.objects.filter(username__iexact=email).exists():
+            self.add_error("email", "Un compte existe déjà avec cet email.")
+        if self.errors:
+            return cleaned
+        cleaned["prenom"] = prenom
+        cleaned["nom"] = nom
+        cleaned["email"] = email
+        cleaned["personne"] = None
+        cleaned["attributions"] = [(self.federation, "federation_direction")]
+        return cleaned
+
+    def _clean_membre(self, cleaned):
         adhesion = cleaned.get("adhesion")
         if not adhesion:
+            self.add_error("adhesion", "Choisissez une personne déjà enregistrée.")
             return cleaned
 
         if adhesion.personne.compte_id:
@@ -471,9 +512,13 @@ class InvitationUtilisateurForm(BootstrapFormMixin, forms.Form):
             else:
                 attributions.append((adhesion.association.federation, role_bureau))
 
-        if not attributions:
+        if not attributions and not self.errors:
             self.add_error("adhesion", "Cette personne ne peut pas recevoir de compte.")
 
+        cleaned["personne"] = adhesion.personne
+        cleaned["prenom"] = adhesion.personne.prenom
+        cleaned["nom"] = adhesion.personne.nom
+        cleaned["email"] = adhesion.personne.email
         cleaned["attributions"] = attributions
         return cleaned
 

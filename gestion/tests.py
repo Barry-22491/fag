@@ -393,7 +393,7 @@ class InvitationMotDePasseTests(FederationFixturesMixin, TestCase):
         adhesion = Adhesion.objects.get(personne=self.personne)
         response = self.client.post(
             reverse("inviter_utilisateur"),
-            data={"adhesion": adhesion.pk, "role_bureau": ""},
+            data={"mode": "membre", "adhesion": adhesion.pk, "role_bureau": ""},
         )
 
         self.assertEqual(response.status_code, 302)
@@ -410,6 +410,29 @@ class InvitationMotDePasseTests(FederationFixturesMixin, TestCase):
         )
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("/accounts/reset/", mail.outbox[0].body)
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_administrateur_sans_adhesion(self):
+        response = self.client.post(
+            reverse("inviter_utilisateur"),
+            data={
+                "mode": "administrateur",
+                "prenom": "Awa",
+                "nom": "Diallo",
+                "email": "admin-fag@example.com",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        user = User.objects.get(email="admin-fag@example.com")
+        self.assertFalse(Personne.objects.filter(compte=user).exists())
+        self.assertTrue(
+            UserEntiteRole.objects.filter(
+                user=user,
+                entite=self.federation,
+                role__nom="federation_direction",
+            ).exists()
+        )
+        self.assertEqual(len(mail.outbox), 1)
 
     def test_pages_mot_de_passe_accessibles(self):
         self.client.logout()

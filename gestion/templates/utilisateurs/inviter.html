@@ -8,13 +8,13 @@
       <div class="card-body p-4">
         <h1 class="h4 mb-2">{{ title }}</h1>
         <p class="text-muted mb-4">
-          Le compte reprend une personne déjà enregistrée : responsable d'une association,
-          ou membre du bureau exécutif. Le lien sert seulement à choisir le mot de passe.
+          Un responsable ou un membre du bureau exécutif est choisi parmi les fiches existantes.
+          Un administrateur peut ne pas être membre : son compte est rattaché directement à la fédération.
         </p>
-        <form method="post" class="row g-3">
+        <form method="post" class="row g-3" id="invitation-form">
           {% csrf_token %}
           {% for field in form %}
-          <div class="col-12">
+          <div class="col-12 invitation-field" data-field="{{ field.name }}">
             <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
             {{ field }}
             {% if field.help_text %}
@@ -34,4 +34,27 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const mode = document.getElementById("id_mode");
+  if (!mode) return;
+  const membreFields = ["adhesion", "role_bureau"];
+  const adminFields = ["prenom", "nom", "email"];
+
+  function refresh() {
+    const admin = mode.value === "administrateur";
+    document.querySelectorAll(".invitation-field").forEach(function (block) {
+      const name = block.dataset.field;
+      if (membreFields.indexOf(name) !== -1) block.classList.toggle("d-none", admin);
+      if (adminFields.indexOf(name) !== -1) block.classList.toggle("d-none", !admin);
+    });
+  }
+
+  mode.addEventListener("change", refresh);
+  refresh();
+})();
+</script>
 {% endblock %}
