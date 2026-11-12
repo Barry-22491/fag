@@ -1,6 +1,8 @@
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.models import User # type: ignore
 from django import forms # type: ignore
+from django.db.models import Q
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _ # type: ignore
 
 
@@ -376,40 +378,103 @@ class ContributionDecesAssociationForm(BootstrapFormMixin, forms.ModelForm):
 
 # la gestion des utilisateur - 02.05.2026
 
-ROLE_INVITATION_CHOICES = [
-    ("federation_direction", "Direction fédération"),
-    ("federation_finances", "Finances fédération"),
-    ("federation_social", "Social fédération"),
-    ("federation_organisation", "Organisation fédération"),
-    ("federation_projets", "Projets fédération"),
-    ("federation_communication", "Communication fédération"),
-    ("federation_externe", "Externe fédération"),
-    ("federation_lecture", "Lecture fédération"),
-    ("association_president", "Président d'association"),
-    ("association_lecture", "Lecture association"),
+ROLE_BUREAU_FEDERAL_CHOICES = [
+    ("federation_direction", "Direction"),
+    ("federation_finances", "Finances"),
+    ("federation_social", "Social"),
+    ("federation_organisation", "Organisation"),
+    ("federation_projets", "Projets"),
+    ("federation_communication", "Communication"),
+    ("federation_lecture", "Lecture"),
 ]
 
 
-class InvitationUtilisateurForm(BootstrapFormMixin, forms.Form):
-    email = forms.EmailField(label="Email")
-    prenom = forms.CharField(max_length=100, label="Prénom")
-    nom = forms.CharField(max_length=100, label="Nom")
-    role = forms.ChoiceField(label="Rôle", choices=ROLE_INVITATION_CHOICES)
-    entite = forms.ModelChoiceField(
-        label="Rattachement",
-        queryset=Entite.objects.none(),
+class AdhesionInvitationField(forms.ModelChoiceField):
+    def label_from_instance(self, adhesion):
+        return (
+            f"{adhesion.personne} — {adhesion.association.entite.nom} "
+            f"({adhesion.get_role_display()})"
+        )
+
+
+def adhesions_invitables(federation):
+    today = timezone.localdate()
+    bureau_federal_ids = BureauMembre.objects.filter(
+        bureau__entite=federation,
+    ).filter(
+        Q(bureau__date_fin__isnull=True) | Q(bureau__date_fin__gte=today)
+    ).values_list("adhesion_id", flat=True)
+
+    return (
+        Adhesion.objects.filter(
+            statut="valide",
+            association__federation=federation,
+            personne__compte__isnull=True,
+        )
+        .exclude(personne__email="")
+        .filter(
+            Q(role__in=["president", "membre_bureau"]) | Q(pk__in=bureau_federal_ids)
+        )
+        .select_related("personne", "association__entite")
+        .order_by("personne__nom", "personne__prenom")
     )
+
+
+def _sur_bureau_federal(adhesion):
+    today = timezone.localdate()
+    return BureauMembre.objects.filter(
+        adhesion=adhesion,
+        bureau__entite=adhesion.association.federation,
+    ).filter(
+        Q(bureau__date_fin__isnull=True) | Q(bureau__date_fin__gte=today)
+    ).exists()
+
+
+class InvitationUtilisateurForm(BootstrapFormMixin, forms.Form):
+    adhesion = AdhesionInvitationField(
+        label="Personne",
+        queryset=Adhesion.objects.none(),
+        help_text="Président, membre du bureau d'association, ou membre du bureau exécutif.",
+    )
+    role_bureau = forms.ChoiceField(
+        label="Rôle au bureau exécutif",
+        choices=[("", "—")] + ROLE_BUREAU_FEDERAL_CHOICES,
+        required=False,
+        help_text="À remplir seulement si la personne siège au bureau exécutif.",
+    )
+
+    def __init__(self, *args, federation=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if federation is not None:
+            self.fields["adhesion"].queryset = adhesions_invitables(federation)
 
     def clean(self):
         cleaned = super().clean()
-        role = cleaned.get("role")
-        entite = cleaned.get("entite")
-        if not role or not entite:
+        adhesion = cleaned.get("adhesion")
+        if not adhesion:
             return cleaned
-        if role.startswith("association") and entite.type != "association":
-            self.add_error("entite", "Ce rôle se rattache à une association.")
-        if role.startswith("federation") and entite.type != "federation":
-            self.add_error("entite", "Ce rôle se rattache à la fédération.")
+
+        if adhesion.personne.compte_id:
+            self.add_error("adhesion", "Cette personne a déjà un compte.")
+            return cleaned
+
+        attributions = []
+        if adhesion.role == "president":
+            attributions.append((adhesion.association.entite, "association_president"))
+        elif adhesion.role == "membre_bureau":
+            attributions.append((adhesion.association.entite, "association_lecture"))
+
+        if _sur_bureau_federal(adhesion):
+            role_bureau = cleaned.get("role_bureau")
+            if not role_bureau:
+                self.add_error("role_bureau", "Choisissez le rôle au bureau exécutif.")
+            else:
+                attributions.append((adhesion.association.federation, role_bureau))
+
+        if not attributions:
+            self.add_error("adhesion", "Cette personne ne peut pas recevoir de compte.")
+
+        cleaned["attributions"] = attributions
         return cleaned
 
 

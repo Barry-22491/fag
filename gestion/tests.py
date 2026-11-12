@@ -390,22 +390,23 @@ class ActiviteCreateTests(FederationFixturesMixin, TestCase):
 class InvitationMotDePasseTests(FederationFixturesMixin, TestCase):
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_invitation_envoie_lien_pour_choisir_le_mot_de_passe(self):
+        adhesion = Adhesion.objects.get(personne=self.personne)
         response = self.client.post(
             reverse("inviter_utilisateur"),
-            data={
-                "email": "nouveau@example.com",
-                "prenom": "Awa",
-                "nom": "Diallo",
-                "role": "federation_lecture",
-                "entite": self.federation.pk,
-            },
+            data={"adhesion": adhesion.pk, "role_bureau": ""},
         )
 
         self.assertEqual(response.status_code, 302)
-        user = User.objects.get(email="nouveau@example.com")
+        self.personne.refresh_from_db()
+        user = User.objects.get(email="john@example.com")
+        self.assertEqual(self.personne.compte, user)
         self.assertTrue(user.has_usable_password())
         self.assertTrue(
-            UserEntiteRole.objects.filter(user=user, entite=self.federation).exists()
+            UserEntiteRole.objects.filter(
+                user=user,
+                entite=self.asso_entite,
+                role__nom="association_president",
+            ).exists()
         )
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("/accounts/reset/", mail.outbox[0].body)

@@ -105,6 +105,13 @@ class Personne(TimeStampedModel):
     statut = models.CharField(max_length=20,choices=STATUS_ChOICES,default="actif")
     date_deces = models.DateField(null=True,blank=True)
     photo = models.ImageField(upload_to="personnes/",null=True,blank=True)
+    compte = models.OneToOneField(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="personne",
+    )
 
     class Meta:
         constraints = [

@@ -8,14 +8,18 @@
       <div class="card-body p-4">
         <h1 class="h4 mb-2">{{ title }}</h1>
         <p class="text-muted mb-4">
-          Aucun mot de passe n'est communiqué. La personne reçoit un lien pour choisir le sien.
+          Le compte reprend une personne déjà enregistrée : responsable d'une association,
+          ou membre du bureau exécutif. Le lien sert seulement à choisir le mot de passe.
         </p>
         <form method="post" class="row g-3">
           {% csrf_token %}
           {% for field in form %}
-          <div class="col-12 col-md-6">
+          <div class="col-12">
             <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
             {{ field }}
+            {% if field.help_text %}
+              <div class="form-text">{{ field.help_text }}</div>
+            {% endif %}
             {% for error in field.errors %}
               <div class="text-danger small mt-1">{{ error }}</div>
             {% endfor %}
