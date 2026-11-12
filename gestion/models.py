@@ -518,6 +518,10 @@ class AffiliationAssociation(TimeStampedModel):
                 name="unique_affiliation_association_federation",
             )
         ]
+        indexes = [
+            models.Index(fields=["statut"]),
+            models.Index(fields=["federation", "statut"]),
+        ]
 
     def clean(self):
         if self.federation.type != "federation":
@@ -584,6 +588,11 @@ class CotisationAssociationMensuelle(TimeStampedModel):
                 name="unique_cotisation_mensuelle_par_affiliation",
             )
         ]
+        indexes = [
+            models.Index(fields=["annee", "mois", "statut"]),
+            models.Index(fields=["affiliation", "statut"]),
+            models.Index(fields=["statut"]),
+        ]
         ordering = ["-annee", "-mois"]
 
     def clean(self):
@@ -636,6 +645,10 @@ class BeneficiaireFederation(TimeStampedModel):
                 fields=["personne", "affiliation"],
                 name="unique_beneficiaire_par_affiliation",
             )
+        ]
+        indexes = [
+            models.Index(fields=["actif"]),
+            models.Index(fields=["affiliation", "actif"]),
         ]
 
     def clean(self):
@@ -758,6 +771,12 @@ class DossierRapatriement(TimeStampedModel):
                 "La personne doit être bénéficiaire active de la fédération."
             )
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["statut"]),
+            models.Index(fields=["affiliation", "statut"]),
+        ]
+
     def __str__(self):
         return f"Rapatriement - {self.personne}"
 
@@ -783,6 +802,12 @@ class ActiviteCulturelle(TimeStampedModel):
     capacite = models.PositiveIntegerField(null=True, blank=True)
     reserve_aux_beneficiaires = models.BooleanField(default=True)
     est_public = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["entite", "date"]),
+            models.Index(fields=["est_public", "date"]),
+        ]
 
     def titre_traduit(self):
         lang = get_language()
@@ -948,6 +973,12 @@ class Information(TimeStampedModel):
     est_public = models.BooleanField(default=False)
     envoyer_email = models.BooleanField(default=False, verbose_name="Envoyer une notification email")
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["entite", "statut", "created_at"]),
+            models.Index(fields=["est_public", "statut"]),
+        ]
+
     def titre_traduit(self):
         lang = get_language()
 
@@ -1096,6 +1127,12 @@ class PaiementAssociation(TimeStampedModel):
         on_delete=models.SET_NULL,
         related_name="paiements_associations_enregistres"
     )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["association", "montant_avance"]),
+            models.Index(fields=["date_paiement"]),
+        ]
 
     def __str__(self):
         return f"{self.association} - {self.montant}"

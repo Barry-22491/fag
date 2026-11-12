@@ -1,12 +1,12 @@
 from django.conf import settings
-from django.core.mail import send_mail
-from django.core.mail.backends.smtp import EmailBackend
+from django.core.mail import get_connection, send_mail
 from smtplib import SMTPException
 from .models import HistoriqueEmail
 
 
 def _smtp_connection():
-    return EmailBackend(
+    return get_connection(
+        backend=getattr(settings, "EMAIL_BACKEND", "gestion.email_backend.EmailBackend"),
         host=settings.EMAIL_HOST,
         port=settings.EMAIL_PORT,
         username=settings.EMAIL_HOST_USER,

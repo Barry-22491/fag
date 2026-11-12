@@ -16,6 +16,15 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Fix SSL sous Windows/Python (IONOS SMTP)
+try:
+    import certifi
+
+    os.environ.setdefault("SSL_CERT_FILE", certifi.where())
+    os.environ.setdefault("REQUESTS_CA_BUNDLE", certifi.where())
+except ImportError:
+    pass
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -154,7 +163,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 # configuration email — IONOS / fag-nrw.de (plus de Gmail)
 #EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "gestion.email_backend.EmailBackend"
 EMAIL_HOST = "smtp.ionos.de"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True

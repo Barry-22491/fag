@@ -238,16 +238,12 @@ class InformationForm(BootstrapFormMixin, forms.ModelForm):
         model = Information
         fields = [
             "entite",
-
             "titre_fr",
             "contenu_fr",
-
             "titre_de",
             "contenu_de",
-
             "titre_en",
             "contenu_en",
-
             "type_information",
             "priorite",
             "statut",
@@ -262,7 +258,6 @@ class InformationForm(BootstrapFormMixin, forms.ModelForm):
             "contenu_fr": forms.Textarea(attrs={"rows": 5}),
             "contenu_de": forms.Textarea(attrs={"rows": 5}),
             "contenu_en": forms.Textarea(attrs={"rows": 5}),
-            "description":  forms.Textarea(attrs={"rows": 4}),
         }
 
         labels = {
@@ -273,13 +268,14 @@ class InformationForm(BootstrapFormMixin, forms.ModelForm):
             "titre_en": "Titre anglais",
             "contenu_en": "Contenu anglais",
         }
-        def __init__(self):
-            self.fields['titre_de'].required = False
-            self.fields['contenu_de'].required = False
-            self.fields['titre_en'].required = False
-            self.fields['contenu_en'].required = False
 
-        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["titre_de"].required = False
+        self.fields["contenu_de"].required = False
+        self.fields["titre_en"].required = False
+        self.fields["contenu_en"].required = False
+
 
 class ContactPublicForm(BootstrapFormMixin, forms.Form):
     nom = forms.CharField(
