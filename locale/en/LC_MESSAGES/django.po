@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-01 22:15+0200\n"
+"POT-Creation-Date: 2026-11-12 11:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,98 +17,456 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: .\gestion\forms.py:202
+#: .\gestion\forms.py:175
+msgid "Langue de publication"
+msgstr "Publication language"
+
+#: .\gestion\forms.py:287
 msgid "Nom"
 msgstr "Name"
 
-#: .\gestion\forms.py:205
+#: .\gestion\forms.py:290
 msgid "Email"
 msgstr "Emails"
 
-#: .\gestion\forms.py:209
+#: .\gestion\forms.py:294
 msgid "Sujet"
 msgstr "Subject"
 
-#: .\gestion\forms.py:212
+#: .\gestion\forms.py:297
 msgid "Message"
 msgstr "Message"
 
-#: .\gestion\templates\public\about.html:8
-msgid "À propos de la fédération"
-msgstr "About us"
+#: .\gestion\templates\public\about.html:4
+#: .\gestion\templates\public\about.html:11
+#: .\gestion\templates\public\base_public.html:50
+#: .\gestion\templates\public\home.html:79
+msgid "À propos"
+msgstr "About"
 
-#: .\gestion\templates\public\activites.html:6
-msgid "Activités publiques"
-msgstr "Public activities"
+#: .\gestion\templates\public\about.html:13
+msgid ""
+"Fédération des Associations Guinéennes de Rhénanie-du-Nord-Westphalie (FAG-"
+"NRW e.V.)"
+msgstr ""
+"Federation of Guinean Associations of North Rhine-Westphalia (FAG-NRW"
+"e.V.)"#: .\gestion\templates\public\about.html:16
+msgid "Ensemble pour une communauté unie, engagée et solidaire"
+msgstr "Together for a united, committed and solidarity-driven community"
 
-#: .\gestion\templates\public\activites.html:21
-#: .\gestion\templates\public\home.html:37
-msgid "Aucune activité publique."
-msgstr "No public activities at the moment"
+#: .\gestion\templates\public\about.html:19
+msgid ""
+"La Fédération des Associations Guinéennes de Rhénanie-du-Nord-Westphalie "
+"(FAG-NRW e.V.) est l'organisation faîtière qui rassemble les associations "
+"guinéennes ainsi que leurs partenaires établis dans le Land de Rhénanie-du-"
+"Nord-Westphalie et au-delà. Créée pour fédérer les initiatives de la "
+"communauté guinéenne, la Fédération représente les intérêts de ses membres, "
+"coordonne leurs actions et favorise la coopération entre les associations, "
+"les institutions publiques, les organisations de la société civile et les "
+"partenaires internationaux. Indépendante, apolitique et à but non lucratif, "
+"la FAG-NRW agit dans le respect des lois de la République fédérale "
+"d'Allemagne et des valeurs de solidarité, de diversité, de respect mutuel et "
+"d'intérêt général."
+msgstr ""
+"The Federation of Guinean Associations of North Rhine-Westphalia"
+"(FAG-NRW e.V.) is the umbrella organisation that brings together"
+"Guinean associations and their partners established in the state of"
+"North Rhine-Westphalia and beyond. Created to unite initiatives of the"
+"Guinean community, the Federation represents its members' interests,"
+"coordinates their actions and fosters cooperation between"
+"associations, public institutions, civil society organisations and"
+"international partners. Independent, apolitical and non-profit,"
+"FAG-NRW acts in accordance with the laws of the Federal Republic of"
+"Germany and the values of solidarity, diversity, mutual respect and"
+"the public interest."#: .\gestion\templates\public\about.html:34
+msgid "Notre vision"
+msgstr "Our vision"
 
-#: .\gestion\templates\public\associations.html:6
+#: .\gestion\templates\public\about.html:36
+msgid ""
+"Nous aspirons à une communauté guinéenne forte, unie et pleinement intégrée, "
+"qui contribue activement au développement de la société allemande tout en "
+"maintenant des liens solides avec la Guinée. Notre ambition est de devenir "
+"un acteur reconnu du dialogue interculturel, de la coopération "
+"internationale et de l'engagement citoyen."
+msgstr ""
+"We aspire to a strong, united and fully integrated Guinean community"
+"that actively contributes to German society while maintaining strong"
+"ties with Guinea. Our ambition is to become a recognised actor in"
+"intercultural dialogue, international cooperation and civic"
+"engagement."#: .\gestion\templates\public\about.html:48
+msgid "Notre mission"
+msgstr "Our mission"
+
+#: .\gestion\templates\public\about.html:49
+msgid "La FAG-NRW a pour mission de :"
+msgstr "FAG-NRW's mission is to:"
+
+#: .\gestion\templates\public\about.html:51
+msgid "fédérer les associations guinéennes de Rhénanie-du-Nord-Westphalie"
+msgstr "bring together Guinean associations in North Rhine-Westphalia"
+
+#: .\gestion\templates\public\about.html:52
+msgid ""
+"représenter leurs intérêts auprès des institutions allemandes et des "
+"partenaires"
+msgstr "represent their interests before German institutions and partners"
+
+#: .\gestion\templates\public\about.html:53
+msgid "coordonner les initiatives communes de ses membres"
+msgstr "coordinate joint initiatives of its members"
+
+#: .\gestion\templates\public\about.html:54
+msgid "promouvoir la solidarité et la cohésion de la communauté guinéenne"
+msgstr "promote solidarity and cohesion within the Guinean community"
+
+#: .\gestion\templates\public\about.html:55
+msgid "encourager les échanges entre les peuples et les cultures"
+msgstr "encourage exchanges between peoples and cultures"
+
+#: .\gestion\templates\public\about.html:56
+msgid "soutenir les actions de coopération entre l'Allemagne et la Guinée"
+msgstr "support cooperation initiatives between Germany and Guinea"
+
+#: .\gestion\templates\public\about.html:63
+msgid "Nos valeurs"
+msgstr "Our values"
+
+#: .\gestion\templates\public\about.html:64
+msgid "Les actions de la Fédération reposent sur des valeurs fortes :"
+msgstr "The Federation's actions are based on strong values:"
+
+#: .\gestion\templates\public\about.html:66
+msgid "Solidarité"
+msgstr "Solidarity"
+
+#: .\gestion\templates\public\about.html:67
+msgid "Respect"
+msgstr "Respect"
+
+#: .\gestion\templates\public\about.html:68
+msgid "Tolérance"
+msgstr "Tolerance"
+
+#: .\gestion\templates\public\about.html:69
+msgid "Diversité culturelle"
+msgstr "Cultural diversity"
+
+#: .\gestion\templates\public\about.html:70
+msgid "Dialogue"
+msgstr "Dialogue"
+
+#: .\gestion\templates\public\about.html:71
+msgid "Transparence"
+msgstr "Transparency"
+
+#: .\gestion\templates\public\about.html:72
+msgid "Responsabilité"
+msgstr "Responsibility"
+
+#: .\gestion\templates\public\about.html:73
+msgid "Engagement citoyen"
+msgstr "Civic engagement"
+
+#: .\gestion\templates\public\about.html:74
+msgid "Coopération"
+msgstr "Cooperation"
+
+#: .\gestion\templates\public\about.html:75
+msgid "Esprit d'équipe"
+msgstr "Team spirit"
+
+#: .\gestion\templates\public\about.html:82
+msgid "Nos objectifs"
+msgstr "Our goals"
+
+#: .\gestion\templates\public\about.html:83
+msgid "La Fédération œuvre notamment pour :"
+msgstr "The Federation works in particular to:"
+
+#: .\gestion\templates\public\about.html:85
+msgid "promouvoir la culture guinéenne en Allemagne"
+msgstr "promote Guinean culture in Germany"
+
+#: .\gestion\templates\public\about.html:86
+msgid ""
+"favoriser le dialogue interculturel et la compréhension entre les peuples"
+msgstr "foster intercultural dialogue and understanding between peoples"
+
+#: .\gestion\templates\public\about.html:87
+msgid "accompagner l'intégration des Guinéens dans la société allemande"
+msgstr "support the integration of Guineans into German society"
+
+#: .\gestion\templates\public\about.html:88
+msgid "développer les relations d'amitié entre l'Allemagne et la Guinée"
+msgstr "develop friendly relations between Germany and Guinea"
+
+#: .\gestion\templates\public\about.html:89
+msgid ""
+"créer des partenariats avec les institutions publiques, privées et "
+"associatives"
+msgstr ""
+"create partnerships with public, private and civil society"
+"institutions"#: .\gestion\templates\public\about.html:90
+msgid ""
+"soutenir les initiatives de développement portées par ses associations "
+"membres"
+msgstr "support development initiatives led by its member associations"
+
+#: .\gestion\templates\public\about.html:91
+msgid "promouvoir l'éducation, la formation et l'engagement bénévole"
+msgstr "promote education, training and volunteering"
+
+#: .\gestion\templates\public\about.html:92
+msgid ""
+"soutenir les personnes vulnérables, notamment les réfugiés et les personnes "
+"confrontées à des situations de précarité"
+msgstr ""
+"support vulnerable people, especially refugees and those facing"
+"precarious situations"#: .\gestion\templates\public\about.html:99
+msgid "Nos actions"
+msgstr "Our actions"
+
+#: .\gestion\templates\public\about.html:100
+msgid "Afin de remplir sa mission, la FAG-NRW organise et soutient notamment :"
+msgstr "To fulfil its mission, FAG-NRW organises and supports in particular:"
+
+#: .\gestion\templates\public\about.html:102
+msgid "des rencontres entre les associations membres"
+msgstr "meetings between member associations"
+
+#: .\gestion\templates\public\about.html:103
+msgid "des conférences, séminaires et tables rondes"
+msgstr "conferences, seminars and round tables"
+
+#: .\gestion\templates\public\about.html:104
+msgid "des journées culturelles et festivals guinéens"
+msgstr "cultural days and Guinean festivals"
+
+#: .\gestion\templates\public\about.html:105
+msgid "des activités sportives et éducatives"
+msgstr "sports and educational activities"
+
+#: .\gestion\templates\public\about.html:106
+msgid "des projets d'intégration et de participation citoyenne"
+msgstr "integration and civic participation projects"
+
+#: .\gestion\templates\public\about.html:107
+msgid "des programmes de coopération au développement"
+msgstr "development cooperation programmes"
+
+#: .\gestion\templates\public\about.html:108
+msgid "des actions de solidarité et d'entraide"
+msgstr "solidarity and mutual-aid actions"
+
+#: .\gestion\templates\public\about.html:109
+msgid "des médiations en cas de différends entre membres"
+msgstr "mediation in case of disputes between members"
+
+#: .\gestion\templates\public\about.html:110
+msgid ""
+"des événements favorisant le vivre-ensemble et le renforcement des liens "
+"communautaires"
+msgstr "events that promote living together and stronger community ties"
+
+#: .\gestion\templates\public\about.html:117
+msgid "Notre engagement"
+msgstr "Our commitment"
+
+#: .\gestion\templates\public\about.html:119
+msgid ""
+"La FAG-NRW agit exclusivement dans un but d'intérêt général. Toutes les "
+"ressources de la Fédération sont consacrées à la réalisation de ses "
+"missions. Aucun bénéfice n'est distribué aux membres, et l'ensemble des "
+"activités est mené dans le respect des principes de transparence, de bonne "
+"gouvernance et de gestion responsable. Notre engagement repose sur le "
+"bénévolat, la coopération et le service de la communauté."
+msgstr ""
+"FAG-NRW acts exclusively for the public interest. All of the"
+"Federation's resources are devoted to carrying out its missions. No"
+"profit is distributed to members, and all activities are conducted in"
+"accordance with the principles of transparency, good governance and"
+"responsible management. Our commitment is based on volunteering,"
+"cooperation and service to the community."#: .\gestion\templates\public\about.html:132
+msgid "Notre siège"
+msgstr "Our headquarters"
+
+#: .\gestion\templates\public\about.html:134
+msgid ""
+"Le siège de la Fédération est établi à Dortmund, en Rhénanie-du-Nord-"
+"Westphalie. La FAG-NRW exerce ses activités principalement dans ce Land, "
+"tout en développant des partenariats à l'échelle nationale et internationale "
+"afin de renforcer les échanges, la coopération et le développement durable "
+"entre l'Allemagne et la Guinée."
+msgstr ""
+"The Federation's headquarters are in Dortmund, North Rhine-Westphalia."
+"FAG-NRW mainly operates in this state while also developing national"
+"and international partnerships to strengthen exchanges, cooperation"
+"and sustainable development between Germany and Guinea."#: .\gestion\templates\public\about.html:146
+msgid "Construisons ensemble l'avenir"
+msgstr "Let's build the future together"
+
+#: .\gestion\templates\public\about.html:148
+msgid ""
+"À travers ses associations membres et ses partenaires, la FAG-NRW œuvre "
+"chaque jour pour une communauté plus unie, plus forte et plus engagée. "
+"Ensemble, nous développons des projets porteurs de solidarité, "
+"d'intégration, de dialogue interculturel et de coopération entre la Guinée, "
+"l'Allemagne et le reste du monde."
+msgstr ""
+"Through its member associations and partners, FAG-NRW works every day"
+"for a more united, stronger and more committed community. Together, we"
+"develop projects that promote solidarity, integration, intercultural"
+"dialogue and cooperation between Guinea, Germany and the rest of the"
+"world."#: .\gestion\templates\public\about.html:161
+msgid "Bureau exécutif"
+msgstr "Executive board"
+
+#: .\gestion\templates\public\about.html:164
+msgid "Mandat"
+msgstr "Term"
+
+#: .\gestion\templates\public\about.html:169
+msgid "En cours"
+msgstr "Ongoing"
+
+#: .\gestion\templates\public\about.html:207
+msgid "Aucun bureau exécutif actif."
+msgstr "No active executive board."
+
+#: .\gestion\templates\public\about.html:213
+#: .\gestion\templates\public\associations.html:11
+#: .\gestion\templates\public\home.html:78
 msgid "Associations membres"
 msgstr "Member associations"
 
-#: .\gestion\templates\public\associations.html:20
+#: .\gestion\templates\public\about.html:215
+msgid ""
+"La fédération rassemble des associations engagées au service de la "
+"communauté."
+msgstr ""
+"The federation brings together associations committed to serving the"
+"community."#: .\gestion\templates\public\about.html:218
+msgid "Voir les associations"
+msgstr "View associations"
+
+#: .\gestion\templates\public\activites.html:4
+#: .\gestion\templates\public\base_public.html:56
+msgid "Activités"
+msgstr "Activities"
+
+#: .\gestion\templates\public\activites.html:10
+msgid "Agenda public"
+msgstr "Public Website"
+
+#: .\gestion\templates\public\activites.html:11
+msgid "Activités publiques"
+msgstr "Public activities"
+
+#: .\gestion\templates\public\activites.html:13
+msgid "Conférences, rencontres culturelles et actions ouvertes au public."
+msgstr "Conferences, cultural gatherings, and activities open to the public."
+
+#: .\gestion\templates\public\activites.html:42
+#: .\gestion\templates\public\home.html:51
+msgid "Aucune activité publique."
+msgstr "No public activities at the moment"
+
+#: .\gestion\templates\public\associations.html:4
+#: .\gestion\templates\public\base_public.html:53
+msgid "Associations"
+msgstr "Associations"
+
+#: .\gestion\templates\public\associations.html:10
+msgid "Réseau"
+msgstr "Network"
+
+#: .\gestion\templates\public\associations.html:13
+msgid ""
+"Les associations affiliées qui forment le réseau de la fédération en "
+"Rhénanie-du-Nord-Westphalie."
+msgstr ""
+"The affiliated associations that form the federation's network in"
+"North Rhine-Westphalia."#: .\gestion\templates\public\associations.html:49
 msgid "Aucune association affichée."
 msgstr "No associations listed"
 
 #: .\gestion\templates\public\base_public.html:9
-#: .\gestion\templates\public\base_public.html:20
+#: .\gestion\templates\public\base_public.html:35
 msgid "Fédération"
 msgstr "Federation"
 
-#: .\gestion\templates\public\base_public.html:30
+#: .\gestion\templates\public\base_public.html:10
+msgid "Fédération des Associations Guinéennes de Rhénanie-du-Nord-Westphalie."
+msgstr "Federation of Guinean Associations of North Rhine-Westphalia."
+
+#: .\gestion\templates\public\base_public.html:40
+msgid "Menu"
+msgstr "Menu"
+
+#: .\gestion\templates\public\base_public.html:47
+#: .\gestion\templates\public\home.html:4
 msgid "Accueil"
 msgstr "Home"
 
-#: .\gestion\templates\public\base_public.html:31
-msgid "À propos"
-msgstr "About"
-
-#: .\gestion\templates\public\base_public.html:32
-msgid "Associations"
-msgstr "Associations"
-
-#: .\gestion\templates\public\base_public.html:33
-msgid "Activités"
-msgstr "Activities"
-
-#: .\gestion\templates\public\base_public.html:34
+#: .\gestion\templates\public\base_public.html:59
+#: .\gestion\templates\public\informations.html:4
+#: .\gestion\templates\public\informations.html:10
 msgid "Informations"
 msgstr "Information"
 
-#: .\gestion\templates\public\base_public.html:35
+#: .\gestion\templates\public\base_public.html:62
+#: .\gestion\templates\public\contact.html:4
 #: .\gestion\templates\public\contact.html:10
+#: .\gestion\templates\public\contact.html:11
 msgid "Contact"
 msgstr "Contact"
 
-#: .\gestion\templates\public\base_public.html:63
+#: .\gestion\templates\public\base_public.html:89
 msgid "Retour à l’espace de gestion"
 msgstr "Back to dashboard"
 
-#: .\gestion\templates\public\base_public.html:70
+#: .\gestion\templates\public\base_public.html:95
 msgid "Espace membre"
 msgstr "Member area"
 
-#: .\gestion\templates\public\base_public.html:97
+#: .\gestion\templates\public\base_public.html:109
+msgid "Fermer"
+msgstr "Close"
+
+#: .\gestion\templates\public\base_public.html:130
 msgid "Plateforme officielle"
 msgstr "Official platform"
 
-#: .\gestion\templates\public\contact.html:11
+#: .\gestion\templates\public\contact.html:13
 msgid "Envoyez un message à la fédération."
 msgstr "Send us a message"
 
-#: .\gestion\templates\public\contact.html:18
+#: .\gestion\templates\public\contact.html:27
+msgid ""
+"Nous répondons aux messages concernant la fédération, ses associations "
+"membres et ses activités publiques."
+msgstr ""
+"We respond to messages about the federation, its member associations,"
+"and its public activities."#: .\gestion\templates\public\contact.html:34
+msgid "Siège"
+msgstr "Headquarters"
+
+#: .\gestion\templates\public\contact.html:41
+msgid "Réponse"
+msgstr "Reply"
+
+#: .\gestion\templates\public\contact.html:42
+msgid "Sous quelques jours ouvrés"
+msgstr "Within a few business days"
+
+#: .\gestion\templates\public\contact.html:94
 msgid "Envoyer"
 msgstr "Send"
 
-#: .\gestion\templates\public\home.html:8
-msgid "Bienvenue sur le portail de la FAG NRW e.V."
-msgstr "Welcome to the FAG NRW e.V. portal"
-
-#: .\gestion\templates\public\home.html:10
+#: .\gestion\templates\public\home.html:18
+#: .\gestion\templates\public\home.html:59
+#: .\gestion\templates\public\informations.html:13
 msgid ""
 "Découvrez nos associations affiliées, nos activités et nos communications "
 "officielles."
@@ -116,34 +474,54 @@ msgstr ""
 "Discover our member associations, our activities, and our official "
 "communications."
 
-#: .\gestion\templates\public\home.html:13
+#: .\gestion\templates\public\home.html:21
 msgid "Voir les activités"
 msgstr "View activities"
 
-#: .\gestion\templates\public\home.html:14
+#: .\gestion\templates\public\home.html:22
 msgid "Nous contacter"
 msgstr "Contact us"
 
-#: .\gestion\templates\public\home.html:20
-msgid "Un réseau d’associations au service de la communauté."
-msgstr "A network of associations dedicated to the community."
+#: .\gestion\templates\public\home.html:34
+msgid "Agenda"
+msgstr "Agenda"
 
-#: .\gestion\templates\public\home.html:30
+#: .\gestion\templates\public\home.html:35
 msgid "Dernières activités"
 msgstr "Recent activities"
 
-#: .\gestion\templates\public\home.html:46
+#: .\gestion\templates\public\home.html:36
+msgid "Un réseau d’associations au service de la communauté."
+msgstr "A network of associations dedicated to the community."
+
+#: .\gestion\templates\public\home.html:57
+msgid "Actualités"
+msgstr "News"
+
+#: .\gestion\templates\public\home.html:58
 msgid "Communiqués récents"
 msgstr "Recent communications"
 
-#: .\gestion\templates\public\home.html:53
-#: .\gestion\templates\public\informations.html:20
+#: .\gestion\templates\public\home.html:71
+#: .\gestion\templates\public\informations.html:31
 msgid "Aucune information publique."
 msgstr "No public information"
 
-#: .\gestion\templates\public\informations.html:6
+#: .\gestion\templates\public\informations.html:11
 msgid "Communiqués publics"
 msgstr "Public announcements"
+
+#: .\gestion\views.py:2418
+msgid "Votre message a été envoyé avec succès."
+msgstr "Your message was sent successfully."
+
+#: .\gestion\views.py:2422
+msgid "Votre message a été enregistré, mais l'envoi email a échoué."
+msgstr "Your message was saved, but the email could not be sent."#~ msgid "À propos de la fédération"
+#~ msgstr "About us"
+
+#~ msgid "Bienvenue sur le portail de la FAG NRW e.V."
+#~ msgstr "Welcome to the FAG NRW e.V. portal"
 
 #~ msgid "Gestion Fédération"
 #~ msgstr "Federation Management"
@@ -159,9 +537,6 @@ msgstr "Public announcements"
 
 #~ msgid "Rapatriements"
 #~ msgstr "Repatriations"
-
-#~ msgid "Site public"
-#~ msgstr "Public Website"
 
 #~ msgid "Déconnexion"
 #~ msgstr "Logout"
@@ -187,23 +562,10 @@ msgstr "Public announcements"
 #~ msgid "Rapports"
 #~ msgstr "Reports"
 
-msgid "La fédération regroupe plusieurs associations membres et coordonne les activités, communications et services au bénéfice de la communauté."
-msgstr "The federation brings together several member associations and coordinates activities, communications, and services for the benefit of the community."
-
-msgid "Notre mission"
-msgstr "Our mission"
-
-msgid "Nos objectifs"
-msgstr "Our objectives"
-
-msgid "Bureau exécutif"
-msgstr "Executive Board"
-
-msgid "Mandat"
-msgstr "Mandate"
-
-msgid "La fédération rassemble des associations engagées au service de la communauté."
-msgstr "The federation brings together associations committed to serving the community."
-
-msgid "Voir les associations"
-msgstr "View associations"
+#~ msgid ""
+#~ "La fédération regroupe plusieurs associations membres et coordonne les "
+#~ "activités, communications et services au bénéfice de la communauté."
+#~ msgstr ""
+#~ "The federation brings together several member associations and "
+#~ "coordinates activities, communications, and services for the benefit of "
+#~ "the community."

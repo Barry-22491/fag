@@ -28,7 +28,7 @@ class Command(BaseCommand):
                 self.style.ERROR(
                     "EMAIL_HOST_PASSWORD vide. "
                     "Ajoute le mot de passe IONOS de noreply@fag-nrw.de "
-                    "dans settings.py (EMAIL_HOST_PASSWORD) ou en variable d'environnement."
+                    "dans le fichier .env ou dans la variable d'environnement."
                 )
             )
             return

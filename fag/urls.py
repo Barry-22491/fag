@@ -2,17 +2,23 @@
 URL configuration for fag project.
 """
 from django.contrib import admin # type: ignore
-from django.urls import include, path # type: ignore
+from django.http import HttpResponse # type: ignore
+from django.urls import include, path, re_path # type: ignore
 from django.conf.urls.i18n import i18n_patterns # type: ignore
 from django.conf import settings # type: ignore
-from django.conf.urls.static import static # type: ignore
 from django.contrib.auth import views as auth_views # type: ignore
 from django.views.generic import RedirectView # type: ignore
+from django.views.static import serve # type: ignore
 
 from gestion.forms import ChangerMotDePasseForm, DefinirMotDePasseForm, MotDePasseOublieForm
 
 
+def health(request):
+    return HttpResponse("ok")
+
+
 urlpatterns = [
+    path("health/", health, name="health"),
     path("admin/", admin.site.urls),
     path("i18n/", include("django.conf.urls.i18n")),
     path("", RedirectView.as_view(url="/fr/", permanent=False)),
@@ -75,5 +81,10 @@ urlpatterns += i18n_patterns(
     prefix_default_language=True,
 )
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += [
+    re_path(
+        r"^media/(?P<path>.*)$",
+        serve,
+        {"document_root": settings.MEDIA_ROOT},
+    ),
+]

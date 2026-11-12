@@ -11,10 +11,55 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from urllib.parse import parse_qs, unquote, urlparse
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def _load_env_file():
+    """Charge un fichier .env local sans écraser les variables déjà définies."""
+    path = BASE_DIR / ".env"
+    if not path.is_file():
+        return
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+def _database_from_env():
+    url = os.environ.get("DATABASE_URL", "").strip()
+    if not url:
+        return {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url[len("postgres://"):]
+
+    parsed = urlparse(url)
+    query = parse_qs(parsed.query)
+    config = {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": unquote(parsed.path.lstrip("/")),
+        "USER": unquote(parsed.username or ""),
+        "PASSWORD": unquote(parsed.password or ""),
+        "HOST": parsed.hostname or "",
+        "PORT": str(parsed.port or ""),
+        "CONN_MAX_AGE": 600,
+        "CONN_HEALTH_CHECKS": True,
+    }
+    if "sslmode" in query:
+        config["OPTIONS"] = {"sslmode": query["sslmode"][0]}
+    return config
+
+
+_load_env_file()
 
 # Fix SSL sous Windows/Python (IONOS SMTP)
 try:
@@ -30,10 +75,8 @@ except ImportError:
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-07!ympj4366p)in-g#7i2)wxel$*zbs26jw(+*h0$mh_rfxu+q",
-)
+_INSECURE_SECRET_KEY = "django-insecure-07!ympj4366p)in-g#7i2)wxel$*zbs26jw(+*h0$mh_rfxu+q"
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", _INSECURE_SECRET_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Local: True par défaut. Prod: DJANGO_DEBUG=False
@@ -53,8 +96,20 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+if not DEBUG and SECRET_KEY == _INSECURE_SECRET_KEY:
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured(
+        "DJANGO_SECRET_KEY est obligatoire quand DJANGO_DEBUG=False."
+    )
+
+render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip()
+if render_host and render_host not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_host)
+
 # Sécurité HTTPS (activée seulement hors DEBUG, pour l'hébergement du domaine)
 if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -70,6 +125,9 @@ if not DEBUG:
         ).split(",")
         if origin.strip()
     ]
+    render_url = os.environ.get("RENDER_EXTERNAL_URL", "").strip().rstrip("/")
+    if render_url and render_url not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(render_url)
 
 
 # Application definition
@@ -131,10 +189,7 @@ WSGI_APPLICATION = 'fag.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    "default": _database_from_env(),
 }
 
 
@@ -159,18 +214,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # la configuration des comptes utilisateur-12.04.2026
 LOGIN_REDIRECT_URL = "/fr/dashboard/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-# configuration email — IONOS / fag-nrw.de (plus de Gmail)
-#EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# configuration email — IONOS / fag-nrw.de
+# Mot de passe : variable EMAIL_HOST_PASSWORD (fichier .env en local)
 EMAIL_BACKEND = "gestion.email_backend.EmailBackend"
 EMAIL_HOST = "smtp.ionos.de"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_TIMEOUT = 20
 EMAIL_HOST_USER = "noreply@fag-nrw.de"
-# Mets ici le mot de passe IONOS de noreply@fag-nrw.de
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "Admin12112026@")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = "noreply@fag-nrw.de"
 CONTACT_EMAIL = "info@fag-nrw.de"
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
@@ -205,9 +257,18 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+_media_root = os.environ.get("MEDIA_ROOT", "").strip()
+MEDIA_ROOT = Path(_media_root) if _media_root else BASE_DIR / "media"
 
 DEEPL_AUTH_KEY = os.environ.get("DEEPL_AUTH_KEY")
