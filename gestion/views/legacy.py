@@ -2169,18 +2169,23 @@ def envoyer_rappel_cotisation_view(request, pk):
         messages.info(request, "Cette cotisation est déjà payée.")
         return redirect("cotisation_detail", pk=cotisation.pk)
 
-    association_email = cotisation.affiliation.association.email
-    if not association_email:
+    association = cotisation.affiliation.association
+    president = association.get_president()
+    has_email = bool(association.email) or bool(president and president.email)
+    if not has_email:
         messages.warning(
             request,
-            "Impossible d'envoyer le rappel : email de l'association manquant.",
+            "Impossible d'envoyer le rappel : aucun email association ni président.",
         )
         return redirect("cotisation_detail", pk=cotisation.pk)
 
     ok = envoyer_email_rappel_cotisation(cotisation)
 
     if ok:
-        messages.success(request, "Rappel envoyé avec succès.")
+        messages.success(
+            request,
+            "Rappel envoyé avec le détail (mensuel, retard, décès).",
+        )
     else:
         messages.error(
             request,

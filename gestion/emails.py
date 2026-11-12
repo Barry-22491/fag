@@ -10,6 +10,64 @@ def _format_euro(montant):
     return f"{montant:.2f} €".replace(".", ",")
 
 
+def _destinataires_association(association):
+    destinataires = []
+    if association.email:
+        destinataires.append(association.email)
+
+    president = association.get_president()
+    if president and president.email and president.email not in destinataires:
+        destinataires.append(president.email)
+
+    return destinataires
+
+
+def _bloc_situation(situation):
+    return (
+        f"1) Cotisation mensuelle ({situation['periode']})\n"
+        f"   - Montant du mois : {_format_euro(situation['montant_mensuel'])}\n"
+        f"   - Déjà payé / avance appliquée : {_format_euro(situation['montant_mensuel_paye'])}\n"
+        f"   - Reste à payer ce mois : {_format_euro(situation['montant_mensuel_reste'])}\n"
+        f"   - Statut : {situation['statut_mois']}\n\n"
+        f"2) Retard mensuel (mois antérieurs)\n"
+        f"   - Montant en retard : {_format_euro(situation['retard_mensuel'])}\n\n"
+        f"3) Contributions décès / rapatriement\n"
+        f"   - Montant encore dû : {_format_euro(situation['montant_deces'])}\n\n"
+        f"Total à régler : {_format_euro(situation['total_a_regler'])}\n"
+        f"Identifiant de paiement : {situation['code_paiement'] or '-'}"
+    )
+
+
+def _resume_situation_court(situation, prefix=""):
+    return (
+        f"{prefix}"
+        f"Mensuel : {_format_euro(situation['montant_mensuel'])} "
+        f"(reste {_format_euro(situation['montant_mensuel_reste'])}) · "
+        f"Retard : {_format_euro(situation['retard_mensuel'])} · "
+        f"Décès : {_format_euro(situation['montant_deces'])} · "
+        f"Total : {_format_euro(situation['total_a_regler'])}."
+    )
+
+
+def _creer_notifications_cotisation(association, titre, message):
+    users = list(get_association_users(association))
+    notifications = []
+    for user in users:
+        notifications.append(
+            Notification(
+                entite=association.entite,
+                destinataire=user,
+                titre=titre[:200],
+                message=message,
+                type_notification="cotisation",
+                lien="/cotisations/",
+            )
+        )
+    if notifications:
+        Notification.objects.bulk_create(notifications)
+    return len(users)
+
+
 def _smtp_connection():
     return get_connection(
         backend=getattr(settings, "EMAIL_BACKEND", "gestion.email_backend.EmailBackend"),
@@ -107,30 +165,13 @@ def envoyer_notification_generation_cotisation(cotisation):
         f"Les cotisations du mois de {situation['periode']} ont été générées "
         f"pour l'association {nom}.\n\n"
         f"Voici le détail de votre situation :\n\n"
-        f"1) Cotisation mensuelle ({situation['periode']})\n"
-        f"   - Montant du mois : {_format_euro(situation['montant_mensuel'])}\n"
-        f"   - Déjà payé / avance appliquée : {_format_euro(situation['montant_mensuel_paye'])}\n"
-        f"   - Reste à payer ce mois : {_format_euro(situation['montant_mensuel_reste'])}\n"
-        f"   - Statut : {situation['statut_mois']}\n\n"
-        f"2) Retard mensuel (mois antérieurs)\n"
-        f"   - Montant en retard : {_format_euro(situation['retard_mensuel'])}\n\n"
-        f"3) Contributions décès / rapatriement\n"
-        f"   - Montant encore dû : {_format_euro(situation['montant_deces'])}\n\n"
-        f"Total à régler : {_format_euro(situation['total_a_regler'])}\n"
-        f"Identifiant de paiement : {situation['code_paiement'] or '-'}\n\n"
+        f"{_bloc_situation(situation)}\n\n"
         f"Merci de régulariser dès que possible.\n"
         f"Cordialement,\n"
         f"Bureau exécutif — FAG NRW e.V."
     )
 
-    destinataires = []
-    if association.email:
-        destinataires.append(association.email)
-
-    president = association.get_president()
-    if president and president.email and president.email not in destinataires:
-        destinataires.append(president.email)
-
+    destinataires = _destinataires_association(association)
     email_ok = False
     if destinataires:
         email_ok = envoyer_email_simple(
@@ -141,94 +182,121 @@ def envoyer_notification_generation_cotisation(cotisation):
             cotisation=cotisation,
         )
 
-    notif_message = (
-        f"Cotisations {situation['periode']} générées pour {nom}. "
-        f"Mensuel : {_format_euro(situation['montant_mensuel'])} "
-        f"(reste {_format_euro(situation['montant_mensuel_reste'])}) · "
-        f"Retard : {_format_euro(situation['retard_mensuel'])} · "
-        f"Décès : {_format_euro(situation['montant_deces'])} · "
-        f"Total : {_format_euro(situation['total_a_regler'])}."
+    notif_message = _resume_situation_court(
+        situation,
+        prefix=f"Cotisations {situation['periode']} générées pour {nom}. ",
     )
-
-    users = list(get_association_users(association))
-    notifications = []
-    for user in users:
-        notifications.append(
-            Notification(
-                entite=association.entite,
-                destinataire=user,
-                titre=sujet[:200],
-                message=notif_message,
-                type_notification="cotisation",
-                lien="/cotisations/",
-            )
-        )
-    if notifications:
-        Notification.objects.bulk_create(notifications)
+    users_notifies = _creer_notifications_cotisation(association, sujet, notif_message)
 
     return {
         "email_ok": email_ok,
         "destinataires": destinataires,
-        "users_notifies": len(users),
+        "users_notifies": users_notifies,
         "situation": situation,
     }
 
 
 def envoyer_rappel_cotisation(cotisation):
-    association = cotisation.affiliation.association
-    email = association.email
+    """Rappel mensuel avec situation détaillée (mensuel, retard, décès)."""
+    situation = get_situation_cotisation_association(cotisation)
+    association = situation["association"]
+    nom = association.entite.nom
 
-    if not email:
+    destinataires = _destinataires_association(association)
+    if not destinataires:
         return False
 
-    sujet = "Rappel de cotisation mensuelle"
+    sujet = f"Rappel cotisation — {situation['periode']} — {nom}"
     message = (
         f"Bonjour,\n\n"
-        f"La cotisation mensuelle de l'association {association.entite.nom} "
-        f"pour la période {cotisation.mois}/{cotisation.annee} "
-        f"est actuellement : {cotisation.get_statut_display()}.\n\n"
-        f"Montant attendu : {cotisation.montant_attendu}\n"
-        f"Montant payé : {cotisation.montant_paye}\n\n"
-        f"Merci de régulariser la situation.\n"
+        f"Nous vous adressons un rappel concernant la situation financière "
+        f"de l'association {nom}.\n\n"
+        f"La cotisation de {situation['periode']} est actuellement : "
+        f"{situation['statut_mois']}.\n\n"
+        f"Détail de votre situation :\n\n"
+        f"{_bloc_situation(situation)}\n\n"
+        f"Merci de procéder au règlement dans les meilleurs délais.\n"
         f"Cordialement,\n"
-        f"FAG NRW e.V."
+        f"Bureau exécutif — FAG NRW e.V."
     )
 
-    return envoyer_email_simple(
+    email_ok = envoyer_email_simple(
         sujet=sujet,
         message=message,
-        destinataires=[email],
+        destinataires=destinataires,
         type_email="rappel_cotisation",
         cotisation=cotisation,
     )
 
+    notif_message = _resume_situation_court(
+        situation,
+        prefix=f"Rappel cotisation {situation['periode']} — {nom}. ",
+    )
+    _creer_notifications_cotisation(association, sujet, notif_message)
+
+    return email_ok
+
 
 def envoyer_confirmation_paiement(cotisation):
-    association = cotisation.affiliation.association
-    email = association.email
+    """Confirmation de paiement avec situation actualisée après encaissement."""
+    situation = get_situation_cotisation_association(cotisation)
+    association = situation["association"]
+    nom = association.entite.nom
 
-    if not email:
+    destinataires = _destinataires_association(association)
+    if not destinataires:
         return False
 
-    sujet = "Confirmation de paiement de cotisation"
-    message = (
-        f"Bonjour,\n\n"
-        f"Nous confirmons la réception du paiement de la cotisation de l'association "
-        f"{association.entite.nom} pour la période {cotisation.mois}/{cotisation.annee}.\n\n"
-        f"Montant payé : {cotisation.montant_paye}\n"
-        f"Date de paiement : {cotisation.date_paiement.strftime('%d/%m/%Y') if cotisation.date_paiement else '-'}\n\n"
-        f"Merci.\n"
-        f"Cordialement,\n"
-        f"FAG NRW e.V."
+    date_paiement = (
+        cotisation.date_paiement.strftime("%d/%m/%Y")
+        if cotisation.date_paiement
+        else "-"
     )
 
-    return envoyer_email_simple(
+    if situation["total_a_regler"] > 0:
+        conclusion = (
+            f"Il reste encore {_format_euro(situation['total_a_regler'])} à régler "
+            f"au total (mensuel, retards et/ou décès).\n"
+            f"Merci de compléter le paiement dès que possible."
+        )
+    else:
+        conclusion = (
+            "Votre association est à jour pour le mensuel, les retards "
+            "et les contributions décès. Merci pour votre règlement."
+        )
+
+    sujet = f"Confirmation de paiement — {situation['periode']} — {nom}"
+    message = (
+        f"Bonjour,\n\n"
+        f"Nous confirmons la réception du paiement de cotisation pour "
+        f"l'association {nom}.\n\n"
+        f"Paiement enregistré :\n"
+        f"   - Période : {situation['periode']}\n"
+        f"   - Montant payé sur ce mois : {_format_euro(situation['montant_mensuel_paye'])}\n"
+        f"   - Date de paiement : {date_paiement}\n"
+        f"   - Statut du mois : {situation['statut_mois']}\n\n"
+        f"Situation actualisée après ce paiement :\n\n"
+        f"{_bloc_situation(situation)}\n\n"
+        f"{conclusion}\n\n"
+        f"Cordialement,\n"
+        f"Bureau exécutif — FAG NRW e.V."
+    )
+
+    email_ok = envoyer_email_simple(
         sujet=sujet,
         message=message,
-        destinataires=[email],
+        destinataires=destinataires,
         type_email="confirmation_paiement",
         cotisation=cotisation,
     )
+
+    notif_message = _resume_situation_court(
+        situation,
+        prefix=f"Paiement confirmé ({situation['periode']}) — {nom}. ",
+    )
+    _creer_notifications_cotisation(association, sujet, notif_message)
+
+    return email_ok
 
 
 def envoyer_notification_activite(activite, destinataires):

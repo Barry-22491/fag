@@ -4,10 +4,16 @@ from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
+from django.core import mail
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from .emails import envoyer_email_historise, envoyer_notification_generation_cotisation
+from .emails import (
+    envoyer_confirmation_paiement,
+    envoyer_email_historise,
+    envoyer_notification_generation_cotisation,
+    envoyer_rappel_cotisation,
+)
 from .forms import InformationForm
 from .models import (
     Adhesion,
@@ -281,6 +287,71 @@ class GenerationCotisationNotificationTests(FederationFixturesMixin, TestCase):
         self.assertEqual(situation["montant_deces"], Decimal("200.00"))
         self.assertEqual(situation["total_a_regler"], Decimal("240.00"))
         self.assertTrue(resultat["email_ok"])
+
+
+class RappelEtConfirmationCotisationTests(FederationFixturesMixin, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.cotisation = CotisationAssociationMensuelle.objects.create(
+            affiliation=self.affiliation,
+            annee=2026,
+            mois=2,
+            montant_attendu=Decimal("20.00"),
+            montant_paye=Decimal("0"),
+            statut="en_attente",
+        )
+        CotisationAssociationMensuelle.objects.create(
+            affiliation=self.affiliation,
+            annee=2026,
+            mois=1,
+            montant_attendu=Decimal("20.00"),
+            montant_paye=Decimal("0"),
+            statut="en_attente",
+        )
+        dossier = DossierRapatriement.objects.create(
+            personne=self.personne,
+            affiliation=self.affiliation,
+            date_deces=date(2026, 1, 10),
+            lieu_deces="Dortmund",
+            pays_deces="Allemagne",
+            destination_rapatriement="Conakry",
+            cout_total=Decimal("400.00"),
+            statut="ouvert",
+        )
+        ContributionDecesAssociation.objects.create(
+            dossier=dossier,
+            association=self.association,
+            montant_attendu=Decimal("150.00"),
+            montant_paye=Decimal("0"),
+            statut="en_attente",
+        )
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_rappel_detaille(self):
+        ok = envoyer_rappel_cotisation(self.cotisation)
+        self.assertTrue(ok)
+        self.assertTrue(mail.outbox)
+        body = mail.outbox[0].body
+        self.assertIn("Rappel", mail.outbox[0].subject)
+        self.assertIn("Retard mensuel", body)
+        self.assertIn("150,00", body)
+        self.assertIn("meilleurs délais", body)
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_confirmation_detaillee(self):
+        self.cotisation.montant_paye = Decimal("20.00")
+        self.cotisation.statut = "paye"
+        self.cotisation.date_paiement = date(2026, 2, 15)
+        self.cotisation.save()
+
+        ok = envoyer_confirmation_paiement(self.cotisation)
+        self.assertTrue(ok)
+        self.assertTrue(mail.outbox)
+        body = mail.outbox[0].body
+        self.assertIn("Confirmation", mail.outbox[0].subject)
+        self.assertIn("Situation actualisée", body)
+        self.assertIn("Retard mensuel", body)
+        self.assertIn("150,00", body)
 
 
 class AlertesPermissionTests(FederationFixturesMixin, TestCase):
