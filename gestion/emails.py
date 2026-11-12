@@ -1,5 +1,7 @@
 from django.conf import settings
-from django.core.mail import send_mail 
+from django.core.mail import send_mail
+from django.core.mail.backends.smtp import EmailBackend
+from smtplib import SMTPException
 from .models import HistoriqueEmail
 from django.utils import timezone
 
@@ -15,18 +17,41 @@ def envoyer_email_simple(
     if not destinataires:
         return False
 
-    send_mail(
-        subject=sujet,
-        message=message,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=destinataires,
-        fail_silently=False,
-    )
+    try:
+        connection = EmailBackend(
+            host=settings.EMAIL_HOST,
+            port=settings.EMAIL_PORT,
+            username=settings.EMAIL_HOST_USER,
+            password=settings.EMAIL_HOST_PASSWORD,
+            use_tls=getattr(settings, "EMAIL_USE_TLS", False),
+            use_ssl=getattr(settings, "EMAIL_USE_SSL", False),
+            timeout=getattr(settings, "EMAIL_TIMEOUT", 20),
+        )
+        send_mail(
+            subject=sujet,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=destinataires,
+            fail_silently=False,
+            connection=connection,
+        )
+    except (SMTPException, OSError) as exc:
+        for email in destinataires:
+            HistoriqueEmail.objects.create(
+                destinataire=email,
+                type_email=type_email or "notification_activite",
+                sujet=sujet,
+                succes=False,
+                commentaire=str(exc)[:500],
+                cotisation=cotisation,
+                activite=activite,
+            )
+        return False
 
     for email in destinataires:
         HistoriqueEmail.objects.create(
             destinataire=email,
-            type_email=type_email or 'notification_activite',
+            type_email=type_email or "notification_activite",
             sujet=sujet,
             succes=True,
             cotisation=cotisation,

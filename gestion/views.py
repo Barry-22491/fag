@@ -2066,6 +2066,7 @@ def rapports(request):
     })
 
 @login_required
+@require_POST
 def envoyer_rappel_cotisation_view(request, pk):
     cotisation = get_object_or_404(
         CotisationAssociationMensuelle.objects.select_related(
@@ -2082,25 +2083,27 @@ def envoyer_rappel_cotisation_view(request, pk):
     ):
         return HttpResponseForbidden("Accès refusé.")
 
-    # empêcher rappel si déjà payé
     if cotisation.statut == "paye":
-        messages.info(
+        messages.info(request, "Cette cotisation est déjà payée.")
+        return redirect("cotisation_detail", pk=cotisation.pk)
+
+    association_email = cotisation.affiliation.association.email
+    if not association_email:
+        messages.warning(
             request,
-            "Cette cotisation est déjà payée."
+            "Impossible d'envoyer le rappel : email de l'association manquant.",
         )
         return redirect("cotisation_detail", pk=cotisation.pk)
 
     ok = envoyer_email_rappel_cotisation(cotisation)
 
     if ok:
-        messages.success(
-            request,
-            "Rappel envoyé avec succès."
-        )
+        messages.success(request, "Rappel envoyé avec succès.")
     else:
-        messages.warning(
+        messages.error(
             request,
-            "Impossible d'envoyer le rappel : email de l'association manquant."
+            "L'envoi du rappel a échoué (connexion SMTP). "
+            "Vérifiez la configuration email ou réessayez plus tard.",
         )
 
     return redirect("cotisation_detail", pk=cotisation.pk)
