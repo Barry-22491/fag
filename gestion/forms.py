@@ -145,7 +145,13 @@ class BureauMembreForm(BootstrapFormMixin, forms.ModelForm):
                 qs = qs.filter(association__entite=bureau.entite)
 
             elif bureau.entite.type == "federation":
-                qs = qs.filter(association__federation=bureau.entite)
+                qs = qs.filter(
+                    association__affiliations__federation=bureau.entite,
+                    association__affiliations__statut="active",
+                ).distinct()
+                self.fields["adhesion"].help_text = (
+                    "Tout membre validé d'une association affiliée peut être élu."
+                )
 
         self.fields["adhesion"].queryset = qs
 
@@ -443,7 +449,7 @@ class InvitationUtilisateurForm(BootstrapFormMixin, forms.Form):
         label="Personne",
         queryset=Adhesion.objects.none(),
         required=False,
-        help_text="Président, membre du bureau d'association, ou membre du bureau exécutif.",
+        help_text="Responsable d'association, ou membre du bureau exécutif. Un élu du bureau doit déjà être membre d'une association affiliée.",
     )
     role_bureau = forms.ChoiceField(
         label="Rôle au bureau exécutif",

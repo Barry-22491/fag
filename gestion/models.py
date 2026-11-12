@@ -253,9 +253,15 @@ class BureauMembre(TimeStampedModel):
                 raise ValidationError("Le membre doit appartenir à cette association.")
 
         elif self.bureau.entite.type == "federation":
-            if self.adhesion.association.federation != self.bureau.entite:
+            affiliation_active = AffiliationAssociation.objects.filter(
+                association=self.adhesion.association,
+                federation=self.bureau.entite,
+                statut="active",
+            ).exists()
+            if not affiliation_active:
                 raise ValidationError(
-                    "Le membre doit appartenir à une association affiliée à cette fédération."
+                    "Pour siéger au bureau exécutif, la personne doit être membre "
+                    "d'une association affiliée à la fédération."
                 )
 
     def __str__(self):

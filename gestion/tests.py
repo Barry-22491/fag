@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
+from django.core.exceptions import ValidationError
 from django.core import mail
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
@@ -24,11 +25,14 @@ from .models import (
     ContributionDecesAssociation,
     CotisationAssociationMensuelle,
     DossierRapatriement,
+    Bureau,
+    BureauMembre,
     Entite,
     HistoriqueEmail,
     Notification,
     PaiementAssociation,
     Personne,
+    Poste,
     Role,
     UserEntiteRole,
 )
@@ -385,6 +389,39 @@ class ActiviteCreateTests(FederationFixturesMixin, TestCase):
         self.assertTrue(activite.est_public)
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("Site public", mail.outbox[0].body)
+
+
+class BureauExecutifTests(FederationFixturesMixin, TestCase):
+    def test_membre_d_association_affiliee_peut_etre_elu(self):
+        adhesion = Adhesion.objects.get(personne=self.personne)
+        adhesion.role = "membre"
+        adhesion.save()
+        bureau = Bureau.objects.create(
+            entite=self.federation,
+            date_debut=date(2026, 1, 1),
+        )
+        poste = Poste.objects.create(nom="Secrétaire test", ordre=1)
+        membre = BureauMembre(
+            bureau=bureau,
+            poste=poste,
+            adhesion=adhesion,
+        )
+        membre.full_clean()
+        membre.save()
+        self.assertEqual(BureauMembre.objects.count(), 1)
+
+    def test_association_non_affiliee_est_refusee(self):
+        self.affiliation.statut = "suspendue"
+        self.affiliation.save()
+        adhesion = Adhesion.objects.get(personne=self.personne)
+        bureau = Bureau.objects.create(
+            entite=self.federation,
+            date_debut=date(2026, 1, 1),
+        )
+        poste = Poste.objects.create(nom="Trésorier test", ordre=2)
+        membre = BureauMembre(bureau=bureau, poste=poste, adhesion=adhesion)
+        with self.assertRaises(ValidationError):
+            membre.full_clean()
 
 
 class InvitationMotDePasseTests(FederationFixturesMixin, TestCase):
