@@ -1,7 +1,7 @@
 {% extends "public/base_public.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Accueil" %} — {% if federation_courante %}{{ federation_courante.nom }}{% else %}FAG NRW{% endif %}{% endblock %}
+{% block title %}{% trans "Accueil" %} - {% if federation_courante %}{{ federation_courante.nom }}{% else %}FAG NRW{% endif %}{% endblock %}
 
 {% block hero %}
 <section class="public-hero">
