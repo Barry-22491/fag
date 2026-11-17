@@ -1,0 +1,1 @@
+0 1 1 * * . /etc/fag.env; cd /app && /usr/local/bin/python manage.py generer_cotisations >> /proc/1/fd/1 2>&1

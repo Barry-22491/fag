@@ -1,0 +1,79 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: fag
+      POSTGRES_USER: fag
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fag -d fag"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  web:
+    build: .
+    env_file: .env
+    environment:
+      DJANGO_DEBUG: "False"
+      DATABASE_URL: postgresql://fag:${POSTGRES_PASSWORD}@db:5432/fag
+      MEDIA_ROOT: /app/media
+    volumes:
+      - media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cron:
+    build: .
+    env_file: .env
+    environment:
+      DJANGO_DEBUG: "False"
+      DATABASE_URL: postgresql://fag:${POSTGRES_PASSWORD}@db:5432/fag
+      MEDIA_ROOT: /app/media
+    volumes:
+      - media:/app/media
+    user: root
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        python - <<'PY'
+        import os
+        prefixes = ("DJANGO_", "DATABASE_", "EMAIL_", "DEEPL_", "SITE_", "MEDIA_", "ALLOWED_", "CSRF_")
+        with open("/etc/fag.env", "w", encoding="utf-8") as handle:
+            for key, value in os.environ.items():
+                if key.startswith(prefixes):
+                    escaped = value.replace("'", "'\\''")
+                    handle.write(f"export {key}='{escaped}'\n")
+        PY
+        crontab /app/docker/crontab
+        exec cron -f
+    depends_on:
+      web:
+        condition: service_started
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-fag-nrw.de}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  media:
+  caddy_data:
+  caddy_config:
