@@ -30,7 +30,7 @@
       {% endif %}
       <span>
         {% if federation_courante %}
-          {{ federation_courante.abreviation|default:federation_courante.nom }}
+          {{federation_courante.nom }}
         {% else %}
           {% trans "Fédération" %}
         {% endif %}
