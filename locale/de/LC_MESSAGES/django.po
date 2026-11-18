@@ -49,8 +49,10 @@ msgid ""
 "Fédération des Associations Guinéennes de Rhénanie-du-Nord-Westphalie (FAG-"
 "NRW e.V.)"
 msgstr ""
-"Föderation der guineischen Vereine in Nordrhein-Westfalen (FAG-NRW"
-"e.V.)"#: .\gestion\templates\public\about.html:16
+"Föderation der guineischen Vereine in Nordrhein-Westfalen (FAG-NRW "
+"e.V.)"
+
+#: .\gestion\templates\public\about.html:16
 msgid "Ensemble pour une communauté unie, engagée et solidaire"
 msgstr "Gemeinsam für eine geeinte, engagierte und solidarische Gemeinschaft"
 
@@ -64,21 +66,23 @@ msgid ""
 "coordonne leurs actions et favorise la coopération entre les associations, "
 "les institutions publiques, les organisations de la société civile et les "
 "partenaires internationaux. Indépendante, apolitique et à but non lucratif, "
-"la FAG-NRW agit dans le respect des lois de la République fédérale "
-"d'Allemagne et des valeurs de solidarité, de diversité, de respect mutuel et "
-"d'intérêt général."
+"la FAG-NRW e.V. agit dans le respect des lois de la République fédérale "
+"d'Allemagne, de la loi allemande sur les associations et des valeurs de "
+"solidarité, de diversité, de respect mutuel et d'intérêt général."
 msgstr ""
-"Die Föderation der guineischen Vereine in Nordrhein-Westfalen (FAG-NRW"
-"e.V.) ist die Dachorganisation, die guineische Vereine und ihre"
-"Partner im Land Nordrhein-Westfalen und darüber hinaus zusammenführt."
-"Gegründet, um die Initiativen der guineischen Gemeinschaft zu bündeln,"
-"vertritt die Föderation die Interessen ihrer Mitglieder, koordiniert"
-"ihre Aktivitäten und fördert die Zusammenarbeit zwischen Vereinen,"
-"öffentlichen Institutionen, zivilgesellschaftlichen Organisationen und"
-"internationalen Partnern. Unabhängig, unpolitisch und gemeinnützig"
-"handelt die FAG-NRW im Einklang mit den Gesetzen der Bundesrepublik"
-"Deutschland und den Werten der Solidarität, Vielfalt, gegenseitigen"
-"Achtung und des Gemeinwohls."#: .\gestion\templates\public\about.html:34
+"Die Föderation der guineischen Vereine in Nordrhein-Westfalen (FAG-NRW "
+"e.V.) ist die Dachorganisation, die guineische Vereine und ihre "
+"Partner im Land Nordrhein-Westfalen und darüber hinaus zusammenführt. "
+"Gegründet, um die Initiativen der guineischen Gemeinschaft zu bündeln, "
+"vertritt die Föderation die Interessen ihrer Mitglieder, koordiniert "
+"ihre Aktivitäten und fördert die Zusammenarbeit zwischen Vereinen, "
+"öffentlichen Institutionen, zivilgesellschaftlichen Organisationen und "
+"internationalen Partnern. Unabhängig, unpolitisch und gemeinnützig "
+"handelt die FAG-NRW e.V. im Einklang mit den Gesetzen der Bundesrepublik "
+"Deutschland, dem deutschen Vereinsrecht und den Werten der Solidarität, "
+"Vielfalt, gegenseitigen Achtung und des Gemeinwohls."
+
+#: .\gestion\templates\public\about.html:34
 msgid "Notre vision"
 msgstr "Unsere Vision"
 
@@ -90,18 +94,20 @@ msgid ""
 "un acteur reconnu du dialogue interculturel, de la coopération "
 "internationale et de l'engagement citoyen."
 msgstr ""
-"Wir streben eine starke, geeinte und vollständig integrierte"
-"guineische Gemeinschaft an, die aktiv zur Entwicklung der deutschen"
-"Gesellschaft beiträgt und zugleich enge Verbindungen zu Guinea pflegt."
-"Unser Ziel ist es, ein anerkannter Akteur des interkulturellen"
-"Dialogs, der internationalen Zusammenarbeit und des bürgerschaftlichen"
-"Engagements zu werden."#: .\gestion\templates\public\about.html:48
+"Wir streben eine starke, geeinte und vollständig integrierte "
+"guineische Gemeinschaft an, die aktiv zur Entwicklung der deutschen "
+"Gesellschaft beiträgt und zugleich enge Verbindungen zu Guinea pflegt. "
+"Unser Ziel ist es, ein anerkannter Akteur des interkulturellen "
+"Dialogs, der internationalen Zusammenarbeit und des bürgerschaftlichen "
+"Engagements zu werden."
+
+#: .\gestion\templates\public\about.html:48
 msgid "Notre mission"
 msgstr "Unsere Mission"
 
 #: .\gestion\templates\public\about.html:49
-msgid "La FAG-NRW a pour mission de :"
-msgstr "Die FAG-NRW hat die Aufgabe:"
+msgid "La FAG-NRW e.V. a pour mission de :"
+msgstr "Die FAG-NRW e.V. hat die Aufgabe:"
 
 #: .\gestion\templates\public\about.html:51
 msgid "fédérer les associations guinéennes de Rhénanie-du-Nord-Westphalie"
@@ -112,16 +118,20 @@ msgid ""
 "représenter leurs intérêts auprès des institutions allemandes et des "
 "partenaires"
 msgstr ""
-"ihre Interessen gegenüber deutschen Institutionen und Partnern"
-"vertreten"#: .\gestion\templates\public\about.html:53
+"ihre Interessen gegenüber deutschen Institutionen und Partnern "
+"vertreten"
+
+#: .\gestion\templates\public\about.html:53
 msgid "coordonner les initiatives communes de ses membres"
 msgstr "die gemeinsamen Initiativen ihrer Mitglieder koordinieren"
 
 #: .\gestion\templates\public\about.html:54
 msgid "promouvoir la solidarité et la cohésion de la communauté guinéenne"
 msgstr ""
-"die Solidarität und den Zusammenhalt der guineischen Gemeinschaft"
-"fördern"#: .\gestion\templates\public\about.html:55
+"die Solidarität und den Zusammenhalt der guineischen Gemeinschaft "
+"fördern"
+
+#: .\gestion\templates\public\about.html:55
 msgid "encourager les échanges entre les peuples et les cultures"
 msgstr "den Austausch zwischen Völkern und Kulturen fördern"
 
@@ -193,8 +203,10 @@ msgstr "die guineische Kultur in Deutschland fördern"
 msgid ""
 "favoriser le dialogue interculturel et la compréhension entre les peuples"
 msgstr ""
-"den interkulturellen Dialog und die Verständigung zwischen den Völkern"
-"fördern"#: .\gestion\templates\public\about.html:87
+"den interkulturellen Dialog und die Verständigung zwischen den Völkern "
+"fördern"
+
+#: .\gestion\templates\public\about.html:87
 msgid "accompagner l'intégration des Guinéens dans la société allemande"
 msgstr "die Integration der Guineer in die deutsche Gesellschaft begleiten"
 
@@ -207,8 +219,10 @@ msgid ""
 "créer des partenariats avec les institutions publiques, privées et "
 "associatives"
 msgstr ""
-"Partnerschaften mit öffentlichen, privaten und zivilgesellschaftlichen"
-"Institutionen schaffen"#: .\gestion\templates\public\about.html:90
+"Partnerschaften mit öffentlichen, privaten und zivilgesellschaftlichen "
+"Institutionen schaffen"
+
+#: .\gestion\templates\public\about.html:90
 msgid ""
 "soutenir les initiatives de développement portées par ses associations "
 "membres"
@@ -223,16 +237,20 @@ msgid ""
 "soutenir les personnes vulnérables, notamment les réfugiés et les personnes "
 "confrontées à des situations de précarité"
 msgstr ""
-"schutzbedürftige Personen unterstützen, insbesondere Geflüchtete und"
-"Menschen in prekären Lagen"#: .\gestion\templates\public\about.html:99
+"schutzbedürftige Personen unterstützen, insbesondere Geflüchtete und "
+"Menschen in prekären Lagen"
+
+#: .\gestion\templates\public\about.html:99
 msgid "Nos actions"
 msgstr "Unsere Aktivitäten"
 
 #: .\gestion\templates\public\about.html:100
-msgid "Afin de remplir sa mission, la FAG-NRW organise et soutient notamment :"
+msgid "Afin de remplir sa mission, la FAG-NRW e.V. organise et soutient notamment :"
 msgstr ""
-"Zur Erfüllung ihres Auftrags organisiert und unterstützt die FAG-NRW"
-"insbesondere:"#: .\gestion\templates\public\about.html:102
+"Zur Erfüllung ihres Auftrags organisiert und unterstützt die FAG-NRW e.V. "
+"insbesondere:"
+
+#: .\gestion\templates\public\about.html:102
 msgid "des rencontres entre les associations membres"
 msgstr "Treffen zwischen den Mitgliedsvereinen"
 
@@ -269,58 +287,66 @@ msgid ""
 "des événements favorisant le vivre-ensemble et le renforcement des liens "
 "communautaires"
 msgstr ""
-"Veranstaltungen, die das Zusammenleben und den"
-"Gemeinschaftszusammenhalt fördern"#: .\gestion\templates\public\about.html:117
+"Veranstaltungen, die das Zusammenleben und den "
+"Gemeinschaftszusammenhalt fördern"
+
+#: .\gestion\templates\public\about.html:117
 msgid "Notre engagement"
 msgstr "Unser Engagement"
 
 #: .\gestion\templates\public\about.html:119
 msgid ""
-"La FAG-NRW agit exclusivement dans un but d'intérêt général. Toutes les "
+"La FAG-NRW e.V. agit exclusivement dans un but d'intérêt général. Toutes les "
 "ressources de la Fédération sont consacrées à la réalisation de ses "
 "missions. Aucun bénéfice n'est distribué aux membres, et l'ensemble des "
 "activités est mené dans le respect des principes de transparence, de bonne "
 "gouvernance et de gestion responsable. Notre engagement repose sur le "
 "bénévolat, la coopération et le service de la communauté."
 msgstr ""
-"Die FAG-NRW handelt ausschließlich im Gemeinwohl. Alle Ressourcen der"
-"Föderation dienen der Erfüllung ihrer Aufgaben. Es werden keine"
-"Gewinne an die Mitglieder ausgeschüttet, und alle Aktivitäten erfolgen"
-"nach den Grundsätzen von Transparenz, guter Governance und"
-"verantwortungsvoller Verwaltung. Unser Engagement beruht auf Ehrenamt,"
-"Zusammenarbeit und dem Dienst an der Gemeinschaft."#: .\gestion\templates\public\about.html:132
+"Die FAG-NRW e.V. handelt ausschließlich im Gemeinwohl. Alle Ressourcen der "
+"Föderation dienen der Erfüllung ihrer Aufgaben. Es werden keine "
+"Gewinne an die Mitglieder ausgeschüttet, und alle Aktivitäten erfolgen "
+"nach den Grundsätzen von Transparenz, guter Governance und "
+"verantwortungsvoller Verwaltung. Unser Engagement beruht auf Ehrenamt, "
+"Zusammenarbeit und dem Dienst an der Gemeinschaft."
+
+#: .\gestion\templates\public\about.html:132
 msgid "Notre siège"
 msgstr "Unser Sitz"
 
 #: .\gestion\templates\public\about.html:134
 msgid ""
 "Le siège de la Fédération est établi à Dortmund, en Rhénanie-du-Nord-"
-"Westphalie. La FAG-NRW exerce ses activités principalement dans ce Land, "
+"Westphalie. La FAG-NRW e.V. exerce ses activités principalement dans ce Land, "
 "tout en développant des partenariats à l'échelle nationale et internationale "
 "afin de renforcer les échanges, la coopération et le développement durable "
 "entre l'Allemagne et la Guinée."
 msgstr ""
-"Der Sitz der Föderation befindet sich in Dortmund,"
-"Nordrhein-Westfalen. Die FAG-NRW ist vor allem in diesem Land tätig"
-"und baut zugleich nationale und internationale Partnerschaften auf, um"
-"den Austausch, die Zusammenarbeit und die nachhaltige Entwicklung"
-"zwischen Deutschland und Guinea zu stärken."#: .\gestion\templates\public\about.html:146
+"Der Sitz der Föderation befindet sich in Dortmund, "
+"Nordrhein-Westfalen. Die FAG-NRW e.V. ist vor allem in diesem Land tätig "
+"und baut zugleich nationale und internationale Partnerschaften auf, um "
+"den Austausch, die Zusammenarbeit und die nachhaltige Entwicklung "
+"zwischen Deutschland und Guinea zu stärken."
+
+#: .\gestion\templates\public\about.html:146
 msgid "Construisons ensemble l'avenir"
 msgstr "Gestalten wir gemeinsam die Zukunft"
 
 #: .\gestion\templates\public\about.html:148
 msgid ""
-"À travers ses associations membres et ses partenaires, la FAG-NRW œuvre "
+"À travers ses associations membres et ses partenaires, la FAG-NRW e.V. œuvre "
 "chaque jour pour une communauté plus unie, plus forte et plus engagée. "
 "Ensemble, nous développons des projets porteurs de solidarité, "
 "d'intégration, de dialogue interculturel et de coopération entre la Guinée, "
 "l'Allemagne et le reste du monde."
 msgstr ""
-"Durch ihre Mitgliedsvereine und Partner arbeitet die FAG-NRW jeden Tag"
-"für eine einigere, stärkere und engagiertere Gemeinschaft. Gemeinsam"
-"entwickeln wir Projekte der Solidarität, Integration, des"
-"interkulturellen Dialogs und der Zusammenarbeit zwischen Guinea,"
-"Deutschland und der übrigen Welt."#: .\gestion\templates\public\about.html:161
+"Durch ihre Mitgliedsvereine und Partner arbeitet die FAG-NRW e.V. jeden Tag "
+"für eine einigere, stärkere und engagiertere Gemeinschaft. Gemeinsam "
+"entwickeln wir Projekte der Solidarität, Integration, des "
+"interkulturellen Dialogs und der Zusammenarbeit zwischen Guinea, "
+"Deutschland und der übrigen Welt."
+
+#: .\gestion\templates\public\about.html:161
 msgid "Bureau exécutif"
 msgstr "Vorstand"
 
@@ -368,8 +394,10 @@ msgstr "Öffentliche Veranstaltungen"
 #: .\gestion\templates\public\activites.html:13
 msgid "Conférences, rencontres culturelles et actions ouvertes au public."
 msgstr ""
-"Konferenzen, kulturelle Begegnungen und öffentlich zugängliche"
-"Aktionen."#: .\gestion\templates\public\activites.html:42
+"Konferenzen, kulturelle Begegnungen und öffentlich zugängliche "
+"Aktionen."
+
+#: .\gestion\templates\public\activites.html:42
 #: .\gestion\templates\public\home.html:51
 msgid "Aucune activité publique."
 msgstr "Derzeit keine öffentlichen Aktivitäten"
@@ -388,8 +416,10 @@ msgid ""
 "Les associations affiliées qui forment le réseau de la fédération en "
 "Rhénanie-du-Nord-Westphalie."
 msgstr ""
-"Die angeschlossenen Vereine, die das Netzwerk der Föderation in"
-"Nordrhein-Westfalen bilden."#: .\gestion\templates\public\associations.html:49
+"Die angeschlossenen Vereine, die das Netzwerk der Föderation in "
+"Nordrhein-Westfalen bilden."
+
+#: .\gestion\templates\public\associations.html:49
 msgid "Aucune association affichée."
 msgstr "Keine Verbände aufgeführt"
 
@@ -449,8 +479,10 @@ msgid ""
 "Nous répondons aux messages concernant la fédération, ses associations "
 "membres et ses activités publiques."
 msgstr ""
-"Wir beantworten Nachrichten zur Föderation, ihren Mitgliedsvereinen"
-"und öffentlichen Aktivitäten."#: .\gestion\templates\public\contact.html:34
+"Wir beantworten Nachrichten zur Föderation, ihren Mitgliedsvereinen "
+"und öffentlichen Aktivitäten."
+
+#: .\gestion\templates\public\contact.html:34
 msgid "Siège"
 msgstr "Sitz"
 
@@ -520,8 +552,10 @@ msgstr "Ihre Nachricht wurde erfolgreich gesendet."
 #: .\gestion\views.py:2422
 msgid "Votre message a été enregistré, mais l'envoi email a échoué."
 msgstr ""
-"Ihre Nachricht wurde gespeichert, der E-Mail-Versand ist jedoch"
-"fehlgeschlagen."#~ msgid "À propos de la fédération"
+"Ihre Nachricht wurde gespeichert, der E-Mail-Versand ist jedoch "
+"fehlgeschlagen."
+
+#~ msgid "À propos de la fédération"
 #~ msgstr "Über uns"
 
 #~ msgid "Bienvenue sur le portail de la FAG NRW e.V."
